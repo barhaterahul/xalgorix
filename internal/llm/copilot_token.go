@@ -278,6 +278,17 @@ func applyCopilotRequestHeaders(req *http.Request, integrationID string) {
 // path, which is what Copilot Free requires). The destination host is
 // GitHub's own Copilot API (api.githubcopilot.com), so sending the
 // GitHub token there is the intended flow, not a leak.
+// ApplyCopilotAuth prepares req for a GitHub Copilot API call — chat OR model
+// discovery. It resolves the GitHub credential to a Copilot bearer (the token
+// exchange, falling back to the direct-Bearer path), sets Authorization and the
+// editor-identity headers, and repoints the host for data-residency tenants.
+// This is the SAME logic the chat path uses via VendorOverride, exported so
+// model discovery authenticates identically — a raw OAuth (gho_) or Enterprise
+// token sent direct-Bearer to /models 401s, but the exchange makes it work.
+func ApplyCopilotAuth(req *http.Request, githubToken string) {
+	copilotVendorOverride(githubToken)(req)
+}
+
 func copilotVendorOverride(githubToken string) func(req *http.Request) {
 	integrationID := copilotIntegrationID(githubToken)
 	return func(req *http.Request) {

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/barhaterahul/ai-dast-ing/v4/internal/auth"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/llm"
 	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
 )
 
@@ -146,21 +147,17 @@ func requestProviderModels(r *http.Request, entry providers.Entry, credential, a
 			req.Header.Set("x-goog-api-key", credential)
 		}
 	case "openai", "openai_responses":
+		if entry.ID == "copilot" {
+			// Authenticate exactly like the chat path (internal/llm): token
+			// exchange, falling back to direct-Bearer, plus the editor headers
+			// and the data-residency host repoint. A raw OAuth (gho_) or
+			// Enterprise token sent direct-Bearer to /models 401s; the exchange
+			// is what the chat path does, so discovery must do it too.
+			llm.ApplyCopilotAuth(req, credential)
+			break
+		}
 		if credential != "" {
 			req.Header.Set("Authorization", "Bearer "+credential)
-		}
-		if entry.ID == "copilot" {
-			// Copilot's /models endpoint needs the same editor-identity headers
-			// as its chat endpoint (see internal/llm/copilot_token.go), or it
-			// rejects the request. Integration-id depends on the token type:
-			// fine-grained PATs use copilot-developer-cli, OAuth uses vscode-chat.
-			integ := "vscode-chat"
-			if strings.HasPrefix(strings.TrimSpace(credential), "github_pat_") {
-				integ = "copilot-developer-cli"
-			}
-			req.Header.Set("Copilot-Integration-Id", integ)
-			req.Header.Set("Editor-Version", "vscode/1.95.0")
-			req.Header.Set("Editor-Plugin-Version", "copilot-chat/0.26.7")
 		}
 		if accountID != "" {
 			req.Header.Set("chatgpt-account-id", accountID)
