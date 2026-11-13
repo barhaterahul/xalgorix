@@ -181,7 +181,7 @@ var targetScopeExemptTools = map[string]bool{
 	"list_skills": true, "read_skill": true, "search_skills": true,
 	"web_search": true, "cve_search": true, "exploit_search": true,
 	"str_replace_editor": true, "list_files": true, "search_files": true,
-	"code_search": true, "list_requests": true, "agentmail": true,
+	"code_search": true, "list_requests": true,
 	"spawn_agent": true, "create_agent": true, "check_agent": true, "wait_agent": true,
 }
 

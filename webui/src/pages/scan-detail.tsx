@@ -1378,13 +1378,6 @@ function ConfigTab({
     { k: "Stop reason", v: scan.stop_reason || "—" },
     { k: "Started", v: formatTime(scan.started_at) },
     { k: "Finished", v: scan.finished_at ? formatTime(scan.finished_at) : "—" },
-    {
-      k: "Discord webhook",
-      v:
-        scan.discord_webhook_configured || scan.discord_webhook
-          ? "configured"
-          : "none",
-    },
   ];
   return (
     <Card>

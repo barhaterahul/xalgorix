@@ -6,7 +6,7 @@
 // by its WAF/SOC. They are applied to the agent's HTTP client and passed
 // through to bundled tools that accept the same -H "Name: value" flag (httpx,
 // nuclei). They are NEVER attached to non-target destinations — LLM/provider
-// APIs, AgentMail, Discord/Telegram, or the dashboard.
+// APIs, or the dashboard.
 package scanheaders
 
 import (

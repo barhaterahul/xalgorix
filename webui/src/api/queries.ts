@@ -18,7 +18,6 @@ export const qk = {
   instanceEvents: (id: string) => ["instance", id, "events"] as const,
   queue: ["queue"] as const,
   rateLimit: ["settings", "rate-limit"] as const,
-  agentMail: ["settings", "agentmail"] as const,
   llmSettings: ["settings", "llm"] as const,
   environmentSettings: ["settings", "environment"] as const,
   schedules: ["schedules"] as const,
@@ -161,13 +160,6 @@ export function useRateLimit() {
   });
 }
 
-export function useAgentMail() {
-  return useQuery({
-    queryKey: qk.agentMail,
-    queryFn: api.agentMail,
-  });
-}
-
 export function useLLMSettings() {
   return useQuery({
     queryKey: qk.llmSettings,
@@ -282,17 +274,6 @@ export function useUpdateRateLimit() {
   });
 }
 
-export function useUpdateAgentMail() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: api.updateAgentMail,
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: qk.agentMail });
-      qc.invalidateQueries({ queryKey: qk.environmentSettings });
-    },
-  });
-}
-
 export function useUpdateLLMSettings() {
   const qc = useQueryClient();
   return useMutation({
@@ -313,7 +294,6 @@ export function useUpdateEnvironmentSettings() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.environmentSettings });
       qc.invalidateQueries({ queryKey: qk.llmSettings });
-      qc.invalidateQueries({ queryKey: qk.agentMail });
       qc.invalidateQueries({ queryKey: qk.rateLimit });
       qc.invalidateQueries({ queryKey: qk.version });
       qc.invalidateQueries({ queryKey: qk.instances });

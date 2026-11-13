@@ -346,7 +346,7 @@ func (a *Agent) shouldBlockForActivityPolicy(toolName string, toolArgs map[strin
 		return false, ""
 	}
 	switch lowerTool {
-	case "add_note", "read_notes", "finish", "list_skills", "read_skill", "report_vulnerability", "agentmail":
+	case "add_note", "read_notes", "finish", "list_skills", "read_skill", "report_vulnerability":
 		return false, ""
 	case "browser_action", "page_agent":
 		if passiveReconGuard {
@@ -406,7 +406,7 @@ func (a *Agent) shouldBlockForActivityPolicy(toolName string, toolArgs map[strin
 //     hops are checked by checkHTTPHop, which the tools call before
 //     following each one.
 //
-// All other tools (notes, finish, web_search, agentmail, list_skills,
+// All other tools (notes, finish, web_search, list_skills,
 // read_skill, etc.) bypass this gate entirely — they are exempt
 // because they don't probe targets.
 //

@@ -46,8 +46,6 @@ func (s *Server) saveExactDispatchSnapshot(rec *ScanRecord) error {
 	// Webhook URLs are credentials. Exact coordinator snapshots carry status,
 	// findings, events, and dispatch evidence only; they never duplicate secrets.
 	copyRec := *rec
-	copyRec.DiscordWebhook = ""
-	copyRec.DiscordWebhookConfigured = rec.DiscordWebhookConfigured
 	copyRec.Events = append([]WSEvent(nil), rec.Events...)
 	copyRec.Vulns = append([]VulnSummary(nil), rec.Vulns...)
 	copyRec.SubScans = cloneSubScanSummaries(rec.SubScans)
@@ -115,7 +113,6 @@ func (s *Server) persistPendingDispatchSnapshot(req ScanRequest, instanceID stri
 		Target: strings.Join(req.Targets, ", "), StartedAt: now,
 		Status: "pending", ScanMode: req.ScanMode, Instruction: req.Instruction,
 		SeverityFilter:           append([]string(nil), req.SeverityFilter...),
-		DiscordWebhookConfigured: req.DiscordWebhook != "" || s.discordWebhook != "",
 		ReconMode:                req.ReconMode, ScanIntensity: req.ScanIntensity,
 		Events: []WSEvent{}, Vulns: []VulnSummary{}, SubScans: []SubScanSummary{},
 		CompanyName: req.CompanyName, LogoPath: req.LogoPath,

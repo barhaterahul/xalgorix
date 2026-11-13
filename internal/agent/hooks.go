@@ -2176,7 +2176,7 @@ func hookStuckTracker(state *ScanState, args map[string]string) HookResult {
 // advance or reset the repeated-probe counters.
 func isAdministrativeTool(name string) bool {
 	switch name {
-	case "add_note", "read_notes", "update_plan", "finish", "read_skill", "list_skills", "search_skills", "agentmail", "read_ledger", "record_hypothesis", "update_hypothesis", "add_hypothesis_evidence", "claim_next_hypothesis", "report_vulnerability":
+	case "add_note", "read_notes", "update_plan", "finish", "read_skill", "list_skills", "search_skills", "read_ledger", "record_hypothesis", "update_hypothesis", "add_hypothesis_evidence", "claim_next_hypothesis", "report_vulnerability":
 		return true
 	}
 	return false
@@ -2491,7 +2491,7 @@ var localOnlyTools = map[string]bool{
 	"report_vulnerability": true, "submit_verdict": true, "finish": true,
 	"str_replace_editor": true, "list_files": true, "search_files": true,
 	"read_tool_output": true, "scan_source_sinks": true, "scan_source_routes": true,
-	"ingest_har": true, "agentmail": true,
+	"ingest_har": true,
 }
 
 var targetNetworkCommandPattern = regexp.MustCompile(`(?i)\b(?:curl|wget|httpx|nmap|ffuf|nuclei|nikto|sqlmap|dig|nslookup|ping)\b|\b(?:requests\.|urllib\.|aiohttp\.|http\.client|fetch\()`)

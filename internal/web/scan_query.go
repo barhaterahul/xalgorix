@@ -576,27 +576,6 @@ func (s *Server) findScanByInstanceID(instanceID string) (string, *ScanRecord) {
 	return matchedDir, matched
 }
 
-func (s *Server) markDiscordWebhookConfigured(rec *ScanRecord) {
-	if rec == nil {
-		return
-	}
-	rec.DiscordWebhookConfigured = rec.DiscordWebhookConfigured ||
-		rec.DiscordWebhook != "" ||
-		s.discordWebhook != ""
-}
-
-// markTelegramConfigured sets the TelegramConfigured flag on a scan
-// record when global Telegram notifications are enabled. Telegram is
-// global-only in v1 (no per-scan override), so the flag reflects the
-// server-wide configuration rather than any per-scan field. The bot
-// token itself is never written to the record (only the boolean).
-func (s *Server) markTelegramConfigured(rec *ScanRecord) {
-	if rec == nil {
-		return
-	}
-	rec.TelegramConfigured = s.telegramConfigured()
-}
-
 func cloneSubScanSummaries(source []SubScanSummary) []SubScanSummary {
 	if source == nil {
 		return nil
@@ -644,9 +623,6 @@ func (s *Server) scanRecordFromInstance(inst *ScanInstance) *ScanRecord {
 		ScanMode:                 inst.ScanMode,
 		Instruction:              inst.Instruction,
 		SeverityFilter:           severityFilter,
-		DiscordWebhook:           inst.DiscordWebhook,
-		DiscordWebhookConfigured: inst.DiscordWebhook != "",
-		TelegramConfigured:       s.telegramConfigured(),
 		ReconMode:                inst.ReconMode,
 		ScanIntensity:            inst.ScanIntensity,
 		Events:                   events,
@@ -1453,7 +1429,6 @@ func (s *Server) rebuildInstancesFromDisk() {
 			ScanIntensity:      entry.rec.ScanIntensity,
 			CompanyName:        entry.rec.CompanyName,
 			LogoPath:           entry.rec.LogoPath,
-			DiscordWebhook:     entry.rec.DiscordWebhook,
 			Vulns:              entry.rec.Vulns,
 			CurrentPhase:       entry.rec.CurrentPhase,
 			SubScans:           cloneSubScanSummaries(entry.rec.SubScans),

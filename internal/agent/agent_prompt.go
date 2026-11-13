@@ -1100,60 +1100,21 @@ If credentials like "Login with: admin@email.com / Password123":
    curl -b "session_id=VALUE; csrf_token=VALUE" https://TARGET/api/user/profile
 
 **Option 2: API Key Authentication**
-If API credentials provided (e.g., "API: am_us_xxx, username: agentmail"):
+If API credentials provided:
 1. Look for API documentation or endpoints
 2. Try authentication endpoints: /api/auth, /api/login, /api/token
 3. Test with: curl -H "Authorization: Bearer API_KEY" or -H "X-API-Key: API_KEY"
 4. Test authenticated API endpoints with the token
 5. Look for IDOR in API endpoints (change IDs in API calls)
 
-**Option 3: Sign Up with AgentMail + Browser (RECOMMENDED for targets with registration)**
-STEP-BY-STEP WORKFLOW:
-
-Step 1 - Create email inbox:
-  agentmail action=create_inbox username=xalgotest123
-  → Saves: inbox_id=XXX, email=xalgotest123@agentmail.to
-
-Step 2 - Navigate to signup page:
-  browser_action command=launch url=https://TARGET/signup
-  browser_action command=snapshot → identify all form fields
-
-Step 3 - Fill the registration form:
-  browser_action command=fill_form fields=email=xalgotest123@agentmail.to|password=SecureP@ss123!|name=Test User
-  OR fill fields individually:
-  browser_action command=type selector=@e3 text=xalgotest123@agentmail.to
-  browser_action command=type selector=@e5 text=SecureP@ss123!
-  browser_action command=type selector=@e7 text=Test User
-
-Step 4 - Submit the form:
+**Option 3: Register two accounts (for IDOR / multi-user testing)**
+When the target allows self-registration, create TWO accounts (A and B) with
+email addresses you control, completing any email verification manually. Log in
+as each and save them as named browser sessions:
+  browser_action command=fill_form fields=email=ACCOUNT_A_EMAIL|password=SecureP@ss123!|name=Test User
   browser_action command=submit
-  browser_action command=wait text=navigation timeout=10
-  browser_action command=snapshot → check for success message or errors
-
-Step 5 - Get verification email:
-  agentmail action=wait_for_email inbox_id=XXX subject=verify timeout=120
-  → Extract the verification URL from the email body
-
-Step 6 - Complete verification:
-  browser_action command=goto url=VERIFICATION_URL_FROM_EMAIL
-  browser_action command=wait text=navigation
-  browser_action command=snapshot → confirm account is verified
-
-Step 7 - Login with account A and save as named session:
-  browser_action command=goto url=https://TARGET/login
-  browser_action command=fill_form fields=email=xalgotest123@agentmail.to|password=SecureP@ss123!
-  browser_action command=submit
-  browser_action command=wait text=navigation
-  browser_action command=get_cookies → capture session
   browser_action command=save_session session_name=user_a
-
-Step 8 - Create second account and save as separate session:
-  → Create a SECOND account using agentmail (different email, e.g. xalgotest456@agentmail.to)
-  → Complete signup + verification flow for account B
-  browser_action command=goto url=https://TARGET/login
-  browser_action command=fill_form fields=email=xalgotest456@agentmail.to|password=SecureP@ss456!
-  browser_action command=submit
-  browser_action command=wait text=navigation
+  (repeat the signup + login flow for account B)
   browser_action command=save_session session_name=user_b
 
 Step 9 - IDOR Two-Account Testing Workflow:
@@ -1180,7 +1141,7 @@ IMPORTANT BROWSER TIPS:
 - If the page has iframes (e.g., CAPTCHA), use iframe/main_frame to switch context
 - Use extract_links to find all links on a page (useful for navigation)
 
-TIP: If the target requires email verification, ALWAYS use agentmail — it gives you real working email addresses instantly.
+TIP: If the target requires email verification you cannot complete, note it in the report as a manual-verification step rather than skipping the account.
 
 ### Caido Proxy
 All HTTP requests via the send_request tool are automatically routed through the Caido proxy (port 8080) for traffic analysis.

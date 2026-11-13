@@ -36,6 +36,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -72,6 +73,17 @@ const (
 // client's proxy behavior, and bounds the handshake independently of
 // the (streaming) chat request timeout.
 var copilotHTTPClient = &http.Client{Timeout: 30 * time.Second}
+
+// copilotAPIBaseOverride returns an operator-set Copilot API base URL, or ""
+// when unset. Copilot Enterprise / data-residency (ghe.com) tenants whose API
+// host is not api.githubcopilot.com — and whose token exchange does not
+// advertise one — set AIDASTING_COPILOT_API_URL to their tenant's Copilot API
+// base (e.g. https://api.<tenant>.ghe.com). When set it takes precedence over
+// both the default host and the exchange-advertised host, so a request can't
+// be mis-routed to the public gateway (a common cause of 502s on Enterprise).
+func copilotAPIBaseOverride() string {
+	return strings.TrimRight(strings.TrimSpace(os.Getenv("AIDASTING_COPILOT_API_URL")), "/")
+}
 
 // copilotIntegrationID picks the Copilot-Integration-Id header value
 // for a GitHub credential. Fine-grained PATs (github_pat_…) are only
@@ -266,6 +278,17 @@ func applyCopilotRequestHeaders(req *http.Request, integrationID string) {
 // path, which is what Copilot Free requires). The destination host is
 // GitHub's own Copilot API (api.githubcopilot.com), so sending the
 // GitHub token there is the intended flow, not a leak.
+// ApplyCopilotAuth prepares req for a GitHub Copilot API call — chat OR model
+// discovery. It resolves the GitHub credential to a Copilot bearer (the token
+// exchange, falling back to the direct-Bearer path), sets Authorization and the
+// editor-identity headers, and repoints the host for data-residency tenants.
+// This is the SAME logic the chat path uses via VendorOverride, exported so
+// model discovery authenticates identically — a raw OAuth (gho_) or Enterprise
+// token sent direct-Bearer to /models 401s, but the exchange makes it work.
+func ApplyCopilotAuth(req *http.Request, githubToken string) {
+	copilotVendorOverride(githubToken)(req)
+}
+
 func copilotVendorOverride(githubToken string) func(req *http.Request) {
 	integrationID := copilotIntegrationID(githubToken)
 	return func(req *http.Request) {
@@ -289,6 +312,11 @@ func copilotVendorOverride(githubToken string) func(req *http.Request) {
 // one that already matches the request is a no-op, so the default path
 // is unchanged.
 func repointCopilotHost(req *http.Request, apiBase string) {
+	// An explicit operator override wins over the exchange-advertised host:
+	// the resolver already built the request URL from it, so don't rewrite.
+	if copilotAPIBaseOverride() != "" {
+		return
+	}
 	if apiBase == "" || req.URL == nil {
 		return
 	}

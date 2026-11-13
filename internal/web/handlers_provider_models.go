@@ -6,11 +6,13 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"sort"
 	"strings"
 	"time"
 
 	"github.com/barhaterahul/ai-dast-ing/v4/internal/auth"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/llm"
 	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
 )
 
@@ -145,6 +147,15 @@ func requestProviderModels(r *http.Request, entry providers.Entry, credential, a
 			req.Header.Set("x-goog-api-key", credential)
 		}
 	case "openai", "openai_responses":
+		if entry.ID == "copilot" {
+			// Authenticate exactly like the chat path (internal/llm): token
+			// exchange, falling back to direct-Bearer, plus the editor headers
+			// and the data-residency host repoint. A raw OAuth (gho_) or
+			// Enterprise token sent direct-Bearer to /models 401s; the exchange
+			// is what the chat path does, so discovery must do it too.
+			llm.ApplyCopilotAuth(req, credential)
+			break
+		}
 		if credential != "" {
 			req.Header.Set("Authorization", "Bearer "+credential)
 		}
@@ -182,7 +193,16 @@ func providerModelsURLs(entry providers.Entry) ([]string, error) {
 	for _, suffix := range []string{"/chat/completions", "/responses", "/messages", "/models"} {
 		base = strings.TrimSuffix(base, suffix)
 	}
-	if entry.HeaderStyle == "openai" {
+	if entry.ID == "copilot" {
+		// GitHub Copilot serves the model list at the host root (/models),
+		// not /v1/models like the generic OpenAI path. Honor the Enterprise /
+		// data-residency override (AIDASTING_COPILOT_API_URL) for the host.
+		cb := base
+		if ov := strings.TrimRight(strings.TrimSpace(os.Getenv("AIDASTING_COPILOT_API_URL")), "/"); ov != "" {
+			cb = ov
+		}
+		base = strings.TrimRight(cb, "/") + "/models"
+	} else if entry.HeaderStyle == "openai" {
 		base = providers.OpenAICompatibleURL(base, "models")
 	}
 	u, err := url.Parse(base)

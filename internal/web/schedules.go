@@ -40,10 +40,6 @@ func (s *Server) handleSchedules(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "targets are required", http.StatusBadRequest)
 			return
 		}
-		if err := s.validateScanWebhook(req.DiscordWebhook); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
 		if req.Name == "" {
 			req.Name = "Scheduled Scan " + strings.Join(req.Targets, ", ")
 		}
@@ -117,7 +113,6 @@ func (s *Server) handleScheduleDetail(w http.ResponseWriter, r *http.Request) {
 			ScanIntensity:  sch.ScanIntensity,
 			CompanyName:    sch.CompanyName,
 			LogoPath:       sch.LogoPath,
-			DiscordWebhook: sch.DiscordWebhook,
 			Name:           sch.Name + " (Scheduled)",
 			Model:          sch.Model,
 		}
@@ -157,10 +152,6 @@ func (s *Server) handleScheduleDetail(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "targets are required", http.StatusBadRequest)
 			return
 		}
-		if err := s.validateScanWebhook(req.DiscordWebhook); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
 		normalizeScheduleActivity(&req)
 		if err := normalizeScheduleTiming(&req); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -186,7 +177,6 @@ func (s *Server) handleScheduleDetail(w http.ResponseWriter, r *http.Request) {
 		sch.ScanIntensity = req.ScanIntensity
 		sch.CompanyName = req.CompanyName
 		sch.LogoPath = req.LogoPath
-		sch.DiscordWebhook = req.DiscordWebhook
 		sch.Model = req.Model
 
 		// If any timing field changed, or enabled transitioned false -> true, recalculate NextRun

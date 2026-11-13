@@ -38,6 +38,7 @@ import (
 	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
 	"github.com/barhaterahul/ai-dast-ing/v4/internal/proxy"
 	"github.com/barhaterahul/ai-dast-ing/v4/internal/resources"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scopeguard"
 	"github.com/barhaterahul/ai-dast-ing/v4/internal/safe"
 	"github.com/barhaterahul/ai-dast-ing/v4/internal/sandbox"
 	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
@@ -378,7 +379,6 @@ type ScanRequest struct {
 	Model          string   `json:"model"`           // e.g. "openai/gpt-5.6"
 	APIKey         string   `json:"api_key"`         // provider API key
 	APIBase        string   `json:"api_base"`        // provider API base URL
-	DiscordWebhook string   `json:"discord_webhook"` // Discord webhook URL
 	SeverityFilter []string `json:"severity_filter"` // e.g. ["critical", "high"]
 	Name           string   `json:"name"`            // user-defined scan name
 	SaveOnly       bool     `json:"save_only"`       // if true, save scan config without starting
@@ -569,9 +569,6 @@ type ScanRecord struct {
 	ScanMode                 string    `json:"scan_mode,omitempty"`                  // single, wildcard, dast
 	Instruction              string    `json:"instruction,omitempty"`                // custom scan instructions
 	SeverityFilter           []string  `json:"severity_filter,omitempty"`            // severity filter for scan
-	DiscordWebhook           string    `json:"discord_webhook,omitempty"`            // discord notification webhook
-	DiscordWebhookConfigured bool      `json:"discord_webhook_configured,omitempty"` // true when a per-scan or global webhook is configured
-	TelegramConfigured       bool      `json:"telegram_configured,omitempty"`        // true when global Telegram notifications are configured (token never exposed)
 	ReconMode                string    `json:"recon_mode,omitempty"`                 // active or passive reconnaissance
 	ScanIntensity            string    `json:"scan_intensity,omitempty"`             // active or passive testing/scanning
 	Events                   []WSEvent `json:"events"`
@@ -640,7 +637,6 @@ type QueueState struct {
 	ScanIntensity         string   `json:"scan_intensity,omitempty"`
 	CompanyName           string   `json:"company_name,omitempty"`
 	LogoPath              string   `json:"logo_path,omitempty"`
-	DiscordWebhook        string   `json:"discord_webhook,omitempty"`
 	Paused                bool     `json:"paused,omitempty"`
 	ActiveTarget          string   `json:"active_target,omitempty"`
 	ActiveScanDir         string   `json:"active_scan_dir,omitempty"`
@@ -688,9 +684,8 @@ type ScanInstance struct {
 	ScanIntensity       string                  `json:"scan_intensity,omitempty"`  // active or passive testing/scanning
 	CompanyName         string                  `json:"company_name,omitempty"`    // report branding: company name
 	LogoPath            string                  `json:"logo_path,omitempty"`       // report branding: logo path
-	DiscordWebhook      string                  `json:"-"`                         // discord webhook (not exposed to API)
 	// Per-scan auth/whitebox/context, restored when a saved scan is started.
-	// Kept in-memory only (json:"-", like DiscordWebhook) so third-party
+	// Kept in-memory only (json:"-") so third-party
 	// credentials and token-bearing source URLs are never written to the
 	// on-disk instance record or exposed via the API. Survives save→start
 	// within the running process; a process restart drops them (the operator
@@ -798,7 +793,6 @@ var dashboardRoutes = []string{
 	"/uploads/logos/",
 	"/api/report/",
 	"/api/settings/rate-limit",
-	"/api/settings/agentmail",
 	"/api/settings/llm",
 	"/api/settings/llm/keys",
 	"/api/settings/llm/test-route",
@@ -807,7 +801,6 @@ var dashboardRoutes = []string{
 	"/api/queue/resume",
 	"/api/queue/clear",
 	"/api/version",
-	"/api/stop-notify",
 	"/api/instances",
 	"/api/instances/",
 	"/api/chat",
@@ -846,12 +839,6 @@ type Server struct {
 	dataDir                string
 	currentScanDir         string
 	currentScanID          string
-	discordWebhook         string
-	discordMinSeverity     string      // minimum severity to send to Discord ("info", "low", "medium", "high", "critical")
-	telegramBotToken       string      // AIDASTING_TELEGRAM_BOT_TOKEN (secret, never exposed via API)
-	telegramChatID         string      // AIDASTING_TELEGRAM_CHAT_ID (numeric ID or @channelusername)
-	telegramMinSeverity    string      // minimum severity to send to Telegram ("info", "low", "medium", "high", "critical")
-	notifyScanComplete     atomic.Bool // AIDASTING_NOTIFY_SCAN_COMPLETE - send the "Scan Finished" summary after every scan (default false)
 	rateLimiter            *RateLimiter
 	settingsMu             sync.Mutex
 	instances              map[string]*ScanInstance // concurrent scan instances
@@ -967,11 +954,6 @@ func NewServer(cfg *config.Config, port int) *Server {
 		clients:                make(map[*wsClient]bool),
 		currentAgents:          make(map[string]*agent.Agent),
 		dataDir:                dataDir,
-		discordWebhook:         cfg.DiscordWebhook,
-		discordMinSeverity:     strings.ToLower(strings.TrimSpace(cfg.DiscordMinSeverity)),
-		telegramBotToken:       cfg.TelegramBotToken,
-		telegramChatID:         cfg.TelegramChatID,
-		telegramMinSeverity:    strings.ToLower(strings.TrimSpace(cfg.TelegramMinSeverity)),
 		rateLimiter:            rl,
 		instances:              make(map[string]*ScanInstance),
 		dispatchReservations:   make(map[string]bool),
@@ -992,7 +974,6 @@ func NewServer(cfg *config.Config, port int) *Server {
 		// admission select.
 		admissionWake: make(chan struct{}, 1),
 	}
-	srv.notifyScanComplete.Store(cfg.NotifyScanComplete)
 
 	// Wire postScanChatFn now that srv exists. The closure reads
 	// srv.catalog / srv.profiles at call time so the catalog
@@ -1248,7 +1229,6 @@ func (s *Server) Start() error {
 	mux.Handle("/uploads/logos/", http.StripPrefix("/uploads/logos/", http.FileServer(http.Dir(logosDir))))
 	mux.HandleFunc("/api/report/", s.handleDownloadReport)
 	mux.HandleFunc("/api/settings/rate-limit", s.handleRateLimit)
-	mux.HandleFunc("/api/settings/agentmail", s.handleAgentMailSettings)
 	mux.HandleFunc("/api/settings/llm", s.handleLLMSettings)
 	mux.HandleFunc("/api/settings/llm/keys", s.handleProviderKeys)
 	mux.HandleFunc("/api/settings/llm/test-route", s.handleTestRoute)
@@ -1264,7 +1244,10 @@ func (s *Server) Start() error {
 	mux.HandleFunc("/api/queue/resume", s.handleQueueResume)
 	mux.HandleFunc("/api/queue/clear", s.handleQueueClear)
 	mux.HandleFunc("/api/version", s.handleVersion)
-	mux.HandleFunc("/api/stop-notify", s.handleStopNotify)
+	mux.HandleFunc("/api/stop-notify", func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]string{"status": "notified"})
+	})
 	mux.HandleFunc("/api/instances", s.handleInstances)
 	mux.HandleFunc("/api/instances/", s.handleInstanceAction)
 
@@ -1505,16 +1488,6 @@ func (s *Server) Start() error {
 
 		terminal.KillAllProcesses()
 
-		// Send Discord notification. Use sig.String() explicitly so we get
-		// "terminated"/"interrupt" rather than a numeric fallback for any
-		// os.Signal implementation that doesn't satisfy fmt.Stringer.
-		if s.discordWebhook != "" {
-			s.sendDiscord(0xff6b6b, "🔄 AI-DAST-ING Restarting", fmt.Sprintf("Service received %s signal. Saving state and restarting.\nInterrupted scans will auto-resume.", sig.String()))
-		}
-		if s.telegramConfigured() {
-			s.sendTelegram(0xff6b6b, "🔄 AI-DAST-ING Restarting", fmt.Sprintf("Service received %s signal. Saving state and restarting.\nInterrupted scans will auto-resume.", sig.String()))
-		}
-
 		// Give scans a moment to save their queue state
 		time.Sleep(2 * time.Second)
 
@@ -1562,14 +1535,6 @@ func (s *Server) scheduleGracefulRestart() bool {
 		return false
 	}
 	log.Printf("[RESTART] Graceful restart requested — will restart once all scans finish")
-	if s.discordWebhook != "" {
-		s.sendDiscord(0x4dabf7, "🕓 AI-DAST-ING Restart Scheduled",
-			"A restart was requested. AI-DAST-ING will restart automatically once all running scans finish and no tools are active.")
-	}
-	if s.telegramConfigured() {
-		s.sendTelegram(0x4dabf7, "🕓 AI-DAST-ING Restart Scheduled",
-			"A restart was requested. AI-DAST-ING will restart automatically once all running scans finish and no tools are active.")
-	}
 	go s.restartWhenIdleWatcher(s.httpServer)
 	return true
 }
@@ -1633,12 +1598,6 @@ func (s *Server) restartWhenIdleWatcher(httpServer *http.Server) {
 // up a newly-installed binary on disk.
 func (s *Server) restartNow(httpServer *http.Server) {
 	log.Printf("[RESTART] Scanner idle — restarting now")
-	if s.discordWebhook != "" {
-		s.sendDiscord(0x4dabf7, "🔄 AI-DAST-ING Restarting", "Scanner is idle. Restarting now; interrupted work (if any) auto-resumes.")
-	}
-	if s.telegramConfigured() {
-		s.sendTelegram(0x4dabf7, "🔄 AI-DAST-ING Restarting", "Scanner is idle. Restarting now; interrupted work (if any) auto-resumes.")
-	}
 
 	// Belt-and-suspenders: reap any stray tool processes before we go.
 	terminal.KillAllProcesses()
@@ -1835,7 +1794,6 @@ func (s *Server) handleScan(w http.ResponseWriter, r *http.Request) {
 			CurrentPhase:   firstSelectedPhase(req.Phases),
 			CompanyName:    req.CompanyName,
 			LogoPath:       req.LogoPath,
-			DiscordWebhook: req.DiscordWebhook,
 			// Retained in-memory so "Save for later" → start keeps the
 			// operator's authenticated-scanning + whitebox + context config.
 			TargetAuth:          req.TargetAuth,
@@ -1870,9 +1828,6 @@ func (s *Server) handleScan(w http.ResponseWriter, r *http.Request) {
 				CurrentPhase:             firstSelectedPhase(req.Phases),
 				CompanyName:              req.CompanyName,
 				LogoPath:                 req.LogoPath,
-				DiscordWebhook:           req.DiscordWebhook,
-				DiscordWebhookConfigured: req.DiscordWebhook != "" || s.discordWebhook != "",
-				TelegramConfigured:       s.telegramConfigured(),
 			}
 			s.saveScanRecordTo(rec, savedDir)
 		}
@@ -2048,14 +2003,6 @@ func (s *Server) handleRestart(w http.ResponseWriter, r *http.Request) {
 
 	if restartForceRequested(r) {
 		log.Printf("[RESTART] /api/restart FORCE requested (idle=%v) — restarting immediately, interrupting any in-flight work", idle)
-		if s.discordWebhook != "" {
-			s.sendDiscord(0xff6b6b, "🔁 AI-DAST-ING Force Restart",
-				"An immediate restart was requested. AI-DAST-ING is restarting now; in-flight processes are interrupted and resumable queues will recover after startup.")
-		}
-		if s.telegramConfigured() {
-			s.sendTelegram(0xff6b6b, "🔁 AI-DAST-ING Force Restart",
-				"An immediate restart was requested. AI-DAST-ING is restarting now; in-flight processes are interrupted and resumable queues will recover after startup.")
-		}
 		// Prevent an already-scheduled idle watcher from also firing.
 		s.restartWhenIdle.Store(true)
 		_ = json.NewEncoder(w).Encode(map[string]any{
@@ -2852,7 +2799,6 @@ func (s *Server) handleInstanceAction(w http.ResponseWriter, r *http.Request) {
 		instruction := inst.Instruction
 		scanMode := inst.ScanMode
 		severityFilter := inst.SeverityFilter
-		discordWebhook := inst.DiscordWebhook
 		phases := inst.Phases
 		reconMode := inst.ReconMode
 		scanIntensity := inst.ScanIntensity
@@ -2871,7 +2817,6 @@ func (s *Server) handleInstanceAction(w http.ResponseWriter, r *http.Request) {
 			Instruction:         instruction,
 			ScanMode:            scanMode,
 			SeverityFilter:      severityFilter,
-			DiscordWebhook:      discordWebhook,
 			Name:                instName,
 			Phases:              phases,
 			ReconMode:           reconMode,
@@ -2912,7 +2857,6 @@ func (s *Server) handleInstanceAction(w http.ResponseWriter, r *http.Request) {
 			Instruction:         inst.Instruction,
 			ScanMode:            inst.ScanMode,
 			SeverityFilter:      inst.SeverityFilter,
-			DiscordWebhook:      inst.DiscordWebhook,
 			Name:                inst.Name,
 			Phases:              inst.Phases,
 			ReconMode:           inst.ReconMode,
@@ -3111,7 +3055,6 @@ type scanSession struct {
 	name                string
 	userInstruction     string
 	severityFilter      []string
-	discordWebhook      string
 	discoveryMode       bool
 	genReport           bool
 	resetState          bool
@@ -3467,73 +3410,6 @@ func (s *Server) handleRateLimit(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func maskAgentMailKey(apiKey string) string {
-	if len(apiKey) > 8 {
-		return "****" + apiKey[len(apiKey)-8:]
-	}
-	if apiKey != "" {
-		return "****"
-	}
-	return ""
-}
-
-func isMaskedAgentMailKey(apiKey string) bool {
-	apiKey = strings.TrimSpace(apiKey)
-	return strings.HasPrefix(apiKey, "****") || strings.Contains(apiKey, "••••")
-}
-
-// handleAgentMailSettings handles GET and POST for AgentMail settings.
-func (s *Server) handleAgentMailSettings(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	switch r.Method {
-	case "GET":
-		// Return current AgentMail settings (without exposing the full API key)
-		_ = json.NewEncoder(w).Encode(map[string]any{
-			"pod":       s.cfg.AgentMailPod,
-			"apiKey":    maskAgentMailKey(s.cfg.AgentMailAPIKey),
-			"hasApiKey": s.cfg.AgentMailAPIKey != "",
-		})
-
-	case "POST":
-		// Update AgentMail settings
-		var req struct {
-			Pod    string `json:"pod"`
-			APIKey string `json:"apiKey"`
-		}
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			http.Error(w, "invalid request", http.StatusBadRequest)
-			return
-		}
-
-		preserveKey := strings.TrimSpace(req.APIKey) == "" || isMaskedAgentMailKey(req.APIKey)
-		effectiveAPIKey := req.APIKey
-		if preserveKey {
-			effectiveAPIKey = s.cfg.AgentMailAPIKey
-		}
-
-		updates := map[string]string{"AGENTMAIL_POD": req.Pod}
-		if !preserveKey {
-			updates["AGENTMAIL_API_KEY"] = effectiveAPIKey
-		}
-		if _, err := s.applyEnvironmentUpdates(updates); err != nil {
-			log.Printf("Failed to save AgentMail settings: %v", err)
-			http.Error(w, "failed to save AgentMail settings", http.StatusInternalServerError)
-			return
-		}
-
-		log.Printf("AgentMail settings updated: pod=%s", req.Pod)
-
-		_ = json.NewEncoder(w).Encode(map[string]any{
-			"pod":       req.Pod,
-			"apiKey":    maskAgentMailKey(effectiveAPIKey),
-			"hasApiKey": effectiveAPIKey != "",
-		})
-
-	default:
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-	}
-}
 
 // handleVersion returns the current AI-DAST-ING version
 func (s *Server) handleVersion(w http.ResponseWriter, r *http.Request) {
@@ -3549,19 +3425,17 @@ func (s *Server) handleVersion(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// handleStopNotify sends a stop notification to Discord if a scan was running
-func (s *Server) handleStopNotify(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 
-	// Send Discord notification if webhook is configured
-	if s.discordWebhook != "" {
-		s.sendDiscord(0xff6b6b, "🛑 AI-DAST-ING Stopped", "The AI-DAST-ING service has been stopped by the user.")
-	}
-	if s.telegramConfigured() {
-		s.sendTelegram(0xff6b6b, "🛑 AI-DAST-ING Stopped", "The AI-DAST-ING service has been stopped by the user.")
-	}
-
-	_ = json.NewEncoder(w).Encode(map[string]string{"status": "notified"})
+// isBlockedTarget delegates to scopeguard.IsLocalOrListener, the
+// authoritative classifier for Local_Or_Listener_Host shared by the
+// web fetcher and the agent-side gate (re-homed from the removed
+// notification subsystem).
+func (s *Server) isBlockedTarget(target string) bool {
+	return scopeguard.IsLocalOrListener(scopeguard.Config{
+		BindAddr:          s.cfg.BindAddr,
+		Port:              s.port,
+		AllowLocalTargets: s.cfg.AllowLocalTargets,
+	}, target)
 }
 
 // handleQueueStatus returns the current queue state for recovery
@@ -3690,8 +3564,6 @@ func (s *Server) handleGetScan(w http.ResponseWriter, r *http.Request) {
 		s.attachWildcardSubScansForDetail(rec, func() []scanEntry { return all })
 		finalizeScanRecordForResponse(rec)
 		finalizeEventsMeta(rec)
-		s.markDiscordWebhookConfigured(rec)
-		s.markTelegramConfigured(rec)
 		data, _ := json.Marshal(rec)
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -3788,8 +3660,6 @@ func (s *Server) handleGetScan(w http.ResponseWriter, r *http.Request) {
 					s.attachWildcardSubScansForDetail(persisted, summaries)
 					finalizeScanRecordForResponse(persisted)
 					finalizeEventsMeta(persisted)
-					s.markDiscordWebhookConfigured(persisted)
-					s.markTelegramConfigured(persisted)
 					data, _ := json.Marshal(persisted)
 					w.Header().Set("Content-Type", "application/json")
 					w.Write(data)
@@ -3799,8 +3669,6 @@ func (s *Server) handleGetScan(w http.ResponseWriter, r *http.Request) {
 			s.attachWildcardSubScansForDetail(rec, summaries)
 			finalizeScanRecordForResponse(rec)
 			finalizeEventsMeta(rec)
-			s.markDiscordWebhookConfigured(rec)
-			s.markTelegramConfigured(rec)
 			data, _ := json.Marshal(rec)
 			w.Header().Set("Content-Type", "application/json")
 			w.Write(data)
@@ -3823,8 +3691,6 @@ func (s *Server) handleGetScan(w http.ResponseWriter, r *http.Request) {
 	s.attachWildcardSubScansForDetail(rec, summaries)
 	finalizeScanRecordForResponse(rec)
 	finalizeEventsMeta(rec)
-	s.markDiscordWebhookConfigured(rec)
-	s.markTelegramConfigured(rec)
 	data, _ := json.Marshal(rec)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(data)

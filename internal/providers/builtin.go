@@ -132,7 +132,7 @@ var builtinList = []Entry{
 		// api.github.com/copilot_internal/v2/token for a short-lived Copilot
 		// bearer, then used against this OpenAI-compatible base. Requires an
 		// active Copilot subscription on the account.
-		Notes: "GitHub Copilot via device-code OAuth (recommended) or a fine-grained PAT (github_pat_, needs copilot access) entered as the API key. Classic ghp_ PATs are not supported by Copilot. The GitHub token is exchanged for a short-lived Copilot token automatically.",
+		Notes: "GitHub Copilot via device-code OAuth (recommended) or a fine-grained PAT (github_pat_, needs copilot access) entered as the API key. Classic ghp_ PATs are not supported by Copilot. The GitHub token is exchanged for a short-lived Copilot token automatically. For Copilot Enterprise / data-residency (ghe.com) tenants, set AIDASTING_COPILOT_API_URL to your tenant's Copilot API base if requests return 502.",
 	},
 	{
 		ID:          "deepinfra",

@@ -91,7 +91,7 @@ For EVERY potential vulnerability found in Phase 2, you MUST:
 - Proof = command output in response
 
 **IDOR (Insecure Direct Object Reference) — REQUIRES TWO ACCOUNTS:**
-- Create TWO accounts using agentmail (e.g., userA@agentmail.to and userB@agentmail.to)
+- Create TWO accounts with distinct emails you control (e.g., userA@example.com and userB@example.com), completing any email verification manually
 - Login as User A → browser_action command=save_session session_name=user_a
 - Login as User B → browser_action command=save_session session_name=user_b
 - Load user_a: find resource IDs (profile IDs, order IDs, API object IDs)
@@ -171,13 +171,10 @@ If the answer to #5 is "yes, it's designed to work this way" → DO NOT REPORT I
 - Always prefer passive confirmation over active exploitation
 - If you're unsure whether an exploit is safe, use time-based or error-based confirmation
 
-## UNIVERSAL EMAIL USAGE (STRICT REQUIREMENT)
+## UNIVERSAL EMAIL USAGE
 Whenever you need an email address for ANY test (SMTP Open Relay, form submissions, sign-ups, XSS/SSRF payloads, or contact forms):
-1. NEVER use random, fake, or external emails like test@gmail.com or admin@target.com.
-2. ALWAYS use the agentmail tool to generate a unique test email address:
-   - action=create_inbox name=smtp_test1 (or whatever naming applies to your test)
-   - Wait/check the inbox for bounce-backs, verifications, or callback receipts using action=wait_for_email
-By exclusively using agentmail, you prevent spamming 3rd-party domains and can actually verify received payloads.
+1. NEVER use real third-party addresses (e.g. test@gmail.com) or addresses on the target's own domain (e.g. admin@target.com).
+2. Use a dedicated test address under a domain you control, or a clearly throwaway address (e.g. smtp-test1@example.com), so bounces and replies cannot bother third parties.
 
 ## NATIVE BROWSER-BASED TESTING
 
@@ -185,26 +182,21 @@ For testing that requires a real browser (JavaScript execution, login flows, DOM
 
 **Key commands:** launch, goto, snapshot, click, type, submit, fill_form, get_cookies, save_session, wait, iframe, extract_links, execute_js, screenshot
 
-**Login/Signup Workflow (ALWAYS use agentmail):
-1. FIRST: call ` + "`" + `agentmail` + "`" + ` action=list_inboxes to see your available emails and IDs
-2. Use your PRE-CREATED agentmail email addresses for ALL login/signup forms
-   - NEVER use random/fake emails like test@gmail.com
-3. If signup requires email verification:
-   - After submitting form, call ` + "`" + `agentmail` + "`" + ` action=wait_for_email inbox_id=YOUR_INBOX_ID subject=verify timeout=120
-   - Extract verification link from the email
-   - Navigate to that link in the browser to complete signup
-4. After login, ALWAYS: ` + "`" + `browser_action` + "`" + ` command=get_cookies then ` + "`" + `save_session
-5. Use saved session for IDOR, authenticated API testing, etc.
+**Login/Signup Workflow:
+1. Use a dedicated test email address for all login/signup forms — never a real third-party address like test@gmail.com
+2. If signup requires email verification you cannot complete, note it as a manual step and move on
+3. After login, ALWAYS: ` + "`" + `browser_action` + "`" + ` command=get_cookies then ` + "`" + `save_session
+4. Use saved session for IDOR, authenticated API testing, etc.
 
 **Multi-field form shortcut:**
-` + "`" + `browser_action` + "`" + ` command=fill_form fields=email={{AGENTMAIL_EMAIL}}|password=Pass123!|name=Test
+` + "`" + `browser_action` + "`" + ` command=fill_form fields=email=test-user@example.com|password=Pass123!|name=Test
 
 **Multi-step login (e.g., SSO, OAuth, magic links, 2FA):**
 - Step 1: Fill first form and submit
 - Step 2: snapshot → see what comes next (redirect, 2FA prompt, SSO button)
 - Step 3: If redirected to SSO/OAuth: use ` + "`" + `browser_action command=goto url=SsoUrl` + "`" + `
-- Step 4: If 2FA: use browser to fill TOTP, or check agentmail for 2FA code
-- Step 5: If magic link: agentmail wait_for_email for the link
+- Step 4: If 2FA: use browser to fill TOTP if you have the test secret
+- Step 5: If magic link: note it as a manual-verification step
 - Repeat snapshot/wait until fully logged in, then save_session
 
 **Iframe handling (for CAPTCHAs, embedded forms):**

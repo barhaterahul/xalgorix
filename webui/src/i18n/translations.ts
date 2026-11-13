@@ -53,7 +53,6 @@ const en: Dict = {
   "nav.instances": "Instances",
   "nav.findings": "Findings",
   "nav.live": "Live Feed",
-  "nav.email": "Email Triage",
   "nav.reports": "Reports",
   "nav.integrations": "Integrations",
   "nav.settings": "Settings",
@@ -203,8 +202,6 @@ const en: Dict = {
   // Integrations page
   "integrations.title": "Integrations",
   "integrations.category.AI": "AI",
-  "integrations.category.Email": "Email",
-  "integrations.category.Notifications": "Notifications",
   "integrations.category.Engagement": "Engagement",
   "integrations.connected": "Connected",
   "integrations.notConnected": "Not connected",
@@ -212,17 +209,6 @@ const en: Dict = {
   // Live page
   "live.title": "Live Feed",
 
-  // Email triage page
-  "email.title": "Email Triage",
-  "email.subtitle": "Live AgentMail events and ingestion status.",
-  "email.pod": "AgentMail pod",
-  "email.apiKey": "API key",
-  "email.status": "Status",
-  "email.notConfigured": "not configured",
-  "email.set": "set",
-  "email.missing": "missing",
-  "email.listening": "listening",
-  "email.setupRequired": "setup required",
 
   // Scan detail page
   "scanDetail.phaseProgress": "Phase progress",
@@ -250,8 +236,6 @@ const en: Dict = {
   "settings.title": "Settings",
   "settings.tab.llm": "LLM",
   "settings.tab.engagement": "Engagement",
-  "settings.tab.notifications": "Notifications",
-  "settings.tab.email": "Email",
   "settings.tab.environment": "Environment",
   "settings.backup.title": "Backup & migration",
   "settings.backup.desc":
@@ -262,9 +246,6 @@ const en: Dict = {
   "settings.tab.account": "Account",
   "settings.card.llmProvider": "LLM provider",
   "settings.card.rateLimits": "Rate limits",
-  "settings.card.discord": "Discord notifications",
-  "settings.card.telegram": "Telegram notifications",
-  "settings.card.agentMail": "AgentMail",
   "settings.card.account": "Account",
   "settings.account.desc": "Session and access.",
   "settings.savedIndicator": "Saved",
@@ -280,7 +261,6 @@ const zhCN: Dict = {
   "nav.instances": "实例",
   "nav.findings": "漏洞发现",
   "nav.live": "实时动态",
-  "nav.email": "邮件分诊",
   "nav.reports": "报告",
   "nav.integrations": "集成",
   "nav.settings": "设置",
@@ -430,8 +410,6 @@ const zhCN: Dict = {
   // Integrations page
   "integrations.title": "集成",
   "integrations.category.AI": "AI",
-  "integrations.category.Email": "邮件",
-  "integrations.category.Notifications": "通知",
   "integrations.category.Engagement": "测试参数",
   "integrations.connected": "已连接",
   "integrations.notConnected": "未连接",
@@ -439,17 +417,6 @@ const zhCN: Dict = {
   // Live page
   "live.title": "实时动态",
 
-  // Email triage page
-  "email.title": "邮件分诊",
-  "email.subtitle": "实时 AgentMail 事件与接收状态。",
-  "email.pod": "AgentMail Pod",
-  "email.apiKey": "API 密钥",
-  "email.status": "状态",
-  "email.notConfigured": "未配置",
-  "email.set": "已设置",
-  "email.missing": "缺失",
-  "email.listening": "监听中",
-  "email.setupRequired": "需要配置",
 
   // Scan detail page
   "scanDetail.phaseProgress": "阶段进度",
@@ -477,8 +444,6 @@ const zhCN: Dict = {
   "settings.title": "设置",
   "settings.tab.llm": "大模型",
   "settings.tab.engagement": "测试参数",
-  "settings.tab.notifications": "通知",
-  "settings.tab.email": "邮件",
   "settings.tab.environment": "环境变量",
   "settings.backup.title": "备份与迁移",
   "settings.backup.desc":
@@ -489,9 +454,6 @@ const zhCN: Dict = {
   "settings.tab.account": "账户",
   "settings.card.llmProvider": "大模型提供商",
   "settings.card.rateLimits": "速率限制",
-  "settings.card.discord": "Discord 通知",
-  "settings.card.telegram": "Telegram 通知",
-  "settings.card.agentMail": "AgentMail",
   "settings.card.account": "账户",
   "settings.account.desc": "会话与访问权限。",
   "settings.savedIndicator": "已保存",

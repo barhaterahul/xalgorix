@@ -25,7 +25,6 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { ErrorState } from "@/components/states";
 import {
-  useAgentMail,
   useAuthProfiles,
   useDeleteAuthProfile,
   useDiscoverProviderModels,
@@ -34,7 +33,6 @@ import {
   useProviders,
   useRateLimit,
   useRefreshAuthProfile,
-  useUpdateAgentMail,
   useUpdateEnvironmentSettings,
   useUpdateLLMSettings,
   useUpdateRateLimit,
@@ -58,8 +56,6 @@ import { syncLanguageFromServer, useI18n } from "@/i18n";
 const settingsTabs = [
   "llm",
   "engagement",
-  "notifications",
-  "email",
   "environment",
   "account",
 ] as const;
@@ -121,8 +117,6 @@ export default function SettingsPage() {
   const { t } = useI18n();
   const rate = useRateLimit();
   const updateRate = useUpdateRateLimit();
-  const mail = useAgentMail();
-  const updateMail = useUpdateAgentMail();
   const llm = useLLMSettings();
   const updateLLM = useUpdateLLMSettings();
   const environment = useEnvironmentSettings();
@@ -137,25 +131,14 @@ export default function SettingsPage() {
   const deleteProfile = useDeleteAuthProfile();
 
   const [rateForm, setRateForm] = useState({ requests: 10, window: 1 });
-  const [mailForm, setMailForm] = useState({ pod: "", apiKey: "" });
   const [llmForm, setLLMForm] = useState<LLMFormState>(emptyLLMForm);
   const [oauthOpen, setOAuthOpen] = useState(false);
-  const [notificationForm, setNotificationForm] = useState({
-    webhook: "",
-    minSeverity: "",
-    telegramBotToken: "",
-    telegramChatId: "",
-    telegramMinSeverity: "",
-    notifyScanComplete: false,
-  });
   const [envValues, setEnvValues] = useState<Record<string, string>>({});
   const [envChanges, setEnvChanges] = useState<Record<string, string>>({});
   const [envFilter, setEnvFilter] = useState("");
   const [envRestartRequired, setEnvRestartRequired] = useState(false);
   const [savedRate, setSavedRate] = useState(false);
-  const [savedMail, setSavedMail] = useState(false);
   const [savedLLM, setSavedLLM] = useState(false);
-  const [savedNotifications, setSavedNotifications] = useState(false);
   const [savedEnvironment, setSavedEnvironment] = useState(false);
 
   useEffect(() => {
@@ -166,15 +149,6 @@ export default function SettingsPage() {
       });
     }
   }, [rate.data]);
-
-  useEffect(() => {
-    if (mail.data) {
-      setMailForm({
-        pod: mail.data.pod ?? "",
-        apiKey: mail.data.apiKey ?? "",
-      });
-    }
-  }, [mail.data]);
 
   useEffect(() => {
     if (!llm.data) return;
@@ -203,16 +177,6 @@ export default function SettingsPage() {
       activeProfileKey: llm.data.activeProfileKey ?? "",
     });
   }, [llm.data]);
-
-  useEffect(() => {
-    const webhook = envValue(environment.data, "AIDASTING_DISCORD_WEBHOOK");
-    const minSeverity = envValue(environment.data, "AIDASTING_DISCORD_MIN_SEVERITY");
-    const telegramBotToken = envValue(environment.data, "AIDASTING_TELEGRAM_BOT_TOKEN");
-    const telegramChatId = envValue(environment.data, "AIDASTING_TELEGRAM_CHAT_ID");
-    const telegramMinSeverity = envValue(environment.data, "AIDASTING_TELEGRAM_MIN_SEVERITY");
-    const notifyScanComplete = envValue(environment.data, "AIDASTING_NOTIFY_SCAN_COMPLETE") === "true";
-    setNotificationForm({ webhook, minSeverity, telegramBotToken, telegramChatId, telegramMinSeverity, notifyScanComplete });
-  }, [environment.data]);
 
   useEffect(() => {
     if (!environment.data) return;
@@ -439,8 +403,6 @@ export default function SettingsPage() {
         <TabsList className="flex h-auto flex-wrap">
           <TabsTrigger value="llm">{t("settings.tab.llm")}</TabsTrigger>
           <TabsTrigger value="engagement">{t("settings.tab.engagement")}</TabsTrigger>
-          <TabsTrigger value="notifications">{t("settings.tab.notifications")}</TabsTrigger>
-          <TabsTrigger value="email">{t("settings.tab.email")}</TabsTrigger>
           <TabsTrigger value="environment">{t("settings.tab.environment")}</TabsTrigger>
           <TabsTrigger value="account">{t("settings.tab.account")}</TabsTrigger>
         </TabsList>
@@ -1062,268 +1024,6 @@ export default function SettingsPage() {
                     disabled={updateRate.isPending}
                   >
                     {updateRate.isPending ? "Saving..." : "Save"}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        <TabsContent value="notifications">
-          {environment.isLoading ? (
-            <Skeleton className="h-72" />
-          ) : environment.error ? (
-            <ErrorState
-              title="Failed to load notification settings"
-              description={environment.error instanceof Error ? environment.error.message : "Unknown error"}
-              action={
-                <Button size="sm" variant="outline" onClick={() => environment.refetch()}>
-                  Retry
-                </Button>
-              }
-            />
-          ) : (
-            <>
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("settings.card.discord")}</CardTitle>
-                <CardDescription>
-                  Global defaults used unless a scan provides its own webhook.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-5">
-                <div className="grid gap-3 lg:grid-cols-[1fr_220px]">
-                  <div className="space-y-2">
-                    <Label htmlFor="discord-webhook">Discord webhook</Label>
-                    <Input
-                      id="discord-webhook"
-                      value={notificationForm.webhook}
-                      onChange={(e) =>
-                        setNotificationForm({
-                          ...notificationForm,
-                          webhook: e.target.value,
-                        })
-                      }
-                      placeholder="https://discord.com/api/webhooks/..."
-                      className="font-mono"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Keep the masked value to preserve the saved webhook.
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Minimum severity</Label>
-                    <Select
-                      value={notificationForm.minSeverity || "__unset__"}
-                      onValueChange={(value) =>
-                        setNotificationForm({
-                          ...notificationForm,
-                          minSeverity: value === "__unset__" ? "" : value,
-                        })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__unset__">Default</SelectItem>
-                        {["info", "low", "medium", "high", "critical"].map((value) => (
-                          <SelectItem key={value} value={value}>
-                            {value}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <Separator />
-                <div className="flex items-center justify-end gap-3">
-                  {savedNotifications && (
-                    <span className="text-xs text-success">{t("settings.savedIndicator")}</span>
-                  )}
-                  <Button
-                    onClick={async () => {
-                      setSavedNotifications(false);
-                      await updateEnvironment.mutateAsync({
-                        AIDASTING_DISCORD_WEBHOOK: notificationForm.webhook,
-                        AIDASTING_DISCORD_MIN_SEVERITY: notificationForm.minSeverity,
-                        AIDASTING_TELEGRAM_BOT_TOKEN: notificationForm.telegramBotToken,
-                        AIDASTING_TELEGRAM_CHAT_ID: notificationForm.telegramChatId,
-                        AIDASTING_TELEGRAM_MIN_SEVERITY: notificationForm.telegramMinSeverity,
-                        AIDASTING_NOTIFY_SCAN_COMPLETE: notificationForm.notifyScanComplete ? "true" : "false",
-                      });
-                      setSavedNotifications(true);
-                      setTimeout(() => setSavedNotifications(false), 2500);
-                    }}
-                    disabled={updateEnvironment.isPending}
-                  >
-                    {updateEnvironment.isPending ? "Saving..." : "Save notifications"}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("settings.card.telegram")}</CardTitle>
-                <CardDescription>
-                  Send scan events and findings to a Telegram chat or channel.
-                  Configure a bot via @BotFather and add it to the target chat as an admin.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-5">
-                <div className="grid gap-3 lg:grid-cols-[1fr_1fr_220px]">
-                  <div className="space-y-2">
-                    <Label htmlFor="telegram-bot-token">Bot token</Label>
-                    <Input
-                      id="telegram-bot-token"
-                      value={notificationForm.telegramBotToken}
-                      onChange={(e) =>
-                        setNotificationForm({
-                          ...notificationForm,
-                          telegramBotToken: e.target.value,
-                        })
-                      }
-                      placeholder="123456789:ABC-DEF..."
-                      className="font-mono"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Keep the masked value to preserve the saved token.
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="telegram-chat-id">Chat ID</Label>
-                    <Input
-                      id="telegram-chat-id"
-                      value={notificationForm.telegramChatId}
-                      onChange={(e) =>
-                        setNotificationForm({
-                          ...notificationForm,
-                          telegramChatId: e.target.value,
-                        })
-                      }
-                      placeholder="-1001234567890 or @channelusername"
-                      className="font-mono"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Minimum severity</Label>
-                    <Select
-                      value={notificationForm.telegramMinSeverity || "__unset__"}
-                      onValueChange={(value) =>
-                        setNotificationForm({
-                          ...notificationForm,
-                          telegramMinSeverity: value === "__unset__" ? "" : value,
-                        })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__unset__">Default</SelectItem>
-                        {["info", "low", "medium", "high", "critical"].map((value) => (
-                          <SelectItem key={value} value={value}>
-                            {value}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <Label htmlFor="notify-scan-complete">Notify on scan completion</Label>
-                    <p className="text-xs text-muted-foreground">
-                      Send the &quot;Scan Finished&quot; summary (report ready / clean scan) after every scan.
-                      Off by default — you only receive per-vulnerability alerts.
-                    </p>
-                  </div>
-                  <Switch
-                    id="notify-scan-complete"
-                    checked={notificationForm.notifyScanComplete}
-                    onCheckedChange={(checked) =>
-                      setNotificationForm({
-                        ...notificationForm,
-                        notifyScanComplete: checked,
-                      })
-                    }
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Telegram is independent of Discord — configure one or both.
-                  The bot token is treated as a secret and never returned in API responses.
-                </p>
-              </CardContent>
-            </Card>
-            </>
-          )}
-        </TabsContent>
-
-        <TabsContent value="email">
-          {mail.isLoading ? (
-            <Skeleton className="h-72" />
-          ) : mail.error ? (
-            <ErrorState
-              title="Failed to load AgentMail settings"
-              description={mail.error instanceof Error ? mail.error.message : "Unknown error"}
-              action={
-                <Button size="sm" variant="outline" onClick={() => mail.refetch()}>
-                  Retry
-                </Button>
-              }
-            />
-          ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("settings.card.agentMail")}</CardTitle>
-                <CardDescription>
-                  Inbound triage requires a configured pod and API key.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-5">
-                <div className="space-y-2">
-                  <Label htmlFor="pod">Pod</Label>
-                  <Input
-                    id="pod"
-                    value={mailForm.pod}
-                    onChange={(e) =>
-                      setMailForm({ ...mailForm, pod: e.target.value })
-                    }
-                    placeholder="ai-dast-ing-prod"
-                    className="font-mono"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="apikey">API key</Label>
-                  <Input
-                    id="apikey"
-                    value={mailForm.apiKey}
-                    onChange={(e) =>
-                      setMailForm({ ...mailForm, apiKey: e.target.value })
-                    }
-                    placeholder={mail.data?.hasApiKey ? "**** (saved)" : "ak_..."}
-                    className="font-mono"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Leave masked value untouched to keep the existing key.
-                  </p>
-                </div>
-                <Separator />
-                <div className="flex items-center justify-end gap-3">
-                  {savedMail && (
-                    <span className="text-xs text-success">{t("settings.savedIndicator")}</span>
-                  )}
-                  <Button
-                    onClick={async () => {
-                      setSavedMail(false);
-                      await updateMail.mutateAsync(mailForm);
-                      setSavedMail(true);
-                      setTimeout(() => setSavedMail(false), 2500);
-                    }}
-                    disabled={updateMail.isPending}
-                  >
-                    {updateMail.isPending ? "Saving..." : "Save"}
                   </Button>
                 </div>
               </CardContent>

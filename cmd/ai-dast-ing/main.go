@@ -679,17 +679,6 @@ func startBackground() {
 
 // handleStop stops the ai-dast-ing service
 func handleStop() {
-	// Try to send stop notification to Discord first
-	go func() {
-		resp, err := http.Get(fmt.Sprintf("http://localhost:%d/api/stop-notify", defaultWebPort))
-		if err == nil {
-			resp.Body.Close()
-		}
-	}()
-
-	// Small delay to let notification send
-	time.Sleep(500 * time.Millisecond)
-
 	// Try systemctl first (with sudo)
 	cmd := exec.Command("sudo", "systemctl", "stop", "ai-dast-ing")
 	err := cmd.Run()

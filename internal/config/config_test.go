@@ -143,13 +143,6 @@ func TestLoad_ReadsDashboardProviderProxyAndAgentMailSettings(t *testing.T) {
 		"AIDASTING_TELEMETRY=false",
 		"AIDASTING_OTEL_ENDPOINT=http://otel.test",
 		"GEMINI_API_KEY=search-key",
-		"AGENTMAIL_API_KEY=agentmail-key",
-		"AGENTMAIL_POD=am_test_pod",
-		"AIDASTING_DISCORD_WEBHOOK=https://discord.example/webhook",
-		"AIDASTING_DISCORD_MIN_SEVERITY=high",
-		"AIDASTING_TELEGRAM_BOT_TOKEN=123456:ABC-DEF",
-		"AIDASTING_TELEGRAM_CHAT_ID=-1001234567890",
-		"AIDASTING_TELEGRAM_MIN_SEVERITY=critical",
 		"AIDASTING_USERNAME=admin",
 		"AIDASTING_PASSWORD=password",
 		"AIDASTING_BROWSER_PATH=/opt/chrome",
@@ -180,14 +173,8 @@ func TestLoad_ReadsDashboardProviderProxyAndAgentMailSettings(t *testing.T) {
 	if cfg.Telemetry || cfg.OTelEndpoint != "http://otel.test" {
 		t.Fatalf("telemetry settings not loaded: %#v", cfg)
 	}
-	if cfg.GeminiAPIKey != "search-key" || cfg.AgentMailAPIKey != "agentmail-key" || cfg.AgentMailPod != "am_test_pod" {
+	if cfg.GeminiAPIKey != "search-key" {
 		t.Fatalf("integration settings not loaded: %#v", cfg)
-	}
-	if cfg.DiscordWebhook != "https://discord.example/webhook" || cfg.DiscordMinSeverity != "high" {
-		t.Fatalf("discord settings not loaded: %#v", cfg)
-	}
-	if cfg.TelegramBotToken != "123456:ABC-DEF" || cfg.TelegramChatID != "-1001234567890" || cfg.TelegramMinSeverity != "critical" {
-		t.Fatalf("telegram settings not loaded: %#v", cfg)
 	}
 	if cfg.Username != "admin" || cfg.Password != "password" || cfg.BrowserPath != "/opt/chrome" {
 		t.Fatalf("dashboard/browser settings not loaded: %#v", cfg)

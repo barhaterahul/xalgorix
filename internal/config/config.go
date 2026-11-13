@@ -362,24 +362,6 @@ type Config struct {
 	// Web Search API
 	GeminiAPIKey string // GEMINI_API_KEY - for web search using Gemini
 
-	// AgentMail - temp email for sign-up verification
-	AgentMailAPIKey string // AGENTMAIL_API_KEY - AgentMail API key
-	AgentMailPod    string // AGENTMAIL_POD - AgentMail pod (e.g., "am_us_pod_47")
-
-	// Discord notifications
-	DiscordWebhook     string // AIDASTING_DISCORD_WEBHOOK - notification webhook URL
-	DiscordMinSeverity string // AIDASTING_DISCORD_MIN_SEVERITY - minimum severity to notify
-
-	// Telegram notifications
-	TelegramBotToken    string // AIDASTING_TELEGRAM_BOT_TOKEN - bot token from @BotFather (secret)
-	TelegramChatID      string // AIDASTING_TELEGRAM_CHAT_ID - target chat/channel ID (numeric or @username)
-	TelegramMinSeverity string // AIDASTING_TELEGRAM_MIN_SEVERITY - minimum severity to notify
-
-	// Scan-completion summary notification.
-	// When false (default) the "Scan Finished" summary is suppressed and only
-	// per-vulnerability alerts are sent; set true to also get an end-of-scan summary.
-	NotifyScanComplete bool // AIDASTING_NOTIFY_SCAN_COMPLETE - send the "Scan Finished" summary after every scan
-
 	// Dashboard auth
 	Username     string // AIDASTING_USERNAME - dashboard login username
 	Password     string // AIDASTING_PASSWORD - dashboard login password (DEPRECATED: prefer PasswordHash)
@@ -595,21 +577,7 @@ func load() *Config {
 		OTelEndpoint: envOr("AIDASTING_OTEL_ENDPOINT", ""),
 
 		// Web Search API
-		GeminiAPIKey:    envOr("GEMINI_API_KEY", ""),
-		AgentMailAPIKey: envOr("AGENTMAIL_API_KEY", ""),
-		AgentMailPod:    envOr("AGENTMAIL_POD", ""),
-
-		// Discord notifications
-		DiscordWebhook:     envOr("AIDASTING_DISCORD_WEBHOOK", ""),
-		DiscordMinSeverity: envOr("AIDASTING_DISCORD_MIN_SEVERITY", ""),
-
-		// Telegram notifications
-		TelegramBotToken:    envOr("AIDASTING_TELEGRAM_BOT_TOKEN", ""),
-		TelegramChatID:      envOr("AIDASTING_TELEGRAM_CHAT_ID", ""),
-		TelegramMinSeverity: envOr("AIDASTING_TELEGRAM_MIN_SEVERITY", ""),
-
-		// Scan-completion summary notification (opt-in; default off).
-		NotifyScanComplete: envOrBool("AIDASTING_NOTIFY_SCAN_COMPLETE", false),
+		GeminiAPIKey: envOr("GEMINI_API_KEY", ""),
 
 		// Dashboard auth
 		Username:     envOr("AIDASTING_USERNAME", ""),

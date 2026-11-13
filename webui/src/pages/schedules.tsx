@@ -154,7 +154,6 @@ export default function SchedulesPage() {
   const [logoPath, setLogoPath] = useState("");
   const [logoFileName, setLogoFileName] = useState("");
   const [logoUploading, setLogoUploading] = useState(false);
-  const [discordWebhook, setDiscordWebhook] = useState("");
   const [severityFilter, setSeverityFilter] = useState<string[]>([]);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -213,7 +212,6 @@ export default function SchedulesPage() {
     setCompanyName("");
     setLogoPath("");
     setLogoFileName("");
-    setDiscordWebhook("");
     setSeverityFilter([]);
     setProviderProfile("");
     setFormError(null);
@@ -240,7 +238,6 @@ export default function SchedulesPage() {
     setCompanyName(sch.company_name || "");
     setLogoPath(sch.logo_path || "");
     setLogoFileName(sch.logo_path ? "Uploaded logo" : "");
-    setDiscordWebhook(sch.discord_webhook || "");
     setSeverityFilter(sch.severity_filter || []);
     setProviderProfile(sch.provider_profile || "");
     setFormError(null);
@@ -339,7 +336,6 @@ export default function SchedulesPage() {
       provider_profile: providerProfile || undefined,
       company_name: companyName.trim() || undefined,
       logo_path: logoPath || undefined,
-      discord_webhook: discordWebhook.trim() || undefined,
       severity_filter: severityFilter.length ? severityFilter : undefined,
       enabled: editingSchedule ? editingSchedule.enabled : true,
     } as any;
@@ -793,17 +789,6 @@ export default function SchedulesPage() {
                   placeholder="Shown on the PDF cover page"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="sched-webhook">
-                  Discord Webhook Notification
-                </Label>
-                <Input
-                  id="sched-webhook"
-                  placeholder="https://discord.com/api/webhooks/..."
-                  value={discordWebhook}
-                  onChange={(e) => setDiscordWebhook(e.target.value)}
                 />
               </div>
             </div>
