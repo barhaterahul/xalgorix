@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
 )
 
 func TestTimingDifferentialVerdict(t *testing.T) {
@@ -167,10 +167,10 @@ func TestVerifyTimingValidatesInputs(t *testing.T) {
 // engine-owned verifier used by the agent. Both URLs must point at the local,
 // digest-pinned real-world fixture; no request is sent to a public target.
 func TestVerifyTimingMetabasePair(t *testing.T) {
-	vulnerable := strings.TrimSpace(os.Getenv("XALGORIX_METABASE_VULN_URL"))
-	fixed := strings.TrimSpace(os.Getenv("XALGORIX_METABASE_FIXED_URL"))
+	vulnerable := strings.TrimSpace(os.Getenv("AIDASTING_METABASE_VULN_URL"))
+	fixed := strings.TrimSpace(os.Getenv("AIDASTING_METABASE_FIXED_URL"))
 	if vulnerable == "" && fixed == "" {
-		t.Skip("set both XALGORIX_METABASE_VULN_URL and XALGORIX_METABASE_FIXED_URL for the local Docker oracle")
+		t.Skip("set both AIDASTING_METABASE_VULN_URL and AIDASTING_METABASE_FIXED_URL for the local Docker oracle")
 	}
 	for _, raw := range []string{vulnerable, fixed} {
 		u, err := url.Parse(raw)
@@ -237,7 +237,7 @@ func metabaseTimingBodies(t *testing.T, baseURL string) (string, string) {
 					"db":               "zip:/app/metabase.jar!/sample-database.db;MODE=MSSQLServer;",
 					"advanced-options": false, "ssl": true, "init": init,
 				},
-				"name": "xalgorix-safe-timing-oracle-{{TIMING_NONCE}}", "engine": "h2",
+				"name": "ai-dast-ing-safe-timing-oracle-{{TIMING_NONCE}}", "engine": "h2",
 			},
 		}
 		raw, err := json.Marshal(payload)

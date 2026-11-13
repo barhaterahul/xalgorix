@@ -2,11 +2,11 @@ package web
 
 import "testing"
 
-// oobInteractionsDef mirrors the XALGORIX_OOB_INTERACTIONS definition so the
+// oobInteractionsDef mirrors the AIDASTING_OOB_INTERACTIONS definition so the
 // multiselect normalizer is tested against the real option set.
 func oobInteractionsDef() envSettingDefinition {
 	return envSettingDefinition{
-		Key:       "XALGORIX_OOB_INTERACTIONS",
+		Key:       "AIDASTING_OOB_INTERACTIONS",
 		InputType: "multiselect",
 		Options:   []string{"dns", "http", "smtp"},
 	}

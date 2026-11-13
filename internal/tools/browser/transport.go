@@ -11,7 +11,7 @@ import (
 
 	"github.com/go-rod/rod"
 
-	"github.com/xalgord/xalgorix/v4/internal/tools"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
 )
 
 var errBrowserDisconnected = errors.New("browser connection closed; launch a new browser and load a saved session if needed. The interrupted action was not retried; check whether it took effect before repeating it")

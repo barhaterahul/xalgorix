@@ -7,7 +7,7 @@
 //
 // This governs the DASHBOARD CHROME only. AI-generated output (findings,
 // report prose, agent/chat replies) is localized server-side via the
-// XALGORIX_LANGUAGE backend setting; see internal/config/language.go.
+// AIDASTING_LANGUAGE backend setting; see internal/config/language.go.
 
 import { useSyncExternalStore } from "react";
 import {
@@ -17,7 +17,7 @@ import {
   type LanguageCode,
 } from "./translations";
 
-const STORAGE_KEY = "xalgorix.lang";
+const STORAGE_KEY = "ai-dast-ing.lang";
 
 function readStoredLanguage(): LanguageCode {
   if (typeof window === "undefined") return DEFAULT_LANGUAGE;
@@ -59,7 +59,7 @@ export function setLanguage(raw: string | LanguageCode) {
 /**
  * Adopt a server-provided default language when the user has never made an
  * explicit choice in this browser. Lets a fresh dashboard honor the operator's
- * XALGORIX_LANGUAGE setting without overriding a local preference.
+ * AIDASTING_LANGUAGE setting without overriding a local preference.
  */
 export function syncLanguageFromServer(raw: string | null | undefined) {
   if (typeof window === "undefined") return;

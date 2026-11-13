@@ -2,9 +2,9 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "xalgorix.fullname" . }}-data
+  name: {{ include "ai-dast-ing.fullname" . }}-data
   labels:
-    {{- include "xalgorix.labels" . | nindent 4 }}
+    {{- include "ai-dast-ing.labels" . | nindent 4 }}
 spec:
   accessModes:
     {{- toYaml .Values.persistence.accessModes | nindent 4 }}

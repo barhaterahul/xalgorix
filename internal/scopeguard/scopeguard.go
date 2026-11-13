@@ -4,7 +4,7 @@
 // (internal/agent/agent.go) consult.
 //
 // The package is intentionally a leaf: it imports nothing from the
-// xalgorix tree so the agent can take a dependency on it without
+// ai-dast-ing tree so the agent can take a dependency on it without
 // pulling in the web package. Its single semantic entry point is
 // IsLocalOrListener, which classifies a target string (bare host,
 // host:port, scheme://host[:port][/path], or [ipv6][:port]) against
@@ -44,7 +44,7 @@ import (
 )
 
 // Config carries the operator's listener identity. Callers set
-// BindAddr to the configured XALGORIX_BIND value and Port to the
+// BindAddr to the configured AIDASTING_BIND value and Port to the
 // listener port. An empty BindAddr is treated as "127.0.0.1" — the
 // same default the web server applies when no bind override is
 // provided.

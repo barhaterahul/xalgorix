@@ -15,7 +15,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/xalgord/xalgorix/v4/internal/providers"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
 )
 
 // Router resolves model names to provider endpoints with credentials.

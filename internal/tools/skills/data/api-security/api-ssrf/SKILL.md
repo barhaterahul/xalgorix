@@ -11,7 +11,7 @@ Test API endpoints that fetch, validate, or process external URLs for server-sid
 
 ## Preconditions
 - Identified an API endpoint that accepts a URL, hostname, webhook address, or file reference
-- An OOB callback domain (from Xalgorix's oob_callback tool or interactsh)
+- An OOB callback domain (from AI-DAST-ING's oob_callback tool or interactsh)
 
 ## Attack Surface Signals
 - Webhook registration endpoints (accept a callback URL)
@@ -35,7 +35,7 @@ Look for API parameters that accept:
 ### Step 2: Baseline with OOB Callback
 ```bash
 # Generate an OOB callback token
-# (use Xalgorix's oob_callback tool or interactsh)
+# (use AI-DAST-ING's oob_callback tool or interactsh)
 
 # Test with the callback URL
 curl -sk -X POST "https://TARGET/api/webhooks/register" \
@@ -121,7 +121,7 @@ An SSRF finding requires:
 - OOB callback from the SCANNER's IP (client-side request, not SSRF)
 - A URL parameter that is only used client-side (JavaScript navigation, not server-side fetch)
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `oob_callback` for OAST interaction proof
 - `terminal_execute` with curl for precise URL manipulation
 - `verify_timing` for blind SSRF via timing differentials

@@ -93,7 +93,7 @@ An OAuth finding requires a usable credential outcome:
 - Codes that expire before the replay lands (test immediately)
 - Tokens rejected by the cross-client API (audience enforced)
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `browser_action` for interactive flow walking (consent pages, redirects)
 - `http_request`/curl for authorize/token leg manipulation
 - `oob_callback` as the attacker-side redirect receiver

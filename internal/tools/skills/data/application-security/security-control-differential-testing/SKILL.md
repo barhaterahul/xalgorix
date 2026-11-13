@@ -116,7 +116,7 @@ Always attach the CONTROL pair: the same request in canonical form showing what 
 - Cosmetic differences (redirect to login, error styling) without an access or validation outcome difference
 - Path variants that normalize to the same route and produce identical responses - parser agreement, the healthy case
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 
 - http_request for exact control/variant pairs (raw paths, headers, and bodies; keep the pair byte-identical except the variant)
 - browser_action to confirm outcome differences that require execution (redirects, JS-driven flows)

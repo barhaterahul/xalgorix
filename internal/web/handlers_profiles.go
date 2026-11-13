@@ -59,8 +59,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/auth"
-	"github.com/xalgord/xalgorix/v4/internal/providers"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/auth"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
 )
 
 // profilesReady gates every handler on the profiles + catalog +
@@ -317,7 +317,7 @@ func (s *Server) handleCreateAPIKeyProfile(w http.ResponseWriter, r *http.Reques
 // handler invokes Revoke under a 5-second context timeout BEFORE
 // removing the on-disk profile. Failures are logged but never
 // block the delete — the operator's intent is "remove this
-// credential from xalgorix" and a flaky upstream must not strand a
+// credential from ai-dast-ing" and a flaky upstream must not strand a
 // profile in the local store. The revoke attempt itself uses the
 // stored refresh / access token and the catalog's
 // RevocationEndpoint (or, when unset, the RFC 7009 sibling-path
@@ -502,7 +502,7 @@ func (s *Server) handleOAuthStart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	opts := auth.StartOptions{
-		// cfg.BindAddr is the resolved XALGORIX_BIND value (default
+		// cfg.BindAddr is the resolved AIDASTING_BIND value (default
 		// "127.0.0.1"). The PKCE driver inspects this and refuses
 		// non-loopback binds per R13.2 by returning Mode "paste".
 		BindAddr:    s.cfg.BindAddr,

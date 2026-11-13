@@ -13,9 +13,9 @@ import (
 	"sync"
 	"time"
 
-	oobsrv "github.com/xalgord/xalgorix/v4/internal/oob"
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
-	"github.com/xalgord/xalgorix/v4/internal/tools"
+	oobsrv "github.com/barhaterahul/ai-dast-ing/v4/internal/oob"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
 )
 
 // sleepMagnitudeRe extracts the numeric argument of SLEEP/pg_sleep/WAITFOR-style
@@ -36,7 +36,7 @@ var unixIdentityOutputRe = regexp.MustCompile(`(?i)\buid=\d+\([^)]+\)(?:\s+gid=\
 var unixPasswdRootLineRe = regexp.MustCompile(`(?m)^root:[^:\r\n]*:0:0:`)
 var whoamiOutputRe = regexp.MustCompile(`(?i)\bwhoami\s+(?:command\s+)?output\s*[:=]\s*(?:root|www-data|apache|nginx|nobody|system|nt authority\\(?:system|local service|network service))\b`)
 var linuxUnameOutputRe = regexp.MustCompile(`(?im)^Linux\s+\S+\s+\d+\.\d+\.\S+[^\r\n]{0,180}\bGNU/Linux\b`)
-var rceCanaryOutputRe = regexp.MustCompile(`(?i)\b(?:response(?:\s+body)?|command\s+output|returned)\b[^\r\n]{0,160}\b(?:xalgorix[-_ ]?(?:rce|cmd|canary)|rce[-_]?canary)[-_a-z0-9]{4,}\b`)
+var rceCanaryOutputRe = regexp.MustCompile(`(?i)\b(?:response(?:\s+body)?|command\s+output|returned)\b[^\r\n]{0,160}\b(?:ai-dast-ing[-_ ]?(?:rce|cmd|canary)|rce[-_]?canary)[-_a-z0-9]{4,}\b`)
 
 // Valid verification methods — the agent must specify one when reporting.
 var validVerificationMethods = map[string]bool{
@@ -118,7 +118,7 @@ const (
 // A dedicated, distinct-purpose Verifier agent (injected by the agent package
 // to avoid an import cycle) independently re-tests every actionable candidate
 // finding (low severity and above; only 'info' is exempt) BEFORE it is
-// persisted. This is the core of Xalgorix's "real validation, not just
+// persisted. This is the core of AI-DAST-ING's "real validation, not just
 // detection" guarantee: a finding that the verifier cannot independently
 // reproduce is never presented as validated.
 
@@ -430,7 +430,7 @@ func reportVulnWithContextIDAndVerifier(contextID string, verifier FindingVerifi
 	// the owning hypothesis in the scan ledger. Models sometimes make a sparse
 	// report_vulnerability call and omit that evidence (or its endpoint/id). Fold
 	// the engine-owned evidence in before Gate 0.5 so a genuine finding is not
-	// rejected merely because the model failed to repeat data Xalgorix already
+	// rejected merely because the model failed to repeat data AI-DAST-ING already
 	// has. With no endpoint/id, recovery is deliberately limited to a single
 	// unambiguous browser-XSS match in this scan.
 	browserXSSProven := false
@@ -617,7 +617,7 @@ func reportVulnWithContextIDAndVerifier(contextID string, verifier FindingVerifi
 		return tools.Result{
 			Output: fmt.Sprintf(`❌ REJECTED: '%s' reported as %s but has NO exploitation proof.
 
-XALGORIX RULE: You MUST exploit the vulnerability BEFORE reporting it.
+AI-DAST-ING RULE: You MUST exploit the vulnerability BEFORE reporting it.
 
 Required steps:
 1. You found a potential %s → Good, but not enough to report.
@@ -1417,7 +1417,7 @@ func usesSSRFOOBEvidence(token, method, proof, description string) bool {
 		"out-of-band", "out of band", "interact.sh", "interactsh",
 		"collaborator", "burpcollaborator", "webhook.site", "requestbin",
 		"canarytoken", "pingback", "http request received",
-		"request received at", "xalgorix-oob-ok", "dns interaction",
+		"request received at", "ai-dast-ing-oob-ok", "dns interaction",
 		"dns query received")
 }
 
@@ -1470,7 +1470,7 @@ func validateSSRFOOBProof(token, proof string) string {
 			oobsrv.ScannerOriginCalibrationState(), originUnassessedHTTP, scannerOriginHTTP, dnsOnly)
 	}
 	if scannerOriginHTTP > 0 {
-		return fmt.Sprintf("❌ REJECTED (scanner-origin SSRF false positive): %d HTTP callback(s) came from Xalgorix's scanner origin; %d DNS-only interaction(s) were also observed. Neither proves that the target server performed SSRF.", scannerOriginHTTP, dnsOnly)
+		return fmt.Sprintf("❌ REJECTED (scanner-origin SSRF false positive): %d HTTP callback(s) came from AI-DAST-ING's scanner origin; %d DNS-only interaction(s) were also observed. Neither proves that the target server performed SSRF.", scannerOriginHTTP, dnsOnly)
 	}
 	if dnsOnly > 0 {
 		return fmt.Sprintf("❌ REJECTED (DNS-only SSRF evidence): %d DNS interaction(s) were observed, but DNS may originate from the scanner or a recursive resolver. Require an origin-assessed, non-scanner HTTP(S) interaction or returned internal-resource data.", dnsOnly)

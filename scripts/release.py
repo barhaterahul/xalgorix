@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build, publish, and verify a public Xalgorix release.
+"""Build, publish, and verify a public AI-DAST-ING release.
 
 A safe, reproducible release pipeline. Unlike a branch-side "tag then release"
 flow, this script NEVER creates a tag or a GitHub Release until the exact
@@ -47,8 +47,8 @@ import re
 import subprocess
 import tempfile
 
-REPO_DEFAULT = "xalgorix/xalgorix"
-ORIGIN_URL = "https://github.com/xalgorix/xalgorix.git"
+REPO_DEFAULT = "ai-dast-ing/ai-dast-ing"
+ORIGIN_URL = "https://github.com/ai-dast-ing/ai-dast-ing.git"
 PLATFORMS = [("linux", "amd64"), ("linux", "arm64"), ("darwin", "amd64"), ("darwin", "arm64")]
 FILE_ARCH = {
     ("linux", "amd64"): "x86-64",
@@ -180,12 +180,12 @@ class Release:
 
         manifest = []
         for system, arch in PLATFORMS:
-            name = f"xalgorix-{system}-{arch}"
+            name = f"ai-dast-ing-{system}-{arch}"
             path = self.assets / name
             env = dict(os.environ, CGO_ENABLED="0", GOOS=system, GOARCH=arch)
             run(
                 ["go", "build", "-buildvcs=true", "-trimpath", "-ldflags",
-                 f"-s -w -X main.version={self.version}", "-o", str(path), "./cmd/xalgorix"],
+                 f"-s -w -X main.version={self.version}", "-o", str(path), "./cmd/ai-dast-ing"],
                 cwd=self.source, env=env,
             )
             metadata = run(["go", "version", "-m", str(path)], cwd=self.source)
@@ -209,7 +209,7 @@ class Release:
         (self.assets / "SHA256SUMS").write_text(
             "".join(f"{row['sha256']}  {row['name']}\n" for row in manifest)
         )
-        native = self.assets / "xalgorix-linux-amd64"
+        native = self.assets / "ai-dast-ing-linux-amd64"
         assert self.version in run([str(native), "--version"], cwd=self.source)
         assert not run(["git", "status", "--porcelain"], cwd=self.source)
         emit(build_verified=True, assets=len(manifest))
@@ -338,7 +338,7 @@ class Release:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Safe, reproducible Xalgorix release pipeline.")
+    parser = argparse.ArgumentParser(description="Safe, reproducible AI-DAST-ING release pipeline.")
     parser.add_argument("phase", choices=("prepare", "build", "publish", "verify"))
     parser.add_argument("--version", required=True, help="release version, e.g. 4.6.154")
     parser.add_argument("--revision", help="commit to release (default: current origin/main tip; must be on main)")

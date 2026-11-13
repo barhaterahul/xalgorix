@@ -118,7 +118,7 @@ Where the web app has SSRF/file-read/injection primitives, chain into `cloud-met
 - Presigned URLs that are correctly scoped and expired
 - Public marketing content served from a bucket with no sensitive objects
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `terminal_execute` with dig/curl/grep for evidence collection; Python for bulk JS parsing
 - Reconnaissance output (subdomain/JS/crawl corpora) as input
 - Ledger entries for each discovered resource with the attack-model fields above

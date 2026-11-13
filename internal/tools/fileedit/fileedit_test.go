@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
 )
 
 func TestStrReplaceEditor_CreateViewReplaceAndInsert(t *testing.T) {
@@ -141,13 +141,13 @@ func TestContextFileEditorStaysInsideScanWorkspace(t *testing.T) {
 		t.Fatalf("expected file in scan workspace: %v", err)
 	}
 
-	// A write target outside every Allow_List root (Data_Dir, ~/.xalgorix, /tmp)
+	// A write target outside every Allow_List root (Data_Dir, ~/.ai-dast-ing, /tmp)
 	// is rejected by Policy.CheckResolve. The error is returned to the agent
 	// loop via tools.Result{Error: ...}, nil — never as a Go-level error —
 	// so the LLM can recover and retry under an allowed root.
 	res, err := strReplaceEditorForContext(sc.ID, map[string]string{
 		"command":   "create",
-		"path":      "/etc/xalgorix-fileedit-test-outside.txt",
+		"path":      "/etc/ai-dast-ing-fileedit-test-outside.txt",
 		"file_text": "outside",
 	})
 	if err != nil {
@@ -159,7 +159,7 @@ func TestContextFileEditorStaysInsideScanWorkspace(t *testing.T) {
 	if !strings.Contains(res.Error, "fileedit.create") {
 		t.Fatalf("expected tool name fileedit.create in error, got %q", res.Error)
 	}
-	if _, statErr := os.Stat("/etc/xalgorix-fileedit-test-outside.txt"); statErr == nil {
+	if _, statErr := os.Stat("/etc/ai-dast-ing-fileedit-test-outside.txt"); statErr == nil {
 		t.Fatalf("rejected path must not have been written")
 	}
 }

@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
 )
 
 // credentialPolicy mirrors Default(): Data_Dir and /tmp are write roots and
@@ -131,14 +131,14 @@ func TestCheckRead_TempSiblingsDenied(t *testing.T) {
 // yet must canonicalize to where a write would actually land.
 func TestCheckResolve_DanglingSymlinkWritesRejected(t *testing.T) {
 	home := t.TempDir()
-	dataDir := filepath.Join(home, ".xalgorix", "data")
+	dataDir := filepath.Join(home, ".ai-dast-ing", "data")
 	scanDir := filepath.Join(dataDir, "scan-1")
 	if err := os.MkdirAll(scanDir, 0o700); err != nil {
 		t.Fatal(err)
 	}
-	envFile := filepath.Join(home, ".xalgorix.env") // not created
+	envFile := filepath.Join(home, ".ai-dast-ing.env") // not created
 	p := NewWithReadDeny(
-		[]string{dataDir, filepath.Join(home, ".xalgorix")},
+		[]string{dataDir, filepath.Join(home, ".ai-dast-ing")},
 		[]string{envFile, filepath.Join(dataDir, "llm_keys.json"), filepath.Join(home, ".ssh")},
 	)
 	sc := scanctx.New("dangling-link-scan", scanDir)
@@ -155,13 +155,13 @@ func TestCheckResolve_DanglingSymlinkWritesRejected(t *testing.T) {
 		// A: dangling link straight at the (absent) env file.
 		"dangling-abs": link("notes.txt", envFile),
 		// Relative dangling target.
-		"dangling-rel": link("notes2.txt", "../../../.xalgorix.env"),
+		"dangling-rel": link("notes2.txt", "../../../.ai-dast-ing.env"),
 		// B: symlinked dir to Data_Dir, store and nested layout absent.
 		"multi-missing": filepath.Join(link("vendor", dataDir), "llm_keys.json", "llm_keys.json"),
 		// C: symlinked dir to home, ~/.ssh absent.
 		"home-ssh": filepath.Join(link("h", home), ".ssh", "authorized_keys"),
 		// Dangling link out of every write root.
-		"outside": link("cron", "/etc/cron.d/xalgorix-test-never"),
+		"outside": link("cron", "/etc/cron.d/ai-dast-ing-test-never"),
 	}
 	for name, path := range cases {
 		if _, err := p.CheckResolve(sc, "fileedit.create", path); err == nil {

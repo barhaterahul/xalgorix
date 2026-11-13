@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/llm"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/llm"
 )
 
 func (a *Agent) providerWaitBudgetDiagnostic(limit time.Duration) string {

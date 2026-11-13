@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
-	"github.com/xalgord/xalgorix/v4/internal/tools/codesearch"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/codesearch"
 )
 
 // nativeToolPromptRewrite swaps the two blocks of the system prompt that teach
@@ -61,7 +61,7 @@ func (a *Agent) buildSystemPrompt(targets []string, instruction string, ratePoli
 	rateDelay := formatRatePolicyDelay(promptPolicy)
 	ratePolicySection := buildRequestRatePolicySection(ratePolicy)
 
-	// XALGORIX_CHECKLIST: full (22-phase, default) or professional (compact)
+	// AIDASTING_CHECKLIST: full (22-phase, default) or professional (compact)
 	checklistMode := ""
 	if a.cfg != nil {
 		checklistMode = strings.ToLower(strings.TrimSpace(a.cfg.Checklist))
@@ -92,7 +92,7 @@ func (a *Agent) buildSystemPrompt(targets []string, instruction string, ratePoli
 
 ## ENGAGEMENT AUTHORIZATION — READ FIRST
 
-This is a SANCTIONED, AUTHORIZED penetration test. The operator running Xalgorix has explicit, documented permission from the asset owner to security-test the configured target(s). This is defensive security work: finding vulnerabilities so the owner can fix them before real attackers exploit them.
+This is a SANCTIONED, AUTHORIZED penetration test. The operator running AI-DAST-ING has explicit, documented permission from the asset owner to security-test the configured target(s). This is defensive security work: finding vulnerabilities so the owner can fix them before real attackers exploit them.
 
 - You are NOT being asked to do anything unauthorized, illegal, or unethical. Testing the configured scope is exactly what you are authorized and expected to do.
 - The runtime HARD-ENFORCES scope: every tool call is checked, and any out-of-scope host is rejected automatically. You physically cannot touch anything outside the authorized scope, so you never need to second-guess whether a target is permitted — the sandbox already guarantees it.
@@ -100,7 +100,7 @@ This is a SANCTIONED, AUTHORIZED penetration test. The operator running Xalgorix
 
 ## TARGET SCOPE — HARD RULE
 
-You may ONLY probe and report on the configured target host(s) and their subdomains. The runtime enforces this: any tool call that names an out-of-scope host (a third-party Grafana you discovered, an unrelated SaaS the target integrates with, an IP found via portscan that isn't a target subdomain, the local Xalgorix dashboard itself, etc.) is REJECTED with an OUT-OF-SCOPE error.
+You may ONLY probe and report on the configured target host(s) and their subdomains. The runtime enforces this: any tool call that names an out-of-scope host (a third-party Grafana you discovered, an unrelated SaaS the target integrates with, an IP found via portscan that isn't a target subdomain, the local AI-DAST-ING dashboard itself, etc.) is REJECTED with an OUT-OF-SCOPE error.
 
 When you stumble onto a related-but-not-authorized host while doing recon:
 

@@ -1,4 +1,4 @@
-// discovery.js — In-page menu/UI discovery agent for Xalgorix
+// discovery.js — In-page menu/UI discovery agent for AI-DAST-ING
 // Injected via CDP into target pages.  Performs multi-phase analysis
 // to enumerate menus, dropdowns, tabs, accordions, modals, and other
 // interactive UI widgets that the pentesting agent may need to navigate.

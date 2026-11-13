@@ -492,7 +492,7 @@ func (r *Registry) renderDescription(s string) string {
 
 // SetLeanSchema toggles lean tool-schema rendering (drop example/workflow spans
 // to shrink the per-call prompt). Preserves every tool, parameter, and core
-// description. Driven by XALGORIX_LEAN_TOOL_SCHEMA.
+// description. Driven by AIDASTING_LEAN_TOOL_SCHEMA.
 func (r *Registry) SetLeanSchema(on bool) {
 	r.mu.Lock()
 	defer r.mu.Unlock()

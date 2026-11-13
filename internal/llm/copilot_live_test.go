@@ -34,8 +34,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/auth"
-	"github.com/xalgord/xalgorix/v4/internal/providers"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/auth"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
 )
 
 func maskSecret(s string) string {
@@ -139,5 +139,5 @@ func TestCopilotLive(t *testing.T) {
 	}
 
 	t.Logf("stage 2 OK — model %q replied:\n%s", parsed.Model, parsed.Choices[0].Message.Content)
-	t.Log("✅ Copilot inference works end-to-end through xalgorix's native path.")
+	t.Log("✅ Copilot inference works end-to-end through ai-dast-ing's native path.")
 }

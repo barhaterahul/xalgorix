@@ -67,7 +67,7 @@ func TestNoToolHandler_NudgeEscalation(t *testing.T) {
 	}
 }
 
-// With the abort disabled (XALGORIX_NO_TOOL_ABORT_AT=0), the handler must NEVER
+// With the abort disabled (AIDASTING_NO_TOOL_ABORT_AT=0), the handler must NEVER
 // ForceSkip on a no-tool loop — it keeps nudging indefinitely so the model can
 // fix its own output and resume. Neither the consecutive nor the density path
 // may abort.

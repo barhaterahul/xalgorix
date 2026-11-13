@@ -38,7 +38,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/xalgord/xalgorix/v4/internal/methodology"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/methodology"
 )
 
 // TaskStatus is the lifecycle state of a single planned task.
@@ -109,13 +109,13 @@ const (
 	// completion status honest.
 	DispositionBlockedNoProgress = "blocked_no_progress"
 	// DispositionCoverageComplete is ENGINE-SET only: the convergence reconcile
-	// (XALGORIX_CONVERGE_RECONCILE) closes a class-less exploratory task once
+	// (AIDASTING_CONVERGE_RECONCILE) closes a class-less exploratory task once
 	// every measurable obligation is met, so it reads as a terminal "not
 	// individually executed" state rather than completed coverage.
 	DispositionCoverageComplete = "coverage_complete"
 
 	// DispositionCoverageSufficient is ENGINE-SET only: the principled finish
-	// (XALGORIX_CONVERGE_FINISH) closes a generic per-endpoint class task once the
+	// (AIDASTING_CONVERGE_FINISH) closes a generic per-endpoint class task once the
 	// class has been exercised across the surface, per-route coverage has cleared
 	// the threshold, and no new finding has appeared for the finding-idle tail —
 	// i.e. the exhaustive every-route×every-class bar is in diminishing returns.
@@ -125,7 +125,7 @@ const (
 	DispositionCoverageSufficient = "coverage_sufficient"
 
 	// DispositionUntestedAtFinish is ENGINE-SET only: the principled finish
-	// (XALGORIX_CONVERGE_FINISH) closed this task WITHOUT executing it once the
+	// (AIDASTING_CONVERGE_FINISH) closed this task WITHOUT executing it once the
 	// scan was saturated and the no-new-finding tail elapsed. It replaces the
 	// coverage_sufficient / coverage_complete labels the principled finish used
 	// to write: "class exercised somewhere on the target" is not the same as

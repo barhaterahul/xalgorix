@@ -24,16 +24,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/llm"
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
-	"github.com/xalgord/xalgorix/v4/internal/tools"
-	"github.com/xalgord/xalgorix/v4/internal/tools/browser"
-	"github.com/xalgord/xalgorix/v4/internal/tools/httpclient"
-	"github.com/xalgord/xalgorix/v4/internal/tools/notes"
-	oobtool "github.com/xalgord/xalgorix/v4/internal/tools/oob"
-	"github.com/xalgord/xalgorix/v4/internal/tools/reporting"
-	"github.com/xalgord/xalgorix/v4/internal/tools/terminal"
-	"github.com/xalgord/xalgorix/v4/internal/tools/websearch"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/llm"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/browser"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/httpclient"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/notes"
+	oobtool "github.com/barhaterahul/ai-dast-ing/v4/internal/tools/oob"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/reporting"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/terminal"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/websearch"
 )
 
 const (
@@ -279,7 +279,7 @@ func (a *Agent) execVerifierToolGuarded(vreg *tools.Registry, name string, args 
 
 // buildVerifierPrompt produces the adversarial verifier system prompt.
 func buildVerifierPrompt(req reporting.VerificationRequest, toolSchema string) string {
-	return fmt.Sprintf(`You are the XALGORIX INDEPENDENT VERIFIER — a skeptical senior security engineer whose ONLY job is to confirm or DISPROVE a candidate vulnerability that another agent claims to have found. You are NOT a hunter. You do not look for new bugs. You re-test THIS finding and decide if it is real.
+	return fmt.Sprintf(`You are the AI-DAST-ING INDEPENDENT VERIFIER — a skeptical senior security engineer whose ONLY job is to confirm or DISPROVE a candidate vulnerability that another agent claims to have found. You are NOT a hunter. You do not look for new bugs. You re-test THIS finding and decide if it is real.
 
 Your default stance is DISBELIEF. Most "findings" are false positives. Assume this one is wrong until your own re-testing proves otherwise.
 

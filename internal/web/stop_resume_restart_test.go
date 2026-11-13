@@ -16,7 +16,7 @@ func postInstanceAction(t *testing.T, s *Server, id, action string, exact bool) 
 	t.Helper()
 	req := httptest.NewRequest(http.MethodPost, "/api/instances/"+id+"/"+action, nil)
 	if exact {
-		req.Header.Set("X-Xalgorix-Exact-Instance", "1")
+		req.Header.Set("X-AI-DAST-ING-Exact-Instance", "1")
 	}
 	rr := httptest.NewRecorder()
 	s.handleInstanceAction(rr, req)

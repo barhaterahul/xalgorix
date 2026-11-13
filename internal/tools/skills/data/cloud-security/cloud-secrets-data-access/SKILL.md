@@ -96,7 +96,7 @@ retrieved value = test/placeholder → document as hygiene exposure, not comprom
 - Dev/test vault contents with no production connectivity
 - Names in `ListSecrets` without `GetSecretValue` (access properly denied at value level)
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `terminal_execute` with aws/az/gcloud for enumeration and retrieval
 - Python for parsing retrieved bundles (env files, key files)
 - Every retrieved credential → ledger with validation state

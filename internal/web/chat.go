@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/llm"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/llm"
 )
 
 // ChatRequest is the payload for sending a message to a running scan's
@@ -180,9 +180,9 @@ func buildPostScanChatPrompt(inst *ScanInstance, language string) string {
 		b.WriteString("\n\n")
 	}
 	if inst.Status == "paused" {
-		b.WriteString("You are Xalgorix in paused-scan chat mode. The scan is paused, so answer follow-up questions using only the scan context captured so far. Do not claim that you are still scanning or that you can run tools in this chat. If the user asks for new testing, explain what the current results show and suggest resuming the scan.\n\n")
+		b.WriteString("You are AI-DAST-ING in paused-scan chat mode. The scan is paused, so answer follow-up questions using only the scan context captured so far. Do not claim that you are still scanning or that you can run tools in this chat. If the user asks for new testing, explain what the current results show and suggest resuming the scan.\n\n")
 	} else {
-		b.WriteString("You are Xalgorix in post-scan chat mode. The scan has already finished, so answer follow-up questions using only the completed scan context below. Do not claim that you are still scanning or that you can run tools in this chat. If the user asks for new testing, first summarize what the completed scan already found for that topic, then explain that additional live testing requires resuming, restarting, or starting a new scan.\n\n")
+		b.WriteString("You are AI-DAST-ING in post-scan chat mode. The scan has already finished, so answer follow-up questions using only the completed scan context below. Do not claim that you are still scanning or that you can run tools in this chat. If the user asks for new testing, first summarize what the completed scan already found for that topic, then explain that additional live testing requires resuming, restarting, or starting a new scan.\n\n")
 	}
 
 	b.WriteString("## Scan\n")

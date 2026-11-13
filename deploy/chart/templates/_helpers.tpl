@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "xalgorix.name" -}}
+{{- define "ai-dast-ing.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields only accept that
 (e.g. DNS names as per RFC 1035).
 */}}
-{{- define "xalgorix.fullname" -}}
+{{- define "ai-dast-ing.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ We truncate at 63 chars because some Kubernetes name fields only accept that
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "xalgorix.chart" -}}
+{{- define "ai-dast-ing.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels.
 */}}
-{{- define "xalgorix.labels" -}}
-helm.sh/chart: {{ include "xalgorix.chart" . }}
-{{ include "xalgorix.selectorLabels" . }}
+{{- define "ai-dast-ing.labels" -}}
+helm.sh/chart: {{ include "ai-dast-ing.chart" . }}
+{{ include "ai-dast-ing.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,17 +45,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels.
 */}}
-{{- define "xalgorix.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "xalgorix.name" . }}
+{{- define "ai-dast-ing.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "ai-dast-ing.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use.
 */}}
-{{- define "xalgorix.serviceAccountName" -}}
+{{- define "ai-dast-ing.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "xalgorix.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "ai-dast-ing.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
@@ -64,13 +64,13 @@ Create the name of the service account to use.
 {{/*
 ConfigMap name.
 */}}
-{{- define "xalgorix.configMapName" -}}
-{{- printf "%s-config" (include "xalgorix.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- define "ai-dast-ing.configMapName" -}}
+{{- printf "%s-config" (include "ai-dast-ing.fullname" .) | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Secret name.
 */}}
-{{- define "xalgorix.secretName" -}}
-{{- printf "%s-secret" (include "xalgorix.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- define "ai-dast-ing.secretName" -}}
+{{- printf "%s-secret" (include "ai-dast-ing.fullname" .) | trunc 63 | trimSuffix "-" }}
 {{- end }}

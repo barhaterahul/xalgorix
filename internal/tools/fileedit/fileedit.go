@@ -8,10 +8,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/sandbox"
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
-	"github.com/xalgord/xalgorix/v4/internal/tools"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/sandbox"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
 )
 
 // Register adds file editing tools to the registry.
@@ -107,7 +107,7 @@ func resolvePathForContext(contextID, rawPath string) (string, error) {
 }
 
 func envAllowsAbsoluteFileEdit() bool {
-	v := strings.ToLower(strings.TrimSpace(os.Getenv("XALGORIX_ALLOW_ABSOLUTE_FILEEDIT")))
+	v := strings.ToLower(strings.TrimSpace(os.Getenv("AIDASTING_ALLOW_ABSOLUTE_FILEEDIT")))
 	return v == "1" || v == "true" || v == "yes"
 }
 

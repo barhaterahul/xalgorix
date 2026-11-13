@@ -61,7 +61,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/providers"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
 )
 
 const (
@@ -649,7 +649,7 @@ func (d *deviceCodeDriver) requestDeviceCode(ctx context.Context, e providers.En
 //
 // The 1MiB cap on response body reads is defensive — token
 // endpoints return a few hundred bytes at most; capping protects
-// xalgorix from a misbehaving upstream that streams unbounded
+// ai-dast-ing from a misbehaving upstream that streams unbounded
 // data.
 func (d *deviceCodeDriver) postTokenForm(ctx context.Context, endpoint string, form url.Values) (deviceTokenResponse, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, strings.NewReader(form.Encode()))

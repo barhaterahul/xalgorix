@@ -114,7 +114,7 @@ A 403 on one verb is NOT a clean negative until the other verbs, versions, and r
 - Cross-tenant 200 that returns YOUR tenant data re-serialized (id ignored, session tenant used) - that is correct enforcement, not a bypass
 - Mass-assignment role changes belong to the mass-assignment specialist: prove the role field was persisted before reporting privilege escalation here
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 
 - authz_matrix url=<endpoint> - first call whenever an object-id or authenticated route appears; it records the differential as ledger evidence (report CWE-639 with the differential as proof)
 - http_request - exact-request replay across identities

@@ -39,7 +39,7 @@ func TestResolveCJKFontBytes_RejectsNonTTF(t *testing.T) {
 	if err := os.WriteFile(ttc, []byte("not really a font"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("XALGORIX_PDF_CJK_FONT", ttc)
+	t.Setenv("AIDASTING_PDF_CJK_FONT", ttc)
 	if got := resolveCJKFontBytes(); got != nil {
 		// It may still find a system .ttf; only assert the .ttc itself wasn't used.
 		if string(got) == "not really a font" {
@@ -66,10 +66,10 @@ func TestNewReportPDF_EnglishIsPassThrough(t *testing.T) {
 
 // When a real CJK .ttf is available, newReportPDF("zh-CN") must activate the
 // embedded font and render Chinese text without error. The font is sourced from
-// XALGORIX_PDF_CJK_FONT; the test is skipped when no such font is provided so
+// AIDASTING_PDF_CJK_FONT; the test is skipped when no such font is provided so
 // CI without a CJK font still passes.
 func TestNewReportPDF_CJKRendersChinese(t *testing.T) {
-	fontPath := os.Getenv("XALGORIX_TEST_CJK_FONT")
+	fontPath := os.Getenv("AIDASTING_TEST_CJK_FONT")
 	if fontPath == "" {
 		// Fall back to the probe font extracted during development, if present.
 		if _, err := os.Stat("/tmp/wqy-face0.ttf"); err == nil {
@@ -77,9 +77,9 @@ func TestNewReportPDF_CJKRendersChinese(t *testing.T) {
 		}
 	}
 	if fontPath == "" {
-		t.Skip("no CJK .ttf available; set XALGORIX_TEST_CJK_FONT to run")
+		t.Skip("no CJK .ttf available; set AIDASTING_TEST_CJK_FONT to run")
 	}
-	t.Setenv("XALGORIX_PDF_CJK_FONT", fontPath)
+	t.Setenv("AIDASTING_PDF_CJK_FONT", fontPath)
 
 	pdf := newReportPDF("zh-CN")
 	if pdf.cjkFamily == "" {

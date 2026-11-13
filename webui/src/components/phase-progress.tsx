@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 // reports and the phase-filter instructions.
 import methodologyPhases from "@/methodology-phases.json";
 
-// Xalgorix 22-phase methodology. The backend reports `current_phase`,
+// AI-DAST-ING 22-phase methodology. The backend reports `current_phase`,
 // `phase_status` (authoritative per-phase disposition) and `phases` as
 // 1-based ids into this list, and the New Scan form lets the operator opt
 // into any subset.

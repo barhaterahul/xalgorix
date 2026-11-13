@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 #
-# redeploy.sh — Rebuild (or pull) the Xalgorix image and recreate the dashboard
+# redeploy.sh — Rebuild (or pull) the AI-DAST-ING image and recreate the dashboard
 # container IN PLACE, without losing your login or your data.
 #
 # Why this exists
 # ---------------
-# The container reads its dashboard credentials (XALGORIX_USERNAME /
-# XALGORIX_PASSWORD / XALGORIX_PASSWORD_HASH) from its runtime environment, NOT
+# The container reads its dashboard credentials (AIDASTING_USERNAME /
+# AIDASTING_PASSWORD / AIDASTING_PASSWORD_HASH) from its runtime environment, NOT
 # from the data volume. If you `docker rm` + `docker run` by hand and forget to
 # pass them again, docker-entrypoint.sh sees no auth and generates a fresh
 # random admin password — locking you out with your previously-saved password.
 #
 # This script:
-#   1. Captures the running container's XALGORIX_*/GEMINI_*/AGENTMAIL_*/CAIDO_*
+#   1. Captures the running container's AIDASTING_*/GEMINI_*/AGENTMAIL_*/CAIDO_*
 #      environment first, and re-applies it, so auth + integrations survive.
 #   2. Reuses the same data volume, ports and restart policy.
 #   3. Tags the outgoing image and keeps the old container for one cycle, so a
@@ -23,17 +23,17 @@
 #   ./redeploy.sh                       # build ./Dockerfile, recreate in place
 #   ./redeploy.sh --pull                # docker pull IMAGE instead of building
 #   ./redeploy.sh --no-build            # recreate from the current IMAGE as-is
-#   ./redeploy.sh --image xalgord/xalgorix:latest
+#   ./redeploy.sh --image barhaterahul/ai-dast-ing:latest
 #   ./redeploy.sh --env-file ./my.env   # force an env-file (first deploy / override)
 #
 # Config (environment variable = default):
-#   CONTAINER=xalgorix   IMAGE=xalgorix:local        PORT=9137
-#   VOLUME=xalgorix-data DATA_MOUNT=/data            RESTART=unless-stopped
+#   CONTAINER=ai-dast-ing   IMAGE=ai-dast-ing:local        PORT=9137
+#   VOLUME=ai-dast-ing-data DATA_MOUNT=/data            RESTART=unless-stopped
 #   HEALTH_PATH=/login   HEALTH_TIMEOUT=90           BUILD_CONTEXT=<script dir>
 #   BIND_ADDR=<empty>    # host interface for the published port. Empty binds
 #           all interfaces (0.0.0.0). Set BIND_ADDR=127.0.0.1 to expose the
 #           dashboard on loopback only (recommended behind a reverse proxy).
-#   VERSION=<from cmd/xalgorix/main.go, else `git describe`>   # stamps the
+#   VERSION=<from cmd/ai-dast-ing/main.go, else `git describe`>   # stamps the
 #           dashboard version so a --build image reports vX.Y.Z, not "vdocker".
 #   NUCLEI_REFRESH=1     # on `build`, re-pull the LATEST nuclei engine + vuln
 #           templates (cache-bust). Set NUCLEI_REFRESH=0 to reuse Docker's cache.
@@ -42,10 +42,10 @@
 #
 set -euo pipefail
 
-CONTAINER="${CONTAINER:-xalgorix}"
-IMAGE="${IMAGE:-xalgorix:local}"
+CONTAINER="${CONTAINER:-ai-dast-ing}"
+IMAGE="${IMAGE:-ai-dast-ing:local}"
 PORT="${PORT:-9137}"
-VOLUME="${VOLUME:-xalgorix-data}"
+VOLUME="${VOLUME:-ai-dast-ing-data}"
 DATA_MOUNT="${DATA_MOUNT:-/data}"
 RESTART="${RESTART:-unless-stopped}"
 HEALTH_PATH="${HEALTH_PATH:-/login}"
@@ -108,25 +108,25 @@ trap cleanup EXIT
 if [ -z "$ENV_FILE" ] && docker container inspect "$CONTAINER" >/dev/null 2>&1; then
   CAPTURED_ENV="$(mktemp)"
   docker container inspect --format '{{range .Config.Env}}{{println .}}{{end}}' "$CONTAINER" \
-    | grep -E '^(XALGORIX_|GEMINI_|AGENTMAIL_|CAIDO_)' > "$CAPTURED_ENV" || true
+    | grep -E '^(AIDASTING_|GEMINI_|AGENTMAIL_|CAIDO_)' > "$CAPTURED_ENV" || true
   if [ -s "$CAPTURED_ENV" ]; then
     ENV_FILE="$CAPTURED_ENV"
     info "Captured $(wc -l < "$ENV_FILE") env var(s) from the running '$CONTAINER' container."
   else
     rm -f "$CAPTURED_ENV"; CAPTURED_ENV=""
-    warn "Running container exposed no XALGORIX_* env to capture."
+    warn "Running container exposed no AIDASTING_* env to capture."
   fi
 fi
 
 # Warn if the recreated container will have no dashboard auth and is not
 # loopback-bound — the entrypoint will then mint a NEW random admin password.
 if [ -n "$ENV_FILE" ]; then
-  has_auth="$(grep -cE '^XALGORIX_(PASSWORD|PASSWORD_HASH)=.+' "$ENV_FILE" || true)"
+  has_auth="$(grep -cE '^AIDASTING_(PASSWORD|PASSWORD_HASH)=.+' "$ENV_FILE" || true)"
 else
   has_auth=0
 fi
 if [ "$has_auth" -eq 0 ]; then
-  warn "No XALGORIX_PASSWORD/HASH will be passed — a random admin password"
+  warn "No AIDASTING_PASSWORD/HASH will be passed — a random admin password"
   warn "will be generated (printed in 'docker logs $CONTAINER'). Pass --env-file"
   warn "to keep a stable login."
 fi
@@ -145,7 +145,7 @@ case "$MODE" in
     # Stamp the real version into the binary (Dockerfile's ARG VERSION defaults
     # to "docker", which the dashboard shows as "vdocker"). Prefer the source's
     # `var version = "X"`, then `git describe`; leave unset to keep the default.
-    VERSION="${VERSION:-$(sed -n 's/^var version = "\(.*\)"$/\1/p' "$BUILD_CONTEXT/cmd/xalgorix/main.go" 2>/dev/null | head -1)}"
+    VERSION="${VERSION:-$(sed -n 's/^var version = "\(.*\)"$/\1/p' "$BUILD_CONTEXT/cmd/ai-dast-ing/main.go" 2>/dev/null | head -1)}"
     [ -z "$VERSION" ] && VERSION="$(git -C "$BUILD_CONTEXT" describe --tags 2>/dev/null | sed 's/^v//')"
     info "Building $IMAGE from $BUILD_CONTEXT (version=${VERSION:-docker}) ..."
     # Refresh nuclei (engine + templates) to the latest on every build unless

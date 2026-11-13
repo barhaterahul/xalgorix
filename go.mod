@@ -1,4 +1,4 @@
-module github.com/xalgord/xalgorix/v4
+module github.com/barhaterahul/ai-dast-ing/v4
 
 go 1.26.0
 

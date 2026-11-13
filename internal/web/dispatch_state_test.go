@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/agent"
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
-	"github.com/xalgord/xalgorix/v4/internal/scopeguard"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/agent"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scopeguard"
 )
 
 func TestExactStopTombstonePreventsDelayedDispatch(t *testing.T) {
@@ -20,7 +20,7 @@ func TestExactStopTombstonePreventsDelayedDispatch(t *testing.T) {
 	id := "550e8400-e29b-41d4-a716-446655440000"
 
 	stopReq := httptest.NewRequest(http.MethodPost, "/api/instances/"+id+"/stop", nil)
-	stopReq.Header.Set("X-Xalgorix-Exact-Instance", "1")
+	stopReq.Header.Set("X-AI-DAST-ING-Exact-Instance", "1")
 	stopRR := httptest.NewRecorder()
 	s.handleInstanceAction(stopRR, stopReq)
 	if stopRR.Code != http.StatusOK {
@@ -119,7 +119,7 @@ func TestSessionAdmissionSerializesWithExactStop(t *testing.T) {
 		t.Fatalf("work admission was not durable before Agent.Run: rec=%#v err=%v", persisted, err)
 	}
 	stopReq := httptest.NewRequest(http.MethodPost, "/api/instances/"+id+"/stop", nil)
-	stopReq.Header.Set("X-Xalgorix-Exact-Instance", "1")
+	stopReq.Header.Set("X-AI-DAST-ING-Exact-Instance", "1")
 	stopRR := httptest.NewRecorder()
 	s.handleInstanceAction(stopRR, stopReq)
 	if stopRR.Code != http.StatusOK {
@@ -160,7 +160,7 @@ func TestWildcardChildStopRejectsLaterSessionAdmission(t *testing.T) {
 	}
 
 	stopReq := httptest.NewRequest(http.MethodPost, "/api/instances/"+id+"/stop", nil)
-	stopReq.Header.Set("X-Xalgorix-Exact-Instance", "1")
+	stopReq.Header.Set("X-AI-DAST-ING-Exact-Instance", "1")
 	stopRR := httptest.NewRecorder()
 	s.handleInstanceAction(stopRR, stopReq)
 	if stopRR.Code != http.StatusOK {
@@ -200,7 +200,7 @@ func TestExactStopWaitsForDurableFinalSnapshot(t *testing.T) {
 	stop := func() *httptest.ResponseRecorder {
 		t.Helper()
 		req := httptest.NewRequest(http.MethodPost, "/api/instances/"+id+"/stop", nil)
-		req.Header.Set("X-Xalgorix-Exact-Instance", "1")
+		req.Header.Set("X-AI-DAST-ING-Exact-Instance", "1")
 		rr := httptest.NewRecorder()
 		s.handleInstanceAction(rr, req)
 		return rr
@@ -253,7 +253,7 @@ func TestExactStopReconstructsStoppingSnapshotAfterRestart(t *testing.T) {
 	})
 
 	req := httptest.NewRequest(http.MethodPost, "/api/instances/"+id+"/stop", nil)
-	req.Header.Set("X-Xalgorix-Exact-Instance", "1")
+	req.Header.Set("X-AI-DAST-ING-Exact-Instance", "1")
 	rr := httptest.NewRecorder()
 	s.handleInstanceAction(rr, req)
 	if rr.Code != http.StatusOK {

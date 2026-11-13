@@ -6,14 +6,14 @@ import (
 )
 
 // TestScanHeaderEnvSettingsExposed verifies the WebUI settings surface exposes
-// the scan/attribution headers introduced in PR #289 (XALGORIX_SCAN_HEADERS and
-// XALGORIX_SCAN_HEADERS_FILE) so an operator can configure them from the
+// the scan/attribution headers introduced in PR #289 (AIDASTING_SCAN_HEADERS and
+// AIDASTING_SCAN_HEADERS_FILE) so an operator can configure them from the
 // dashboard, not only via the CLI -H flag or the raw environment. A key absent
 // from the definition map is rejected by applyEnvironmentUpdates, so this also
 // guards the POST accept-list.
 func TestScanHeaderEnvSettingsExposed(t *testing.T) {
 	defs := envDefinitionByKey()
-	for _, key := range []string{"XALGORIX_SCAN_HEADERS", "XALGORIX_SCAN_HEADERS_FILE"} {
+	for _, key := range []string{"AIDASTING_SCAN_HEADERS", "AIDASTING_SCAN_HEADERS_FILE"} {
 		def, ok := defs[key]
 		if !ok {
 			t.Fatalf("%s missing from env setting definitions; the WebUI would 400 when saving it", key)
@@ -37,7 +37,7 @@ func TestScanHeaderEnvSettingsExposed(t *testing.T) {
 // normalizeEnvSettingValue unchanged and newline-free so it round-trips to the
 // environment exactly as config.loadScanHeaders() expects to parse it.
 func TestScanHeadersValueSurvivesNormalization(t *testing.T) {
-	def := envDefinitionByKey()["XALGORIX_SCAN_HEADERS"]
+	def := envDefinitionByKey()["AIDASTING_SCAN_HEADERS"]
 	in := "X-Bug-Bounty: ulises2k; Authorization: Bearer a:b:c"
 	got, err := normalizeEnvSettingValue(def, in)
 	if err != nil {

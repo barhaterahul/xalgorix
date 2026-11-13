@@ -1,11 +1,11 @@
-# Build and publish the Xalgorix container image.
+# Build and publish the AI-DAST-ING container image.
 #
 # Each architecture is built on a native GitHub-hosted runner. This avoids the
 # extreme QEMU cost of compiling the batteries-included Kali toolset, then a
 # final job joins both digests into one linux/amd64 + linux/arm64 manifest.
 # Images are published to:
-#   - GitHub Container Registry: ghcr.io/xalgord/xalgorix   (always)
-#   - Docker Hub:                docker.io/xalgord/xalgorix (when the
+#   - GitHub Container Registry: ghcr.io/barhaterahul/ai-dast-ing   (always)
+#   - Docker Hub:                docker.io/barhaterahul/ai-dast-ing (when the
 #     DOCKERHUB_USERNAME + DOCKERHUB_TOKEN repo secrets are set)
 name: Docker
 
@@ -77,7 +77,7 @@ jobs:
         with:
           images: |
             ghcr.io/${{ github.repository }}
-            ${{ env.DOCKERHUB_USER != '' && 'docker.io/xalgord/xalgorix' || '' }}
+            ${{ env.DOCKERHUB_USER != '' && 'docker.io/barhaterahul/ai-dast-ing' || '' }}
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
@@ -91,7 +91,7 @@ jobs:
         run: |
           images="$GHCR_IMAGE"
           if [[ -n "$DOCKERHUB_USER" ]]; then
-            images="${images},docker.io/xalgord/xalgorix"
+            images="${images},docker.io/barhaterahul/ai-dast-ing"
           fi
           echo "names=$images" >> "$GITHUB_OUTPUT"
 
@@ -130,7 +130,7 @@ jobs:
     env:
       DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USERNAME }}
       GHCR_IMAGE: ghcr.io/${{ github.repository }}
-      DOCKERHUB_IMAGE: docker.io/xalgord/xalgorix
+      DOCKERHUB_IMAGE: docker.io/barhaterahul/ai-dast-ing
     steps:
       - name: Download digests
         uses: actions/download-artifact@v4
@@ -163,7 +163,7 @@ jobs:
         with:
           images: |
             ghcr.io/${{ github.repository }}
-            ${{ env.DOCKERHUB_USER != '' && 'docker.io/xalgord/xalgorix' || '' }}
+            ${{ env.DOCKERHUB_USER != '' && 'docker.io/barhaterahul/ai-dast-ing' || '' }}
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}

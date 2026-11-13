@@ -10,7 +10,7 @@ import (
 )
 
 // StartDebugServerFromEnv starts a standalone pprof/debug HTTP server when
-// XALGORIX_PPROF_ADDR is set (e.g. "127.0.0.1:6060"). It is DISABLED by
+// AIDASTING_PPROF_ADDR is set (e.g. "127.0.0.1:6060"). It is DISABLED by
 // default — profiling is opt-in.
 //
 // SECURITY: pprof exposes process internals (heap contents, goroutine stacks,
@@ -25,7 +25,7 @@ import (
 // A non-loopback bind logs a loud warning but is still honored (operators
 // behind a firewall may want it); it never binds automatically.
 func StartDebugServerFromEnv() {
-	addr := strings.TrimSpace(os.Getenv("XALGORIX_PPROF_ADDR"))
+	addr := strings.TrimSpace(os.Getenv("AIDASTING_PPROF_ADDR"))
 	if addr == "" {
 		return
 	}
@@ -38,7 +38,7 @@ func StartDebugServerFromEnv() {
 	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 
 	if !isLoopbackAddr(addr) {
-		log.Printf("[pprof] WARNING: XALGORIX_PPROF_ADDR=%q is not loopback — pprof exposes process "+
+		log.Printf("[pprof] WARNING: AIDASTING_PPROF_ADDR=%q is not loopback — pprof exposes process "+
 			"internals (heap/goroutines). Bind 127.0.0.1 and use an SSH tunnel instead.", addr)
 	}
 

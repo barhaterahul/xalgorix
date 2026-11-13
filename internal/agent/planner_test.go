@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
 )
 
 // AutoPlan must produce a dependency-ordered graph: recon first, vuln-class

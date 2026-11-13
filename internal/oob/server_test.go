@@ -13,8 +13,8 @@ import (
 // any config.Get() runs, so Generate()/Enabled() operate against a configured
 // public URL + port.
 func TestMain(m *testing.M) {
-	os.Setenv("XALGORIX_OOB_PUBLIC_URL", "http://oob.test.example")
-	os.Setenv("XALGORIX_OOB_PORT", "0") // 0 → ensureStarted errors, but Generate registers before that only after start; see note
+	os.Setenv("AIDASTING_OOB_PUBLIC_URL", "http://oob.test.example")
+	os.Setenv("AIDASTING_OOB_PORT", "0") // 0 → ensureStarted errors, but Generate registers before that only after start; see note
 	os.Exit(m.Run())
 }
 
@@ -50,7 +50,7 @@ func fireCallback(path string) *httptest.ResponseRecorder {
 
 func TestEnabledAndPublicBaseURL(t *testing.T) {
 	if !Enabled() {
-		t.Fatal("OOB should be enabled when XALGORIX_OOB_PUBLIC_URL is set")
+		t.Fatal("OOB should be enabled when AIDASTING_OOB_PUBLIC_URL is set")
 	}
 	if got := PublicBaseURL(); got != "http://oob.test.example" {
 		t.Fatalf("PublicBaseURL = %q, want trimmed base", got)
@@ -66,7 +66,7 @@ func TestHandleRecordsRegisteredToken(t *testing.T) {
 	if rr.Code != http.StatusOK {
 		t.Fatalf("handler status = %d, want 200", rr.Code)
 	}
-	if !strings.Contains(rr.Body.String(), "xalgorix-oob-ok:"+tok) {
+	if !strings.Contains(rr.Body.String(), "ai-dast-ing-oob-ok:"+tok) {
 		t.Fatalf("response body missing marker: %q", rr.Body.String())
 	}
 

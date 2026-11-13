@@ -11,10 +11,10 @@ import (
 func TestTokenSaverEnvSettingsExposed(t *testing.T) {
 	defs := envDefinitionByKey()
 	for _, key := range []string{
-		"XALGORIX_BOUNDED_CONTEXT",
-		"XALGORIX_TOOL_ARCHIVE_ACTIVE_WINDOW",
-		"XALGORIX_TOOL_ARCHIVE_MIN_BYTES",
-		"XALGORIX_ROLE_SCOPED_TOOLS",
+		"AIDASTING_BOUNDED_CONTEXT",
+		"AIDASTING_TOOL_ARCHIVE_ACTIVE_WINDOW",
+		"AIDASTING_TOOL_ARCHIVE_MIN_BYTES",
+		"AIDASTING_ROLE_SCOPED_TOOLS",
 	} {
 		def, ok := defs[key]
 		if !ok {
@@ -39,10 +39,10 @@ func TestTokenSaverSettingsHotApply(t *testing.T) {
 	}
 
 	restart, err := s.applyEnvironmentUpdates(map[string]string{
-		"XALGORIX_BOUNDED_CONTEXT":            "true",
-		"XALGORIX_ROLE_SCOPED_TOOLS":          "true",
-		"XALGORIX_TOOL_ARCHIVE_MIN_BYTES":     "2000",
-		"XALGORIX_TOOL_ARCHIVE_ACTIVE_WINDOW": "12",
+		"AIDASTING_BOUNDED_CONTEXT":            "true",
+		"AIDASTING_ROLE_SCOPED_TOOLS":          "true",
+		"AIDASTING_TOOL_ARCHIVE_MIN_BYTES":     "2000",
+		"AIDASTING_TOOL_ARCHIVE_ACTIVE_WINDOW": "12",
 	})
 	if err != nil {
 		t.Fatalf("apply: %v", err)
@@ -58,7 +58,7 @@ func TestTokenSaverSettingsHotApply(t *testing.T) {
 	}
 
 	// Live-value reads reflect the runtime config (drives the UI display).
-	if got := s.envSettingValue("XALGORIX_BOUNDED_CONTEXT"); got != "true" {
+	if got := s.envSettingValue("AIDASTING_BOUNDED_CONTEXT"); got != "true" {
 		t.Fatalf("live value = %q, want true", got)
 	}
 }

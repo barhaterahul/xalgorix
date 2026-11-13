@@ -25,7 +25,7 @@ blackbox: true
 
 ## Purpose
 
-Many business invariants ("once per user", "balance cannot go negative", "limited stock") are enforced with check-then-act logic that two near-simultaneous requests defeat. This skill covers WHICH operations are race-prone, HOW to synchronize concurrent requests from inside Xalgorix with bounded concurrency, and WHAT proof looks like (a duplicated persistent effect, never N status codes).
+Many business invariants ("once per user", "balance cannot go negative", "limited stock") are enforced with check-then-act logic that two near-simultaneous requests defeat. This skill covers WHICH operations are race-prone, HOW to synchronize concurrent requests from inside AI-DAST-ING with bounded concurrency, and WHAT proof looks like (a duplicated persistent effect, never N status codes).
 
 ## Entry Conditions
 
@@ -64,7 +64,7 @@ baseline single request
 5. **Repeat**: races are probabilistic - a single clean batch is NOT a negative; repeat batches (and increase tightness) before concluding not vulnerable. Conversely a single hit IS a positive - reproduce at least once more for confidence.
 6. **Prove impact**: show the duplicated effect persists (double credit, two orders, negative balance, redemption count 2).
 
-## Synchronization Techniques (Xalgorix-Native First)
+## Synchronization Techniques (AI-DAST-ING-Native First)
 
 - **Bounded parallel replay via terminal_execute**: a short Python asyncio/httpx or threads+requests script sends N pre-built requests through one event loop, gated on a barrier so they leave within milliseconds of each other. Keep concurrency bounded by the scan rate policy - the goal is tight ARRIVAL, not flooding.
 - **Barrier batch with xargs/curl** where scripting is unavailable: pre-stage connections (warming) so only the final request bytes race.
@@ -106,7 +106,7 @@ Attach: baseline request, the synchronized batch description (N, technique), and
 - Rate limiting answered with 429s - that is the control working; racing AROUND it (token bucket refill window) is a separate, weaker observation
 - Load-test-scale stress mistaken for a race: the proof is the invariant violation, not request volume
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 
 - http_request for baseline and state re-fetches
 - terminal_execute for the bounded synchronized batch (asyncio/httpx or threads; respect runtime rate policy - bounded concurrency, never a flood)

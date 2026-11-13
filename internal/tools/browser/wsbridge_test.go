@@ -18,7 +18,7 @@ func resetBridge() {
 	if bridge != nil && bridge.running {
 		bridge.Stop()
 	}
-	// Unit tests must not compete with a locally running Xalgorix process for
+	// Unit tests must not compete with a locally running AI-DAST-ING process for
 	// the production extension port (38401). Let the OS allocate an isolated
 	// loopback port for every test bridge instead.
 	bridge = &WSBridge{

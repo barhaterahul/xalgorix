@@ -15,7 +15,7 @@ import (
 	// resolve even on minimal container images that ship without tzdata.
 	_ "time/tzdata"
 
-	"github.com/xalgord/xalgorix/v4/internal/safe"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/safe"
 )
 
 type ScanSchedule struct {

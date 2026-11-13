@@ -42,11 +42,11 @@ import (
 	"strings"
 	"time"
 
-	oobsrv "github.com/xalgord/xalgorix/v4/internal/oob"
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
-	"github.com/xalgord/xalgorix/v4/internal/scopeguard"
-	"github.com/xalgord/xalgorix/v4/internal/tools"
-	"github.com/xalgord/xalgorix/v4/internal/tools/httpclient"
+	oobsrv "github.com/barhaterahul/ai-dast-ing/v4/internal/oob"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scopeguard"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/httpclient"
 )
 
 func (a *Agent) registerVerifyXXETool(reg *tools.Registry) {
@@ -134,7 +134,7 @@ func (a *Agent) verifyXXETool(args map[string]string) (tools.Result, error) {
 	if err != nil {
 		return tools.Result{Error: "verify_xxe: " + err.Error()}, nil
 	}
-	missingURI := "file:///xalgorix-xxe-missing-" + markers.Nonce
+	missingURI := "file:///ai-dast-ing-xxe-missing-" + markers.Nonce
 	baselineBody := fmt.Sprintf("<?xml version=\"1.0\" encoding=\"UTF-8\"?><data>%s%s%s</data>", markers.Start, markers.Control, markers.End)
 	missingBody := xxeProbeDocument(missingURI, markers)
 	probeBody := xxeProbeDocument(fileURI, markers)
@@ -282,9 +282,9 @@ func newXXEProbeMarkers() (xxeProbeMarkers, error) {
 	nonce := hex.EncodeToString(raw)
 	return xxeProbeMarkers{
 		Nonce:   nonce,
-		Start:   "xalgorix-xxe-start-" + nonce,
-		End:     "xalgorix-xxe-end-" + nonce,
-		Control: "xalgorix-xxe-control-" + nonce,
+		Start:   "ai-dast-ing-xxe-start-" + nonce,
+		End:     "ai-dast-ing-xxe-end-" + nonce,
+		Control: "ai-dast-ing-xxe-control-" + nonce,
 	}, nil
 }
 

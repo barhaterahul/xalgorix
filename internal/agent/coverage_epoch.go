@@ -1,7 +1,7 @@
 package agent
 
 // coverage_epoch.go implements OPTIONAL epoch-based coverage convergence
-// (XALGORIX_EPOCH_COVERAGE, default on). It is inert when the flag is off.
+// (AIDASTING_EPOCH_COVERAGE, default on). It is inert when the flag is off.
 //
 // Problem it solves
 // -----------------

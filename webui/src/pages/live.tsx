@@ -65,7 +65,7 @@ export default function LivePage() {
         events={feedEvents}
         filter={filter}
         onFilterChange={setFilter}
-        exportFilePrefix="xalgorix-live-feed"
+        exportFilePrefix="ai-dast-ing-live-feed"
         exportScope="active scans"
         onClearEvents={() => {
           setClearedAt(Date.now())

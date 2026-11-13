@@ -1,6 +1,6 @@
 // Package sandbox owns the Path_Policy boundary check, Allow_List
 // composition, and structured rejection error used by every
-// Filesystem_Tool in xalgorix. See policy.go for the core type and
+// Filesystem_Tool in ai-dast-ing. See policy.go for the core type and
 // API; this file defines the typed error shape.
 package sandbox
 

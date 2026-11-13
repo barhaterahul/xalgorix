@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
 )
 
 // A finished discovery session is not proof of complete host assessments.

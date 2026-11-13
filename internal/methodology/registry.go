@@ -1,4 +1,4 @@
-// Package methodology is the single canonical definition of the Xalgorix
+// Package methodology is the single canonical definition of the AI-DAST-ING
 // 22-phase testing methodology. It lives in its own dependency-free package
 // so the agent planner, the reporting layer, and the web server all consume
 // ONE registry — previously three unshared copies of the phase names

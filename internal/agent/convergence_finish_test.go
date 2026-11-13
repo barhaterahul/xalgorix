@@ -156,7 +156,7 @@ func TestIsContentDiscoveryArtifact(t *testing.T) {
 	artifacts := []string{
 		"/.git/config", "/.svn/entries", "/.htaccess", "/.htpasswd", "/Thumbs.db",
 		"/.DS_Store", "/access.log", "/error_log", "/backup.sql", "/site.zip",
-		"/db.bak", "/__xalgorix_nonexistent_control_71ab9", "/web.config",
+		"/db.bak", "/__aidasting_nonexistent_control_71ab9", "/web.config",
 	}
 	for _, a := range artifacts {
 		if !isContentDiscoveryArtifact(a) {

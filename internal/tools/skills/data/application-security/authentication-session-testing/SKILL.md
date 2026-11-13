@@ -121,7 +121,7 @@ Not enough: reset token appeared reusable. Good proof: the same token changes th
 - Secure/HttpOnly absence reported as vulnerability without a demonstrated theft path
 - Login error messages reported as user enumeration when the differential is not reproducible (same bytes, same timing class)
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 
 - browser_action to drive real lifecycle flows (register, login, MFA, logout) and capture the traffic
 - http_request to replay tokens outside the browser across IP/UA contexts

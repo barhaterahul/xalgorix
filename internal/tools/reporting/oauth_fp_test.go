@@ -19,7 +19,7 @@ func TestCheckFalsePositive_OAuthStateCSRF(t *testing.T) {
 			title:      "OAuth CSRF — missing state validation",
 			desc:       "The authorize endpoint accepts state=test with no rejection, proving CSRF protection is nonexistent",
 			severity:   "high",
-			proof:      "Sent state=test to /oauth2/authorize -> HTTP 200, no AADSTS error. Also XALGORIX-GARBAGE and empty state both returned 200.",
+			proof:      "Sent state=test to /oauth2/authorize -> HTTP 200, no AADSTS error. Also AI-DAST-ING-GARBAGE and empty state both returned 200.",
 			wantReject: true,
 		},
 		{

@@ -18,7 +18,7 @@
 //     set → dispatch through legacyResolver. This preserves the
 //     v4.4.21 path for operators upgrading without re-saving
 //     credentials through the new UI, and covers the provider +
-//     bare model shape written by `xalgorix --setup`.
+//     bare model shape written by `ai-dast-ing --setup`.
 //
 //  3. Otherwise → return *ConfigError "no provider configured".
 //
@@ -35,9 +35,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/xalgord/xalgorix/v4/internal/auth"
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/providers"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/auth"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
 )
 
 // ConfigError is the typed error the composite resolver returns
@@ -97,7 +97,7 @@ type catalogResolver struct {
 	prof *auth.Store
 	pick func(ctx context.Context) (catalogPick, error)
 	// fallbackBase is the operator-configured base URL
-	// (cfg.APIBase / XALGORIX_API_BASE) used when neither the
+	// (cfg.APIBase / AIDASTING_API_BASE) used when neither the
 	// catalog Entry nor the credential Profile carries one — the
 	// "custom" provider case, where Entry.BaseURL is empty by
 	// design. Without it a custom provider with an empty profile
@@ -176,7 +176,7 @@ func defaultCatalogPick(c *compositeResolver) func(ctx context.Context) (catalog
 			return catalogPick{}, &ConfigError{Msg: "catalog resolver: profile store not wired"}
 		}
 		if c.cfg == nil || strings.TrimSpace(c.cfg.LLMProfile) == "" {
-			return catalogPick{}, &ConfigError{Msg: "catalog resolver: no active LLM profile (XALGORIX_LLM_PROFILE unset)"}
+			return catalogPick{}, &ConfigError{Msg: "catalog resolver: no active LLM profile (AIDASTING_LLM_PROFILE unset)"}
 		}
 		profile, ok, err := c.prof.Get(ctx, strings.TrimSpace(c.cfg.LLMProfile))
 		if err != nil {
@@ -205,7 +205,7 @@ func defaultCatalogPick(c *compositeResolver) func(ctx context.Context) (catalog
 // the active credential pointer.
 func (c *compositeResolver) Resolve(ctx context.Context) (Endpoint, error) {
 	// Credential-free catalog providers are selected explicitly through
-	// XALGORIX_LLM_PROVIDER. They do not need or create an Auth Profile, and
+	// AIDASTING_LLM_PROVIDER. They do not need or create an Auth Profile, and
 	// the model remains the provider's bare model ID.
 	if c.cfg != nil && strings.TrimSpace(c.cfg.LLMProvider) != "" && strings.TrimSpace(c.cfg.LLMProfile) == "" && c.cat != nil {
 		entry, ok, err := c.cat.Get(ctx, strings.TrimSpace(c.cfg.LLMProvider))
@@ -227,7 +227,7 @@ func (c *compositeResolver) Resolve(ctx context.Context) (Endpoint, error) {
 			// Custom Provider and LiteLLM catalog entries have
 			// empty Models lists, so BuildCatalogEndpoint returns
 			// an endpoint with Model="". Fall back to the
-			// operator's configured model (XALGORIX_LLM), removing only
+			// operator's configured model (AIDASTING_LLM), removing only
 			// a matching legacy "provider/" prefix — mirrors the same logic
 			// in scan_resolve.go legacyOrCatalogDefaultEndpoint
 			// Branch 0.
@@ -257,15 +257,15 @@ func (c *compositeResolver) Resolve(ctx context.Context) (Endpoint, error) {
 
 	// Branch 3 — neither path is available.
 	return Endpoint{}, &ConfigError{
-		Msg: "no provider configured: set XALGORIX_LLM_PROFILE to a saved credential or set XALGORIX_LLM + XALGORIX_API_KEY",
+		Msg: "no provider configured: set AIDASTING_LLM_PROFILE to a saved credential or set AIDASTING_LLM + AIDASTING_API_KEY",
 	}
 }
 
-// explicitLegacyProvider reports whether XALGORIX_LLM_PROVIDER alone lets
+// explicitLegacyProvider reports whether AIDASTING_LLM_PROVIDER alone lets
 // the legacy resolver route a request without a saved profile — the
-// provider + bare model ID shape that `xalgorix --setup` writes. The provider
+// provider + bare model ID shape that `ai-dast-ing --setup` writes. The provider
 // the request will actually use needs either a built-in default base URL or
-// an operator-supplied XALGORIX_API_BASE, so the key is never sent to a
+// an operator-supplied AIDASTING_API_BASE, so the key is never sent to a
 // guessed host.
 func explicitLegacyProvider(cfg *config.Config) bool {
 	if strings.TrimSpace(cfg.LLMProvider) == "" || strings.TrimSpace(cfg.LLM) == "" {
@@ -401,7 +401,7 @@ func (cr *catalogResolver) Resolve(ctx context.Context) (Endpoint, error) {
 // preserves the "first catalog model" behavior.
 //
 // fallbackBase is the operator-configured base URL (cfg.APIBase /
-// XALGORIX_API_BASE) consulted only when neither the catalog Entry
+// AIDASTING_API_BASE) consulted only when neither the catalog Entry
 // nor the credential Profile supplies one. This is what keeps the
 // "custom" provider working: its catalog Entry.BaseURL is empty by
 // design, so without this fallback a profile missing its
@@ -479,7 +479,7 @@ func BuildCatalogEndpoint(entry providers.Entry, prof auth.Profile, preferModel,
 	// request 5 times.
 	if parsed, perr := url2.Parse(url); perr != nil || parsed.Scheme == "" || parsed.Host == "" {
 		return Endpoint{}, &ConfigError{
-			Msg: "catalog resolver: provider " + entry.ID + " has no base URL — set the Base URL for the Custom Provider (or XALGORIX_API_BASE); built non-absolute request URL " + strconv.Quote(url),
+			Msg: "catalog resolver: provider " + entry.ID + " has no base URL — set the Base URL for the Custom Provider (or AIDASTING_API_BASE); built non-absolute request URL " + strconv.Quote(url),
 		}
 	}
 

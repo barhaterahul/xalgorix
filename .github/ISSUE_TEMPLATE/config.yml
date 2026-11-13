@@ -1,11 +1,11 @@
 blank_issues_enabled: false
 contact_links:
   - name: 📚 Documentation
-    url: https://docs.xalgorix.com
+    url: https://docs.ai-dast-ing.com
     about: Setup, configuration, integrations, and the CLI/API reference.
   - name: 🔒 Report a security vulnerability
-    url: https://github.com/xalgorix/xalgorix/security/policy
+    url: https://github.com/ai-dast-ing/ai-dast-ing/security/policy
     about: Please do NOT open a public issue for security bugs — follow our responsible-disclosure process in SECURITY.md.
   - name: ☁️ Hosted version (no install)
-    url: https://www.xalgorix.com
+    url: https://www.ai-dast-ing.com
     about: Prefer a managed, zero-setup version? Try the hosted cloud.

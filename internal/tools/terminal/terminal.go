@@ -18,12 +18,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	egressproxy "github.com/xalgord/xalgorix/v4/internal/proxy"
-	"github.com/xalgord/xalgorix/v4/internal/resources"
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
-	"github.com/xalgord/xalgorix/v4/internal/tools"
-	"github.com/xalgord/xalgorix/v4/internal/tools/iolimit"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	egressproxy "github.com/barhaterahul/ai-dast-ing/v4/internal/proxy"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/resources"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/iolimit"
 )
 
 const maxOutputLen = 20000
@@ -225,7 +225,7 @@ func requestRatePolicyForContext(contextID string) scanctx.RequestRatePolicy {
 		}
 	}
 	if cfg := config.Get(); cfg != nil && cfg.RateLimitRPS > 0 {
-		return scanctx.NormalizeRequestRatePolicy(scanctx.RequestRatePolicy{MaxRPS: cfg.RateLimitRPS, Source: "XALGORIX_RATE_RPS"})
+		return scanctx.NormalizeRequestRatePolicy(scanctx.RequestRatePolicy{MaxRPS: cfg.RateLimitRPS, Source: "AIDASTING_RATE_RPS"})
 	}
 	return scanctx.RequestRatePolicy{}
 }
@@ -593,7 +593,7 @@ func prepareRequestRateRuntime(workDir string, policy scanctx.RequestRatePolicy)
 		return requestRateRuntime{}, nil
 	}
 
-	root := filepath.Join(workDir, ".xalgorix-rate")
+	root := filepath.Join(workDir, ".ai-dast-ing-rate")
 	rt := requestRateRuntime{
 		BinDir:     filepath.Join(root, "bin"),
 		PythonPath: filepath.Join(root, "python"),
@@ -626,8 +626,8 @@ func writeRateLimitedBinaryWrapper(binDir, name string) error {
 	wrapperPath := filepath.Join(binDir, name)
 	script := fmt.Sprintf(`#!/usr/bin/env bash
 set -euo pipefail
-lock_dir="${XALGORIX_RATE_LOCK_DIR:-/tmp/xalgorix-rate}"
-delay_ms="${XALGORIX_RATE_DELAY_MS:-0}"
+lock_dir="${AIDASTING_RATE_LOCK_DIR:-/tmp/ai-dast-ing-rate}"
+delay_ms="${AIDASTING_RATE_DELAY_MS:-0}"
 mkdir -p "$lock_dir"
 stamp="$lock_dir/last_request_ms"
 lock="$lock_dir/request.lock"
@@ -669,8 +669,8 @@ try:
 except Exception:
     fcntl = None
 
-_delay_ms = int(os.environ.get("XALGORIX_RATE_DELAY_MS", "0") or "0")
-_lock_dir = os.environ.get("XALGORIX_RATE_LOCK_DIR", "/tmp/xalgorix-rate")
+_delay_ms = int(os.environ.get("AIDASTING_RATE_DELAY_MS", "0") or "0")
+_lock_dir = os.environ.get("AIDASTING_RATE_LOCK_DIR", "/tmp/ai-dast-ing-rate")
 _patched = {}
 
 
@@ -759,7 +759,7 @@ except Exception:
 }
 
 // setProcessLimits applies resource constraints to a child process:
-// - Adjusts OOM score so the kernel kills scan tools before xalgorix
+// - Adjusts OOM score so the kernel kills scan tools before ai-dast-ing
 // - Sets RLIMIT_AS (virtual memory limit) when memoryLimited is true
 func setProcessLimits(cmd *exec.Cmd, memoryLimited bool, memLimitBytes int64) {
 	if cmd.Process == nil {
@@ -964,7 +964,7 @@ func killTrackedProcess(cmd *exec.Cmd) {
 				log.Printf("[terminal] Failed to kill process group %d for pid %d: %v", pgid, pid, err)
 			}
 		} else {
-			log.Printf("[terminal] Refusing to kill process group %d for pid %d because it matches xalgorix", pgid, pid)
+			log.Printf("[terminal] Refusing to kill process group %d for pid %d because it matches ai-dast-ing", pgid, pid)
 		}
 	}
 
@@ -1203,7 +1203,7 @@ func executeCommandWithContextID(contextID string, args map[string]string) (tool
 
 	// Block destructive commands
 	if reason := isBlockedCommand(command); reason != "" {
-		return tools.Result{Output: fmt.Sprintf("[BLOCKED] Destructive command rejected: %s. Xalgorix is read-only — it tests for vulnerabilities without causing damage.", reason)}, nil
+		return tools.Result{Output: fmt.Sprintf("[BLOCKED] Destructive command rejected: %s. AI-DAST-ING is read-only — it tests for vulnerabilities without causing damage.", reason)}, nil
 	}
 
 	// Pre-check: install missing tools BEFORE running the command.
@@ -1299,10 +1299,10 @@ func commandWaitContext(contextID string) context.Context {
 //     or the package-level termStore.workDir),
 //  2. the active Scan_Context's ScanDir,
 //  3. cfg.WorkspaceRoot (= Data_Dir),
-//  4. /tmp/xalgorix-workspace as a last-resort sentinel.
+//  4. /tmp/ai-dast-ing-workspace as a last-resort sentinel.
 //
 // $CWD is intentionally NOT consulted: the previous os.Getwd() fallback was
-// the source of the workspace-leak bug where running xalgorix from a source
+// the source of the workspace-leak bug where running ai-dast-ing from a source
 // tree caused tmp/, .cache/, .config/, .local/share/ to be created in that
 // tree by prepareCommandWorkspace. Falling back to WorkspaceRoot keeps the
 // resolution rooted inside the Allow_List even if every higher-priority
@@ -1323,7 +1323,7 @@ func effectiveWorkDirForContext(contextID string, cfg *config.Config) string {
 		}
 	}
 	if workDir == "" {
-		workDir = "/tmp/xalgorix-workspace"
+		workDir = "/tmp/ai-dast-ing-workspace"
 	}
 	if !filepath.IsAbs(workDir) {
 		if abs, err := filepath.Abs(workDir); err == nil {
@@ -1364,7 +1364,7 @@ func shellQuote(s string) string {
 
 // commandEnv builds the environment for the terminal child process. Every
 // path-flavored variable (HOME, TMPDIR, XDG_CACHE_HOME, XDG_CONFIG_HOME,
-// XDG_DATA_HOME, XALGORIX_WORKSPACE) is rooted at workDir, which the caller
+// XDG_DATA_HOME, AIDASTING_WORKSPACE) is rooted at workDir, which the caller
 // resolved via effectiveWorkDirForContext. This is the terminal counterpart
 // of pythonWorkspaceEnv and satisfies R8.9 / R8.10 — XDG_* and TMPDIR for
 // every spawned terminal command stay inside sc.ScanDir (or
@@ -1385,27 +1385,27 @@ func commandEnv(homeDir, goPath, workDir string, rateRuntime requestRateRuntime)
 		"XDG_CACHE_HOME":         true,
 		"XDG_CONFIG_HOME":        true,
 		"XDG_DATA_HOME":          true,
-		"XALGORIX_WORKSPACE":     true,
+		"AIDASTING_WORKSPACE":     true,
 		"PYTHONPATH":             true,
-		"XALGORIX_RATE_LOCK_DIR": true,
-		"XALGORIX_RATE_DELAY_MS": true,
+		"AIDASTING_RATE_LOCK_DIR": true,
+		"AIDASTING_RATE_DELAY_MS": true,
 	}
-	// Scrub every XALGORIX_* variable and known credential variables from
+	// Scrub every AIDASTING_* variable and known credential variables from
 	// the inherited environment before spawning shell commands. The agent
 	// must never see the operator's proxy credentials, LLM API keys,
 	// dashboard auth, or integration tokens — a simple `env | grep` from
 	// a terminal_execute call would otherwise print them into scan logs
 	// that end up visible in the SaaS dashboard.
 	for _, kv := range []string{
-		"XALGORIX_API_KEY", "XALGORIX_API_KEYS", "XALGORIX_LLM",
-		"XALGORIX_LLM_PROVIDER", "XALGORIX_LLM_PROFILE", "XALGORIX_API_BASE",
-		"XALGORIX_PROXY_URL", "XALGORIX_PROXY_FILE", "XALGORIX_PROXY_ROTATION",
-		"XALGORIX_USERNAME", "XALGORIX_PASSWORD", "XALGORIX_PASSWORD_HASH",
-		"XALGORIX_TARGET_AUTH", "XALGORIX_TARGET_AUTH_B",
-		"XALGORIX_DISCORD_WEBHOOK", "XALGORIX_TELEGRAM_BOT_TOKEN",
-		"XALGORIX_TELEGRAM_CHAT_ID", "GEMINI_API_KEY", "AGENTMAIL_API_KEY",
+		"AIDASTING_API_KEY", "AIDASTING_API_KEYS", "AIDASTING_LLM",
+		"AIDASTING_LLM_PROVIDER", "AIDASTING_LLM_PROFILE", "AIDASTING_API_BASE",
+		"AIDASTING_PROXY_URL", "AIDASTING_PROXY_FILE", "AIDASTING_PROXY_ROTATION",
+		"AIDASTING_USERNAME", "AIDASTING_PASSWORD", "AIDASTING_PASSWORD_HASH",
+		"AIDASTING_TARGET_AUTH", "AIDASTING_TARGET_AUTH_B",
+		"AIDASTING_DISCORD_WEBHOOK", "AIDASTING_TELEGRAM_BOT_TOKEN",
+		"AIDASTING_TELEGRAM_CHAT_ID", "GEMINI_API_KEY", "AGENTMAIL_API_KEY",
 		"AGENTMAIL_POD", "CAIDO_API_TOKEN", "INBOUND_EMAIL_SECRET",
-		"XALGORIX_OOB_API_KEY", "XALGORIX_OOB_HOST",
+		"AIDASTING_OOB_API_KEY", "AIDASTING_OOB_HOST",
 	} {
 		replace[kv] = true
 	}
@@ -1419,13 +1419,13 @@ func commandEnv(homeDir, goPath, workDir string, rateRuntime requestRateRuntime)
 		if replace[key] {
 			continue
 		}
-		// Catch-all: strip any XALGORIX_* variable we didn't explicitly
+		// Catch-all: strip any AIDASTING_* variable we didn't explicitly
 		// allow-list above. The terminal tool only re-adds the three
 		// safe ones (WORKSPACE, RATE_LOCK_DIR, RATE_DELAY_MS).
-		if strings.HasPrefix(key, "XALGORIX_") {
+		if strings.HasPrefix(key, "AIDASTING_") {
 			continue
 		}
-		// Operator secrets outside the XALGORIX_* namespace (integration tokens,
+		// Operator secrets outside the AIDASTING_* namespace (integration tokens,
 		// provider keys) must not reach an executed tool either. Shared with the
 		// Python tool via tools.SecretEnvKey so the two deny-lists cannot drift.
 		if tools.SecretEnvKey(key) {
@@ -1442,7 +1442,7 @@ func commandEnv(homeDir, goPath, workDir string, rateRuntime requestRateRuntime)
 		"XDG_CACHE_HOME="+filepath.Join(workDir, ".cache"),
 		"XDG_CONFIG_HOME="+filepath.Join(workDir, ".config"),
 		"XDG_DATA_HOME="+filepath.Join(workDir, ".local", "share"),
-		"XALGORIX_WORKSPACE="+workDir,
+		"AIDASTING_WORKSPACE="+workDir,
 	)
 	if rateRuntime.PythonPath != "" {
 		pythonPath := rateRuntime.PythonPath
@@ -1451,8 +1451,8 @@ func commandEnv(homeDir, goPath, workDir string, rateRuntime requestRateRuntime)
 		}
 		env = append(env,
 			"PYTHONPATH="+pythonPath,
-			"XALGORIX_RATE_LOCK_DIR="+rateRuntime.LockDir,
-			"XALGORIX_RATE_DELAY_MS="+strconv.Itoa(rateRuntime.DelayMS),
+			"AIDASTING_RATE_LOCK_DIR="+rateRuntime.LockDir,
+			"AIDASTING_RATE_DELAY_MS="+strconv.Itoa(rateRuntime.DelayMS),
 		)
 	} else if existingPythonPath != "" {
 		env = append(env, "PYTHONPATH="+existingPythonPath)
@@ -1472,15 +1472,15 @@ func shellPrelude(homeDir, workDir string, memLimitBytes int64) string {
 	fmt.Fprintf(&b, "export XDG_CACHE_HOME=%s\n", shellQuote(filepath.Join(workDir, ".cache")))
 	fmt.Fprintf(&b, "export XDG_CONFIG_HOME=%s\n", shellQuote(filepath.Join(workDir, ".config")))
 	fmt.Fprintf(&b, "export XDG_DATA_HOME=%s\n", shellQuote(filepath.Join(workDir, ".local", "share")))
-	fmt.Fprintf(&b, "export XALGORIX_WORKSPACE=%s\n", shellQuote(workDir))
-	b.WriteString(`__xalgorix_workspace="$(pwd -P)"
-__xalgorix_resolve_path() {
+	fmt.Fprintf(&b, "export AIDASTING_WORKSPACE=%s\n", shellQuote(workDir))
+	b.WriteString(`__aidasting_workspace="$(pwd -P)"
+__aidasting_resolve_path() {
   realpath -m "$1" 2>/dev/null || readlink -m "$1" 2>/dev/null || printf '%s\n' "$1"
 }
 cd() {
   local dest target resolved before after
   if [ "$#" -eq 0 ]; then
-    dest="$__xalgorix_workspace"
+    dest="$__aidasting_workspace"
   else
     dest="$1"
   fi
@@ -1489,19 +1489,19 @@ cd() {
     builtin cd - >/dev/null || return
     after="$(pwd -P)"
     case "$after" in
-      "$__xalgorix_workspace"|"$__xalgorix_workspace"/*) pwd; return ;;
+      "$__aidasting_workspace"|"$__aidasting_workspace"/*) pwd; return ;;
       *) builtin cd "$before"; printf '[WORKSPACE GUARD] cd outside scan workspace blocked: %s\n' "$dest" >&2; return 1 ;;
     esac
   fi
   case "$dest" in
-    "~") target="$__xalgorix_workspace" ;;
-    "~/"*) target="$__xalgorix_workspace/${dest#~/}" ;;
+    "~") target="$__aidasting_workspace" ;;
+    "~/"*) target="$__aidasting_workspace/${dest#~/}" ;;
     /*) target="$dest" ;;
     *) target="$PWD/$dest" ;;
   esac
-  resolved="$(__xalgorix_resolve_path "$target")"
+  resolved="$(__aidasting_resolve_path "$target")"
   case "$resolved" in
-    "$__xalgorix_workspace"|"$__xalgorix_workspace"/*) builtin cd "$resolved" ;;
+    "$__aidasting_workspace"|"$__aidasting_workspace"/*) builtin cd "$resolved" ;;
     *) printf '[WORKSPACE GUARD] cd outside scan workspace blocked: %s\n' "$dest" >&2; return 1 ;;
   esac
 }
@@ -1778,9 +1778,9 @@ func resolvePackage(cmd string) string {
 }
 
 // sudoPrefix returns "sudo " when the process is non-root AND the operator
-// has explicitly opted in via XALGORIX_AUTO_INSTALL_SUDO=1. The previous
+// has explicitly opted in via AIDASTING_AUTO_INSTALL_SUDO=1. The previous
 // behavior was to silently sudo any install attempt, which is a privilege
-// escalation surface when xalgorix is launched by a user with passwordless
+// escalation surface when ai-dast-ing is launched by a user with passwordless
 // sudo (which the --start systemd flow encourages).
 func sudoPrefix() string {
 	if os.Getuid() == 0 {
@@ -1843,8 +1843,8 @@ func maybeRefreshAptLists() string {
 }
 
 // installPackage installs a system package on demand. Gated behind
-// XALGORIX_ALLOW_AUTO_INSTALL — defaults to true for root and false for
-// non-root, so a stock unprivileged xalgorix invocation can never call
+// AIDASTING_ALLOW_AUTO_INSTALL — defaults to true for root and false for
+// non-root, so a stock unprivileged ai-dast-ing invocation can never call
 // apt-get/cargo/npm to install software without the operator's say-so.
 func installPackage(pkg string) string {
 	// Auto-install gate. Two reasons this is opt-in for non-root:
@@ -1856,7 +1856,7 @@ func installPackage(pkg string) string {
 	cfg := config.Get()
 	if !cfg.AllowAutoInstall {
 		return fmt.Sprintf(
-			"[install %s blocked: auto-install is disabled. Set XALGORIX_ALLOW_AUTO_INSTALL=1 in ~/.xalgorix.env to enable, or install manually.]",
+			"[install %s blocked: auto-install is disabled. Set AIDASTING_ALLOW_AUTO_INSTALL=1 in ~/.ai-dast-ing.env to enable, or install manually.]",
 			pkg,
 		)
 	}
@@ -2028,7 +2028,7 @@ func installPackage(pkg string) string {
 	}
 
 	// Prefix with sudo only when the operator has opted in via
-	// XALGORIX_AUTO_INSTALL_SUDO=1. Without that, this install will fail
+	// AIDASTING_AUTO_INSTALL_SUDO=1. Without that, this install will fail
 	// for non-root users — which is the safer default than silently
 	// escalating package-manager invocations.
 	installCmd = sudoPrefix() + installCmd
@@ -2110,9 +2110,9 @@ var blockedPatterns = []struct {
 	// The scanner's own credential files are never part of testing a target.
 	// Best-effort, like the rest of this list (see the boundary note below);
 	// the environment scrub in commandEnv is the matching defense for env vars
-	// and the sandbox deny-list covers the file tools. "xalgorix.env" (no
-	// leading dot) also matches /etc/xalgorix.env.
-	{"xalgorix.env", "access to the scanner credential file is not permitted"},
+	// and the sandbox deny-list covers the file tools. "ai-dast-ing.env" (no
+	// leading dot) also matches /etc/ai-dast-ing.env.
+	{"ai-dast-ing.env", "access to the scanner credential file is not permitted"},
 	{"llm_keys.json", "access to the scanner credential file is not permitted"},
 	{"auth-profiles.json", "access to the scanner credential file is not permitted"},
 }
@@ -2126,7 +2126,7 @@ var blockedPatterns = []struct {
 // expansion (rm$IFS-rf$IFS/), eval $'\\x72m -rf /', fetching a script over
 // HTTP then piping to sh, writing destructive code with tee, etc.
 //
-// The real isolation must be operational: run xalgorix as an unprivileged
+// The real isolation must be operational: run ai-dast-ing as an unprivileged
 // user, inside a container/VM, with the workspace mounted read-write and
 // the rest of the filesystem read-only. The blocklist is here to catch
 // honest mistakes, not malice.

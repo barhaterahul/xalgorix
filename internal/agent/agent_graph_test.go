@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/llm"
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
-	"github.com/xalgord/xalgorix/v4/internal/scopeguard"
-	"github.com/xalgord/xalgorix/v4/internal/tools"
-	"github.com/xalgord/xalgorix/v4/internal/tools/agentsgraph"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/llm"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scopeguard"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/agentsgraph"
 )
 
 func TestCoordinatorFinishGateRequiresDelegatedResultCollection(t *testing.T) {
@@ -368,7 +368,7 @@ func TestDelegatedSubagentInheritsRootLLMClient(t *testing.T) {
 	}
 }
 
-// XALGORIX_DISABLED_SPECIALISTS excludes named lanes from both the early
+// AIDASTING_DISABLED_SPECIALISTS excludes named lanes from both the early
 // discovery stage and the testing wave, without touching the binary version.
 func TestSpecialistDisabled(t *testing.T) {
 	a := &Agent{}

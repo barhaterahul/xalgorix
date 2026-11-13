@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/llm"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/llm"
 )
 
 // A recovered/parsed call must be persisted in canonical <function=…> form so

@@ -1,4 +1,4 @@
-# Xalgorix canonical tool-call reference
+# AI-DAST-ING canonical tool-call reference
 
 This file is embedded into every agent system prompt. The registry schema is
 the final authority, but these examples are the shortest safe forms to copy.

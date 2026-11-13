@@ -1,4 +1,4 @@
-// Translation dictionaries for the Xalgorix dashboard.
+// Translation dictionaries for the AI-DAST-ING dashboard.
 //
 // English is the source of truth: every key MUST exist in `en`. Other locales
 // may be partial — the `t()` helper falls back to the English string (and then

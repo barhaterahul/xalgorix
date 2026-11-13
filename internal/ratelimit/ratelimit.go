@@ -1,12 +1,12 @@
 // Package ratelimit provides a per-domain token-bucket rate limiter
-// for outbound HTTP requests made by Xalgorix tools.
+// for outbound HTTP requests made by AI-DAST-ING tools.
 //
-// Configuration (via env or ~/.xalgorix.env):
+// Configuration (via env or ~/.ai-dast-ing.env):
 //
-//	XALGORIX_RATE_RPS   – sustained requests per second per domain (default 10)
-//	XALGORIX_RATE_BURST – burst size per domain                    (default 20)
+//	AIDASTING_RATE_RPS   – sustained requests per second per domain (default 10)
+//	AIDASTING_RATE_BURST – burst size per domain                    (default 20)
 //
-// Set XALGORIX_RATE_RPS=0 to disable rate limiting entirely.
+// Set AIDASTING_RATE_RPS=0 to disable rate limiting entirely.
 package ratelimit
 
 import (

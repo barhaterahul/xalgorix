@@ -30,7 +30,7 @@ var languageAliases = map[string]string{
 	"simplified chinese": "zh-CN",
 }
 
-// SupportedLanguages returns the canonical codes of every language Xalgorix can
+// SupportedLanguages returns the canonical codes of every language AI-DAST-ING can
 // localize output into. English is always first so callers can present it as
 // the default choice.
 func SupportedLanguages() []string {

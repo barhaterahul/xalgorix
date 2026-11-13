@@ -100,7 +100,7 @@ Verify PERSISTENT state: re-read the object (profile, order, membership) after t
 - Response caching making a skipped step look successful - re-fetch with a fresh request before concluding
 - Cross-session success that only reflects YOUR other session already having completed the flow legitimately
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 
 - browser_action to walk the full legitimate flow and capture every step request (the baseline corpus)
 - http_request to replay captured steps out of order, repeatedly, and across sessions

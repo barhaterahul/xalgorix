@@ -5,10 +5,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/llm"
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
-	"github.com/xalgord/xalgorix/v4/internal/scopeguard"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/llm"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scopeguard"
 )
 
 func TestTokenAttributionAndAggregation(t *testing.T) {
@@ -292,7 +292,7 @@ func TestSecurityQualityInvariants(t *testing.T) {
 	}
 
 	// 2. Verify agent type determination
-	if got := determineAgentType("XalgorixRoot", false); got != scanctx.AgentTypeRoot {
+	if got := determineAgentType("AidastingRoot", false); got != scanctx.AgentTypeRoot {
 		t.Errorf("root agent type = %q, want %q", got, scanctx.AgentTypeRoot)
 	}
 	if got := determineAgentType("specialist-injection-serverside", true); got != scanctx.AgentTypeInjectionServer {
@@ -429,7 +429,7 @@ func TestTokenAttributionRoleRouting(t *testing.T) {
 		delegated bool
 		want      string
 	}{
-		{"root", "XalgorixRoot", false, scanctx.AgentTypeRoot},
+		{"root", "AidastingRoot", false, scanctx.AgentTypeRoot},
 		{"authz", "specialist-authz-logic", true, scanctx.AgentTypeAuthzLogic},
 		{"injection", "specialist-injection-serverside", true, scanctx.AgentTypeInjectionServer},
 		{"client-source", "specialist-client-source", true, scanctx.AgentTypeClientSource},

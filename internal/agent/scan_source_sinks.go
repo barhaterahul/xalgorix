@@ -20,9 +20,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
-	"github.com/xalgord/xalgorix/v4/internal/tools"
-	"github.com/xalgord/xalgorix/v4/internal/tools/codesearch"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/codesearch"
 )
 
 // maxSinkSeed caps how many hypotheses a single sink sweep seeds so a large
@@ -61,7 +61,7 @@ func (a *Agent) scanSourceSinksTool(args map[string]string) (tools.Result, error
 		return tools.Result{Error: "no scan context — scan_source_sinks needs a scan to seed hypotheses into"}, nil
 	}
 	if codesearch.GetSourceRoot(a.scanCtx.ID) == "" {
-		return tools.Result{Output: "❌ Whitebox source not configured for this scan (set XALGORIX_SOURCE_REPO to a git URL or local path). Fall back to black-box discovery: fetch and read client-side JS bundles and map routes with http_request/browser."}, nil
+		return tools.Result{Output: "❌ Whitebox source not configured for this scan (set AIDASTING_SOURCE_REPO to a git URL or local path). Fall back to black-box discovery: fetch and read client-side JS bundles and map routes with http_request/browser."}, nil
 	}
 
 	maxPerClass := 20

@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
 )
 
 var requestRatePatterns = []*regexp.Regexp{
@@ -39,11 +39,11 @@ func instructionRequestRatePolicy(instruction string) scanctx.RequestRatePolicy 
 
 // EffectiveRequestRatePolicy resolves the scan's outbound request budget. The
 // most restrictive non-zero policy wins, so a user instruction such as
-// "max 3 requests/sec" lowers the configured XALGORIX_RATE_RPS budget.
+// "max 3 requests/sec" lowers the configured AIDASTING_RATE_RPS budget.
 func EffectiveRequestRatePolicy(cfg *config.Config, instruction string) scanctx.RequestRatePolicy {
 	var policy scanctx.RequestRatePolicy
 	if cfg != nil && cfg.RateLimitRPS > 0 {
-		policy = scanctx.RequestRatePolicy{MaxRPS: cfg.RateLimitRPS, Source: "XALGORIX_RATE_RPS"}
+		policy = scanctx.RequestRatePolicy{MaxRPS: cfg.RateLimitRPS, Source: "AIDASTING_RATE_RPS"}
 	}
 	custom := instructionRequestRatePolicy(instruction)
 	if custom.Enabled() && (!policy.Enabled() || custom.MaxRPS <= policy.MaxRPS) {
@@ -72,7 +72,7 @@ func buildRequestRatePolicySection(policy scanctx.RequestRatePolicy) string {
 func rateLimitedChecklist(checklist string, policy scanctx.RequestRatePolicy) string {
 	if !policy.Enabled() {
 		if cfg := config.Get(); cfg != nil && cfg.RateLimitRPS > 0 {
-			policy = scanctx.RequestRatePolicy{MaxRPS: cfg.RateLimitRPS, Source: "XALGORIX_RATE_RPS"}
+			policy = scanctx.RequestRatePolicy{MaxRPS: cfg.RateLimitRPS, Source: "AIDASTING_RATE_RPS"}
 		}
 	}
 	if !policy.Enabled() {

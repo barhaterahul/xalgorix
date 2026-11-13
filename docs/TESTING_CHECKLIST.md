@@ -1,4 +1,4 @@
-# Xalgorix Testing Checklist
+# AI-DAST-ING Testing Checklist
 
 This checklist tracks the automated and manual gates for the CLI, web UI, LLM providers, scan orchestration, and agent tools.
 
@@ -9,7 +9,7 @@ This checklist tracks the automated and manual gates for the CLI, web UI, LLM pr
 - [ ] `go test ./... -race`
 - [ ] `go vet ./...`
 - [ ] `node --check internal/web/static/assets/app-*.js`
-- [ ] `go build ./cmd/xalgorix`
+- [ ] `go build ./cmd/ai-dast-ing`
 - [ ] `make test-ci`
 
 ## Config and LLM providers

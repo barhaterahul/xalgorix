@@ -1,4 +1,4 @@
-// Package proxy provides HTTP, HTTPS and SOCKS5 proxy support for Xalgorix.
+// Package proxy provides HTTP, HTTPS and SOCKS5 proxy support for AI-DAST-ING.
 // It supports the following formats:
 //   - ip:port
 //   - ip:port:user:pass
@@ -224,7 +224,7 @@ func NewDirectClient(tlsSkipVerify bool) *http.Client {
 		} else {
 			tr.TLSClientConfig = tr.TLSClientConfig.Clone()
 		}
-		tr.TLSClientConfig.InsecureSkipVerify = true //nolint:gosec // controlled by XALGORIX_TLS_SKIP_VERIFY
+		tr.TLSClientConfig.InsecureSkipVerify = true //nolint:gosec // controlled by AIDASTING_TLS_SKIP_VERIFY
 	}
 	return &http.Client{
 		Transport: tr,

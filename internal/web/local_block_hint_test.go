@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
 )
 
 // TestHandleScan_LocalTargetBlockedHint verifies that an all-local scan request
@@ -29,7 +29,7 @@ func TestHandleScan_LocalTargetBlockedHint(t *testing.T) {
 			t.Fatalf("status = %d, want 400; body=%s", rr.Code, rr.Body.String())
 		}
 		body := rr.Body.String()
-		if !strings.Contains(body, "XALGORIX_ALLOW_LOCAL_TARGETS") {
+		if !strings.Contains(body, "AIDASTING_ALLOW_LOCAL_TARGETS") {
 			t.Fatalf("expected the enable hint, got: %s", body)
 		}
 	})
@@ -46,7 +46,7 @@ func TestHandleScan_LocalTargetBlockedHint(t *testing.T) {
 			t.Fatalf("status = %d, want 400; body=%s", rr.Code, rr.Body.String())
 		}
 		body := rr.Body.String()
-		if strings.Contains(body, "XALGORIX_ALLOW_LOCAL_TARGETS") {
+		if strings.Contains(body, "AIDASTING_ALLOW_LOCAL_TARGETS") {
 			t.Fatalf("should not suggest enabling when it's already on: %s", body)
 		}
 		if !strings.Contains(body, "even with local targets enabled") {

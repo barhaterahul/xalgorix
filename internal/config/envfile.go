@@ -20,19 +20,19 @@ var accountEnvFiles = func() []string {
 	if !testing.Testing() {
 		return nil
 	}
-	paths := []string{"/etc/xalgorix.env", "/root/.xalgorix.env"}
+	paths := []string{"/etc/ai-dast-ing.env", "/root/.ai-dast-ing.env"}
 	if home, err := os.UserHomeDir(); err == nil && home != "" {
-		paths = append(paths, filepath.Join(home, ".xalgorix.env"))
+		paths = append(paths, filepath.Join(home, ".ai-dast-ing.env"))
 	}
 	if sudoUser := os.Getenv("SUDO_USER"); sudoUser != "" {
-		paths = append(paths, filepath.Join("/home", sudoUser, ".xalgorix.env"))
+		paths = append(paths, filepath.Join("/home", sudoUser, ".ai-dast-ing.env"))
 	}
 	return paths
 }()
 
 // refuseAccountEnvFile stops a test binary from writing the env file of the
 // account running it. On 2026-11-12 the test suite ran as root on a production
-// scanner, replaced /root/.xalgorix.env's API keys with test keys, and every
+// scanner, replaced /root/.ai-dast-ing.env's API keys with test keys, and every
 // LLM call failed after the next restart.
 func refuseAccountEnvFile(path string, protected []string) error {
 	target := resolveEnvFilePath(path)
@@ -76,7 +76,7 @@ func EnvFilePath() string {
 	if err != nil || home == "" {
 		home = "/root"
 	}
-	return filepath.Join(home, ".xalgorix.env")
+	return filepath.Join(home, ".ai-dast-ing.env")
 }
 
 // ReadEnvFile parses a dotenv-style file without changing the process

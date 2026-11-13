@@ -52,7 +52,7 @@ func (s *Server) handleUploadSource(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Spool the upload to a temp file so we can open it as a zip.ReaderAt.
-	tmp, err := os.CreateTemp("", "xalgorix-src-*.zip")
+	tmp, err := os.CreateTemp("", "ai-dast-ing-src-*.zip")
 	if err != nil {
 		log.Printf("[ERROR] source upload: temp create: %v", err)
 		http.Error(w, "server error", http.StatusInternalServerError)

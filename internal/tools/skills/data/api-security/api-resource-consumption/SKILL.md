@@ -98,7 +98,7 @@ A resource-consumption finding requires:
 - Limits enforced at a different layer than observed (e.g., per-token not per-IP)
 - Public CDN/cached responses appearing "unlimited"
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `terminal_execute` with curl loops/xargs -P and Python asyncio for concurrency
 - `http_request` for precise single probes
 - ffuf for high-volume enumeration when a bypass is confirmed

@@ -1,6 +1,6 @@
 # Binaries
-/xalgorix
-xalgorix-linux-amd64
+/ai-dast-ing
+ai-dast-ing-linux-amd64
 antigravity-kit
 build/
 *.exe
@@ -19,7 +19,7 @@ build/
 !webui/tsconfig.node.json
 !webui/package-lock.json
 !internal/web/static/.eslintrc.json
-xalgorix-data/
+ai-dast-ing-data/
 *_assessment/
 
 # Secrets / local env (never commit — contains tokens like DOCKERHUB_TOKEN).

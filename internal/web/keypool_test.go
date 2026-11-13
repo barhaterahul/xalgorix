@@ -16,7 +16,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
 )
 
 func doKeyPoolReq(s *Server, method, body string) *httptest.ResponseRecorder {
@@ -72,15 +72,15 @@ func TestKeyPool_PostAppliesPoolAndPrimary(t *testing.T) {
 	}
 
 	// The env file must carry the values so a restart keeps them.
-	data, err := os.ReadFile(filepath.Join(home, ".xalgorix.env"))
+	data, err := os.ReadFile(filepath.Join(home, ".ai-dast-ing.env"))
 	if err != nil {
 		t.Fatalf("read env file: %v", err)
 	}
 	env := string(data)
-	if !strings.Contains(env, "XALGORIX_API_KEYS=sk-new-primary-key-9999,sk-new-secondary-8888") {
+	if !strings.Contains(env, "AIDASTING_API_KEYS=sk-new-primary-key-9999,sk-new-secondary-8888") {
 		t.Fatalf("pool missing from env file: %s", env)
 	}
-	if !strings.Contains(env, "XALGORIX_API_KEY=sk-new-primary-key-9999") {
+	if !strings.Contains(env, "AIDASTING_API_KEY=sk-new-primary-key-9999") {
 		t.Fatalf("primary key missing from env file: %s", env)
 	}
 

@@ -16,12 +16,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/llm"
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
-	"github.com/xalgord/xalgorix/v4/internal/scopeguard"
-	"github.com/xalgord/xalgorix/v4/internal/tools"
-	"github.com/xalgord/xalgorix/v4/internal/tools/reporting"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/llm"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scopeguard"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/reporting"
 )
 
 func verifierOracleAgent(t *testing.T) *Agent {
@@ -36,7 +36,7 @@ func verifierOracleServer(t *testing.T) string {
 	t.Helper()
 	python, err := exec.LookPath("python3")
 	if err != nil {
-		if os.Getenv("XALGORIX_REQUIRE_ORACLE") == "1" {
+		if os.Getenv("AIDASTING_REQUIRE_ORACLE") == "1" {
 			t.Fatal("required application oracle runtime is unavailable")
 		}
 		t.Skip("application oracle requires Python 3")
@@ -142,7 +142,7 @@ func TestVerifierApplicationOracleSQLi(t *testing.T) {
 func TestVerifierApplicationOracleSSTI(t *testing.T) {
 	base := verifierOracleServer(t)
 	if !strings.Contains(oracleRead(t, base+"/capabilities"), `"jinja": true`) {
-		if os.Getenv("XALGORIX_REQUIRE_ORACLE") == "1" {
+		if os.Getenv("AIDASTING_REQUIRE_ORACLE") == "1" {
 			t.Fatal("required template application oracle dependency is unavailable")
 		}
 		t.Skip("template application oracle requires Jinja2")

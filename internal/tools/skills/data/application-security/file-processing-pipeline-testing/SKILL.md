@@ -98,7 +98,7 @@ Good proof per class:
 - Virus-scan flagging your test file = the control working
 - ImageMagick-style operator payloads without evidence the transformation library processes that format = hypothesis, not finding
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 
 - browser_action to drive real upload flows and observe preview/render behavior (stored XSS verification included)
 - http_request for raw multipart upload replays and download fetches across identities

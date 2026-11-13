@@ -16,9 +16,9 @@
 //   - the response is always Server-Sent Events; the terminal text arrives
 //     in `response.output_text.delta` / `response.completed` events
 //
-// The request shape here is the minimal subset Xalgorix needs (system +
+// The request shape here is the minimal subset AI-DAST-ING needs (system +
 // user/assistant text turns). Tool-calling over the Responses API is not
-// modeled — Xalgorix drives tools through its own text protocol, so plain
+// modeled — AI-DAST-ING drives tools through its own text protocol, so plain
 // text in/out is sufficient.
 package llm
 
@@ -159,7 +159,7 @@ func normalizeResponsesEffort(effort string) string {
 }
 
 // responsesEvent is a single SSE event payload from the Responses API.
-// Only the fields Xalgorix consumes are modeled; the rest are ignored by
+// Only the fields AI-DAST-ING consumes are modeled; the rest are ignored by
 // the JSON decoder.
 type responsesEvent struct {
 	Type     string `json:"type"`
@@ -381,7 +381,7 @@ func scanResponsesSSE(r io.Reader, onEvent func(*responsesEvent)) error {
 		var ev responsesEvent
 		if err := json.Unmarshal([]byte(data), &ev); err != nil {
 			// Skip unparseable frames rather than aborting — the backend
-			// interleaves event types Xalgorix doesn't model.
+			// interleaves event types AI-DAST-ING doesn't model.
 			continue
 		}
 		if ev.Type == "response.failed" || ev.Type == "error" || ev.Error != nil {

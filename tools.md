@@ -1,6 +1,6 @@
-# Xalgorix Tools
+# AI-DAST-ING Tools
 
-Complete list of **70+ security tools** included in Xalgorix - the most powerful open-source AI autonomous pentesting agent.
+Complete list of **70+ security tools** included in AI-DAST-ING - the most powerful open-source AI autonomous pentesting agent.
 
 ## 🔍 Recon & Subdomain Enumeration (15 tools)
 
@@ -137,7 +137,7 @@ Complete list of **70+ security tools** included in Xalgorix - the most powerful
 
 ## Auto-Install Feature
 
-Xalgorix **automatically installs** any missing tools when needed! Just run a command and it'll handle the installation.
+AI-DAST-ING **automatically installs** any missing tools when needed! Just run a command and it'll handle the installation.
 
 ### Supported Package Managers
 - **Go** - `go install`
@@ -160,4 +160,4 @@ Xalgorix **automatically installs** any missing tools when needed! Just run a co
 | Utilities | 15 |
 | **TOTAL** | **85+** |
 
-Xalgorix supports **85+ security tools** for comprehensive penetration testing!
+AI-DAST-ING supports **85+ security tools** for comprehensive penetration testing!

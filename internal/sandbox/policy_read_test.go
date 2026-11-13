@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
 )
 
 // TestCheckRead_AllowsOutsideAllowList confirms the new read policy:
@@ -18,7 +18,7 @@ func TestCheckRead_AllowsOutsideAllowList(t *testing.T) {
 	// Allow_List intentionally narrow. /etc/hostname is outside it but
 	// is a real read-only file present on every Linux box, so it
 	// exercises the canonicalization path too.
-	p := New("/tmp/xalgorix-write-only")
+	p := New("/tmp/ai-dast-ing-write-only")
 
 	canonical, err := p.CheckRead(nil, "test", "/etc/hostname")
 	if err != nil {
@@ -51,7 +51,7 @@ func TestCheckRead_AllowsInsideAllowList(t *testing.T) {
 func TestCheckRead_DenyListBlocks(t *testing.T) {
 	denyRoot := t.TempDir()
 	p := NewWithReadDeny(
-		[]string{"/tmp/xalgorix-write-only"},
+		[]string{"/tmp/ai-dast-ing-write-only"},
 		[]string{denyRoot},
 	)
 
@@ -112,7 +112,7 @@ func TestCheckRead_DenyListSiblingNotBlocked(t *testing.T) {
 // read. This is the behavior tests written before the deny-list
 // addition relied on.
 func TestCheckRead_EmptyDenyListAllowsEverything(t *testing.T) {
-	p := New("/tmp/xalgorix-write-only")
+	p := New("/tmp/ai-dast-ing-write-only")
 	if got := len(p.ReadDenyRoots()); got != 0 {
 		t.Fatalf("ReadDenyRoots() len = %d, want 0", got)
 	}

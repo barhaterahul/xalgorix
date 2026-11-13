@@ -7,9 +7,9 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/xalgord/xalgorix/v4/internal/llm"
-	"github.com/xalgord/xalgorix/v4/internal/tools"
-	"github.com/xalgord/xalgorix/v4/internal/tools/notes"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/llm"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/notes"
 )
 
 // maxToolResultBytes caps how much of a single tool result is fed into the LLM
@@ -153,7 +153,7 @@ const maxRecentMsgBytes = 8000
 const perMessageOverheadBytes = 50
 
 // bytesPerTokenEstimate converts the operator's token budget
-// (XALGORIX_CONTEXT_COMPACT_TOKENS) into the byte ceiling used by the cheap
+// (AIDASTING_CONTEXT_COMPACT_TOKENS) into the byte ceiling used by the cheap
 // no-tokenizer heuristic. ~4 bytes/token is a conservative average for the
 // English + JSON + code text that dominates scan transcripts.
 const bytesPerTokenEstimate = 4
@@ -537,7 +537,7 @@ func (a *Agent) hasActiveContent(snippet string) bool {
 //
 // The recent window stays verbatim, the archive is byte-identical, and the
 // existing compaction digest keeps working unchanged. Gated by
-// XALGORIX_BOUNDED_CONTEXT (default on).
+// AIDASTING_BOUNDED_CONTEXT (default on).
 
 const (
 	// archiveMarkerPrefix marks a tool-result message whose full raw output

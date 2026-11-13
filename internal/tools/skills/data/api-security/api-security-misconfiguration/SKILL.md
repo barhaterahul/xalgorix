@@ -117,7 +117,7 @@ done
 - 405 Method Not Allowed (working as designed)
 - Generic error message without internal details
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `terminal_execute` with curl for precise endpoint probing
 - `browser_action` for CORS verification in a browser context
 - Python for batch endpoint enumeration

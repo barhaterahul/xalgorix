@@ -131,7 +131,7 @@ func killTrackedProcess(cmd *exec.Cmd) {
 				log.Printf("[termstate] Failed to kill process group %d for pid %d: %v", pgid, pid, err)
 			}
 		} else {
-			log.Printf("[termstate] Refusing to kill process group %d for pid %d because it matches xalgorix", pgid, pid)
+			log.Printf("[termstate] Refusing to kill process group %d for pid %d because it matches ai-dast-ing", pgid, pid)
 		}
 	}
 

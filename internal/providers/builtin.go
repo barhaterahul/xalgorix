@@ -30,7 +30,7 @@
 //     OAuth client ID (Google's per-app constraint is the
 //     canonical case), Notes calls out the override env var and
 //     ClientIDForEntry reads
-//     XALGORIX_<UPPER_ID>_OAUTH_CLIENT_ID at runtime.
+//     AIDASTING_<UPPER_ID>_OAUTH_CLIENT_ID at runtime.
 package providers
 
 import (
@@ -163,12 +163,12 @@ var builtinList = []Entry{
 		AuthMethods: []string{"api_key", "oauth"},
 		Flow:        "pkce",
 		// ClientID is intentionally empty — Google forces per-app
-		// client IDs. Operators set XALGORIX_GOOGLE_OAUTH_CLIENT_ID
+		// client IDs. Operators set AIDASTING_GOOGLE_OAUTH_CLIENT_ID
 		// (read at lookup time by ClientIDForEntry).
 		AuthorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
 		TokenEndpoint:         "https://oauth2.googleapis.com/token",
 		Scopes:                []string{"https://www.googleapis.com/auth/cloud-platform"},
-		Notes:                 "Set XALGORIX_GOOGLE_OAUTH_CLIENT_ID to your Google Cloud OAuth client.",
+		Notes:                 "Set AIDASTING_GOOGLE_OAUTH_CLIENT_ID to your Google Cloud OAuth client.",
 	},
 	{
 		ID:          "googlevertex",
@@ -497,20 +497,20 @@ func LookupBuiltin(id string) (Entry, bool) {
 	return Entry{}, false
 }
 
-// ClientIDForEntry returns the OAuth client ID Xalgorix should use
+// ClientIDForEntry returns the OAuth client ID AI-DAST-ING should use
 // for the given entry. Operators can override the compiled-in
-// default with the env var XALGORIX_<UPPER_ID>_OAUTH_CLIENT_ID
-// (e.g. XALGORIX_GOOGLE_OAUTH_CLIENT_ID for the "google" slug).
+// default with the env var AIDASTING_<UPPER_ID>_OAUTH_CLIENT_ID
+// (e.g. AIDASTING_GOOGLE_OAUTH_CLIENT_ID for the "google" slug).
 // When the env var is unset, the entry's compiled-in ClientID
 // (often empty) is returned verbatim.
 //
 // This is the escape hatch for providers that require per-deploy
 // client IDs — Google's OAuth client constraint is the canonical
 // case, and the escape hatch lets operators wire their own ID
-// without rebuilding xalgorix.
+// without rebuilding ai-dast-ing.
 func ClientIDForEntry(e Entry) string {
 	upper := strings.ToUpper(strings.ReplaceAll(e.ID, "-", "_"))
-	envKey := "XALGORIX_" + upper + "_OAUTH_CLIENT_ID"
+	envKey := "AIDASTING_" + upper + "_OAUTH_CLIENT_ID"
 	if v := strings.TrimSpace(os.Getenv(envKey)); v != "" {
 		return v
 	}

@@ -1,5 +1,5 @@
 // Package auth — Profile_Store implementation backing the runtime-
-// editable credential store at ~/.xalgorix/data/auth-profiles.json.
+// editable credential store at ~/.ai-dast-ing/data/auth-profiles.json.
 //
 // Store is the in-process owner of the on-disk profile file. It is
 // stateless with respect to a snapshot: List/Get re-read the JSON
@@ -50,7 +50,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/storage"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/storage"
 )
 
 // profileIDRE matches the same shape Catalog_Entry.id uses
@@ -353,7 +353,7 @@ func (s *Store) withLock(fn func() error) error {
 	// every call. Mode 0o600 mirrors the data file mode
 	// (Requirement 4.1) — the sentinel itself never holds
 	// credentials but the operator threat model treats every
-	// file in ~/.xalgorix/data as private to the dashboard
+	// file in ~/.ai-dast-ing/data as private to the dashboard
 	// owner.
 	f, err := os.OpenFile(lockPath, os.O_RDWR|os.O_CREATE, 0o600)
 	if err != nil {

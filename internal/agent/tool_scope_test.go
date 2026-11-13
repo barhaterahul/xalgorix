@@ -4,10 +4,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/llm"
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
-	"github.com/xalgord/xalgorix/v4/internal/scopeguard"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/llm"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scopeguard"
 )
 
 func newScopedSpecialist(t *testing.T, agentName string, scoped bool) *Agent {
@@ -94,7 +94,7 @@ func TestRootCoordinatorNeverScoped(t *testing.T) {
 	sctx := scanctx.New("root-scope-test", t.TempDir())
 	scanctx.Activate(sctx)
 	t.Cleanup(sctx.Close)
-	root := NewAgent(cfg, "XalgorixRoot", make(chan Event, 8), scopeguard.Config{}, sctx)
+	root := NewAgent(cfg, "AidastingRoot", make(chan Event, 8), scopeguard.Config{}, sctx)
 	root.applyRoleToolScope()
 	if hidden := root.registry.SchemaHiddenNames(); len(hidden) != 0 {
 		t.Fatalf("root coordinator must keep full schema, got %v", hidden)

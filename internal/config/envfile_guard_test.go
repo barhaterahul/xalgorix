@@ -10,14 +10,14 @@ import (
 // The guard list is resolved at package load, so it holds the HOME the test
 // binary started with, not a temp HOME a test sets later.
 func TestAccountEnvFilesIncludeStartingHome(t *testing.T) {
-	if !slices.Contains(accountEnvFiles, "/root/.xalgorix.env") {
-		t.Errorf("accountEnvFiles = %v, want /root/.xalgorix.env", accountEnvFiles)
+	if !slices.Contains(accountEnvFiles, "/root/.ai-dast-ing.env") {
+		t.Errorf("accountEnvFiles = %v, want /root/.ai-dast-ing.env", accountEnvFiles)
 	}
 	home, err := os.UserHomeDir()
 	if err != nil || home == "" {
 		t.Skip("no HOME in this environment")
 	}
-	if want := filepath.Join(home, ".xalgorix.env"); !slices.Contains(accountEnvFiles, want) {
+	if want := filepath.Join(home, ".ai-dast-ing.env"); !slices.Contains(accountEnvFiles, want) {
 		t.Errorf("accountEnvFiles = %v, want %s", accountEnvFiles, want)
 	}
 }
@@ -27,8 +27,8 @@ func TestAccountEnvFilesIncludeStartingHome(t *testing.T) {
 // stands in for the real one so a broken guard only damages a temp dir.
 func TestUpdateEnvFileRefusesAccountEnvFile(t *testing.T) {
 	realHome := t.TempDir()
-	sentinel := filepath.Join(realHome, ".xalgorix.env")
-	const original = "XALGORIX_API_KEY=production-key\n"
+	sentinel := filepath.Join(realHome, ".ai-dast-ing.env")
+	const original = "AIDASTING_API_KEY=production-key\n"
 	if err := os.WriteFile(sentinel, []byte(original), 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -40,7 +40,7 @@ func TestUpdateEnvFileRefusesAccountEnvFile(t *testing.T) {
 	if err := os.Symlink(realHome, linkDir); err != nil {
 		t.Fatal(err)
 	}
-	hardLink := filepath.Join(t.TempDir(), ".xalgorix.env")
+	hardLink := filepath.Join(t.TempDir(), ".ai-dast-ing.env")
 	if err := os.Link(sentinel, hardLink); err != nil {
 		t.Fatal(err)
 	}
@@ -48,12 +48,12 @@ func TestUpdateEnvFileRefusesAccountEnvFile(t *testing.T) {
 
 	for name, path := range map[string]string{
 		"exact path":        sentinel,
-		"unclean path":      filepath.Join(realHome, ".", ".xalgorix.env"),
-		"relative path":     ".xalgorix.env",
-		"via symlinked dir": filepath.Join(linkDir, ".xalgorix.env"),
+		"unclean path":      filepath.Join(realHome, ".", ".ai-dast-ing.env"),
+		"relative path":     ".ai-dast-ing.env",
+		"via symlinked dir": filepath.Join(linkDir, ".ai-dast-ing.env"),
 		"hard link to it":   hardLink,
 	} {
-		if err := UpdateEnvFile(path, map[string]string{"XALGORIX_API_KEY": "dup-key-1111"}); err == nil {
+		if err := UpdateEnvFile(path, map[string]string{"AIDASTING_API_KEY": "dup-key-1111"}); err == nil {
 			t.Errorf("%s: UpdateEnvFile(%s) succeeded, want refusal", name, path)
 		}
 	}
@@ -76,21 +76,21 @@ func TestUpdateEnvFileRefusesAccountEnvFile(t *testing.T) {
 	if err := os.Symlink(filepath.Join(absentHome, "sub"), subLink); err != nil {
 		t.Fatal(err)
 	}
-	absent := []string{filepath.Join(absentHome, ".xalgorix.env")}
+	absent := []string{filepath.Join(absentHome, ".ai-dast-ing.env")}
 	// Built by hand: filepath.Join would drop "sub-link/.." lexically.
-	if err := refuseAccountEnvFile(subLink+"/../.xalgorix.env", absent); err == nil {
+	if err := refuseAccountEnvFile(subLink+"/../.ai-dast-ing.env", absent); err == nil {
 		t.Error("path with .. through a symlinked dir was not refused")
 	}
-	if err := refuseAccountEnvFile(filepath.Join(subLink, ".xalgorix.env"), absent); err != nil {
+	if err := refuseAccountEnvFile(filepath.Join(subLink, ".ai-dast-ing.env"), absent); err != nil {
 		t.Errorf("unrelated path refused: %v", err)
 	}
 
 	// Any other path, such as a temp HOME's env file, still works.
-	other := filepath.Join(t.TempDir(), ".xalgorix.env")
-	if err := UpdateEnvFile(other, map[string]string{"XALGORIX_API_KEY": "test-key"}); err != nil {
+	other := filepath.Join(t.TempDir(), ".ai-dast-ing.env")
+	if err := UpdateEnvFile(other, map[string]string{"AIDASTING_API_KEY": "test-key"}); err != nil {
 		t.Fatalf("UpdateEnvFile(temp path): %v", err)
 	}
-	if got, _ := ReadEnvFile(other); got["XALGORIX_API_KEY"] != "test-key" {
+	if got, _ := ReadEnvFile(other); got["AIDASTING_API_KEY"] != "test-key" {
 		t.Fatalf("temp env file = %v", got)
 	}
 }

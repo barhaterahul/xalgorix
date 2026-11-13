@@ -1,7 +1,7 @@
 // Interactsh (ProjectDiscovery OAST) backend for the OOB oracle.
 //
 // This is the ZERO-CONFIG default: when the operator has not stood up a
-// self-hosted callback listener (XALGORIX_OOB_PUBLIC_URL), the agent still
+// self-hosted callback listener (AIDASTING_OOB_PUBLIC_URL), the agent still
 // gets a working out-of-band oracle via ProjectDiscovery's public interactsh
 // servers (oast.pro, oast.live, …). Unlike the built-in HTTP-only listener,
 // interactsh also captures DNS and SMTP interactions — critical because many
@@ -23,7 +23,7 @@ import (
 
 	ishclient "github.com/projectdiscovery/interactsh/pkg/client"
 	ishserver "github.com/projectdiscovery/interactsh/pkg/server"
-	"github.com/xalgord/xalgorix/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
 )
 
 const (
@@ -43,7 +43,7 @@ var (
 )
 
 // interactshEnabled reports whether the interactsh backend may be used. It is
-// on by default and only disabled explicitly via XALGORIX_OOB_DISABLE.
+// on by default and only disabled explicitly via AIDASTING_OOB_DISABLE.
 func interactshEnabled() bool {
 	return !config.Get().OOBDisable
 }

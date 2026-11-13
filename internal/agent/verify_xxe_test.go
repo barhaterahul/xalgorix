@@ -72,9 +72,9 @@ func TestLooksLikeFileLeak(t *testing.T) {
 func TestXXEDifferentialLeakVerdict(t *testing.T) {
 	markers := xxeProbeMarkers{
 		Nonce:   "0123456789abcdef",
-		Start:   "xalgorix-xxe-start-0123456789abcdef",
-		End:     "xalgorix-xxe-end-0123456789abcdef",
-		Control: "xalgorix-xxe-control-0123456789abcdef",
+		Start:   "ai-dast-ing-xxe-start-0123456789abcdef",
+		End:     "ai-dast-ing-xxe-end-0123456789abcdef",
+		Control: "ai-dast-ing-xxe-control-0123456789abcdef",
 	}
 	anchored := func(value string) string {
 		return "response:" + markers.Start + value + markers.End + ":done"

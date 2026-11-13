@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "xalgorix.fullname" . }}
+  name: {{ include "ai-dast-ing.fullname" . }}
   labels:
-    {{- include "xalgorix.labels" . | nindent 4 }}
+    {{- include "ai-dast-ing.labels" . | nindent 4 }}
   {{- with .Values.podAnnotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -14,7 +14,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "xalgorix.selectorLabels" . | nindent 6 }}
+      {{- include "ai-dast-ing.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -22,7 +22,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "xalgorix.labels" . | nindent 8 }}
+        {{- include "ai-dast-ing.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -33,7 +33,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "xalgorix.serviceAccountName" . }}
+      serviceAccountName: {{ include "ai-dast-ing.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -58,7 +58,7 @@ spec:
           envFrom:
             {{- if .Values.env.config }}
             - configMapRef:
-                name: {{ include "xalgorix.configMapName" . }}
+                name: {{ include "ai-dast-ing.configMapName" . }}
             {{- end }}
             {{- if $useExistingSecret }}
             - secretRef:
@@ -66,7 +66,7 @@ spec:
             {{- end }}
             {{- if or .Values.env.secret $authInline }}
             - secretRef:
-                name: {{ include "xalgorix.secretName" . }}
+                name: {{ include "ai-dast-ing.secretName" . }}
             {{- end }}
           {{- end }}
           {{- end }}
@@ -90,7 +90,7 @@ spec:
             claimName: {{ .Values.persistence.existingClaim }}
           {{- else if .Values.persistence.enabled }}
           persistentVolumeClaim:
-            claimName: {{ include "xalgorix.fullname" . }}-data
+            claimName: {{ include "ai-dast-ing.fullname" . }}-data
           {{- else }}
           emptyDir: {}
           {{- end }}

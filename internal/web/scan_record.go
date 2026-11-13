@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/tools/reporting"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/reporting"
 )
 
 func (s *Server) scanRecordForSession(sess *scanSession) *ScanRecord {

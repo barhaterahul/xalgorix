@@ -1,5 +1,5 @@
-// Package config provides configuration management for Xalgorix.
-// All configuration is loaded from environment variables with XALGORIX_ prefix.
+// Package config provides configuration management for AI-DAST-ING.
+// All configuration is loaded from environment variables with AIDASTING_ prefix.
 package config
 
 import (
@@ -13,55 +13,55 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/xalgord/xalgorix/v4/internal/providers"
-	"github.com/xalgord/xalgorix/v4/internal/scanheaders"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanheaders"
 )
 
-// Config holds all Xalgorix configuration.
+// Config holds all AI-DAST-ING configuration.
 type Config struct {
 	// LLM settings
-	LLM                 string   // XALGORIX_LLM — provider-native model ID (for example, "gpt-5.6" or "zai-org/glm-4.5")
-	LLMProvider         string   // XALGORIX_LLM_PROVIDER — explicit provider ID; keeps provider routing separate from the model name
-	APIBase             string   // XALGORIX_API_BASE — API endpoint
-	APIKey              string   // XALGORIX_API_KEY — API key
-	APIKeys             []string // XALGORIX_API_KEYS — additional provider API keys rotated to dodge provider rate limits (combined with APIKey)
-	KeyPoolStrategy     string   // XALGORIX_KEY_POOL_STRATEGY — "roundrobin" (default; both keys share load) or "sticky" (overflow failover: one key at a time, switch only on a rate limit)
-	DisableAutoDelegate bool     // XALGORIX_DISABLE_AUTO_DELEGATE — skip the deterministic specialist wave entirely
-	DisabledSpecialists []string // XALGORIX_DISABLED_SPECIALISTS — comma-separated lane names to skip
-	Checklist           string   // XALGORIX_CHECKLIST - full or professional
-	LLMProfile          string   // XALGORIX_LLM_PROFILE — active credential pointer "<provider>:<profileId>" (v4.4.22+)
-	ReasoningEffort     string   // XALGORIX_REASONING_EFFORT — "none", "low", "medium", "high", or "xhigh"
+	LLM                 string   // AIDASTING_LLM — provider-native model ID (for example, "gpt-5.6" or "zai-org/glm-4.5")
+	LLMProvider         string   // AIDASTING_LLM_PROVIDER — explicit provider ID; keeps provider routing separate from the model name
+	APIBase             string   // AIDASTING_API_BASE — API endpoint
+	APIKey              string   // AIDASTING_API_KEY — API key
+	APIKeys             []string // AIDASTING_API_KEYS — additional provider API keys rotated to dodge provider rate limits (combined with APIKey)
+	KeyPoolStrategy     string   // AIDASTING_KEY_POOL_STRATEGY — "roundrobin" (default; both keys share load) or "sticky" (overflow failover: one key at a time, switch only on a rate limit)
+	DisableAutoDelegate bool     // AIDASTING_DISABLE_AUTO_DELEGATE — skip the deterministic specialist wave entirely
+	DisabledSpecialists []string // AIDASTING_DISABLED_SPECIALISTS — comma-separated lane names to skip
+	Checklist           string   // AIDASTING_CHECKLIST - full or professional
+	LLMProfile          string   // AIDASTING_LLM_PROFILE — active credential pointer "<provider>:<profileId>" (v4.4.22+)
+	ReasoningEffort     string   // AIDASTING_REASONING_EFFORT — "none", "low", "medium", "high", or "xhigh"
 
 	// Language is the output language for human-readable AI content — agent
 	// reasoning, notes, vulnerability findings, and post-scan chat. It does
 	// NOT change tool call structure or technical tokens (payloads, commands,
-	// URLs, CVE/CWE IDs). XALGORIX_LANGUAGE, canonical code (e.g. "en",
+	// URLs, CVE/CWE IDs). AIDASTING_LANGUAGE, canonical code (e.g. "en",
 	// "zh-CN"); default "en" (English) so existing scans are unchanged.
 	Language         string
-	OllamaCompatible bool     // XALGORIX_OLLAMA_COMPATIBLE — force Ollama request semantics for a custom endpoint
-	Temperature      *float64 // XALGORIX_TEMPERATURE — LLM temperature (0.0-2.0), default 0.2; pointer to distinguish unset from 0.0
-	LLMMaxRetries    int      // XALGORIX_LLM_MAX_RETRIES
+	OllamaCompatible bool     // AIDASTING_OLLAMA_COMPATIBLE — force Ollama request semantics for a custom endpoint
+	Temperature      *float64 // AIDASTING_TEMPERATURE — LLM temperature (0.0-2.0), default 0.2; pointer to distinguish unset from 0.0
+	LLMMaxRetries    int      // AIDASTING_LLM_MAX_RETRIES
 	// MaxRateLimitWaitSec bounds how long a scan waits for a provider rate
-	// limit before stopping cleanly. XALGORIX_MAX_RATE_LIMIT_WAIT, default
+	// limit before stopping cleanly. AIDASTING_MAX_RATE_LIMIT_WAIT, default
 	// 1800 seconds (30 minutes).
 	MaxRateLimitWaitSec int
-	MemCompTimeout      int // XALGORIX_MEMORY_COMPRESSOR_TIMEOUT
+	MemCompTimeout      int // AIDASTING_MEMORY_COMPRESSOR_TIMEOUT
 	// MaxOutputTokens caps the model's completion length per call (the
 	// OpenAI-compatible `max_tokens` / Anthropic `max_tokens`). Reasoning
 	// models spend part of this budget on hidden thinking BEFORE emitting a
 	// tool call, so a small provider default truncates large calls like report_vulnerability mid-stream. Set an explicit, generous
-	// budget so the full call fits. XALGORIX_MAX_OUTPUT_TOKENS, default 8192.
+	// budget so the full call fits. AIDASTING_MAX_OUTPUT_TOKENS, default 8192.
 	MaxOutputTokens int
 
 	// GeminiSafetyThreshold sets the HarmBlockThreshold applied to every
 	// adjustable safety category (harassment, hate speech, sexually explicit,
 	// dangerous content) on the NATIVE Gemini API path
-	// (generativelanguage.googleapis.com). Xalgorix is an authorized
+	// (generativelanguage.googleapis.com). AI-DAST-ING is an authorized
 	// security-testing tool: Gemini's default filter classifies legitimate
 	// exploit payloads and offensive-security methodology as
 	// HARM_CATEGORY_DANGEROUS_CONTENT and blocks the response, which surfaces
 	// as an empty candidate (finishReason SAFETY) and a failed agent turn.
-	// XALGORIX_GEMINI_SAFETY. Accepted values (case-insensitive): BLOCK_NONE
+	// AIDASTING_GEMINI_SAFETY. Accepted values (case-insensitive): BLOCK_NONE
 	// (default), OFF, BLOCK_ONLY_HIGH, BLOCK_MEDIUM_AND_ABOVE,
 	// BLOCK_LOW_AND_ABOVE, or DEFAULT/"" to send no safetySettings and use
 	// Google's server-side defaults. This ONLY affects Gemini content
@@ -75,11 +75,11 @@ type Config struct {
 	// tools remain registered and callable, and a one-line index in the
 	// schema keeps the model aware they exist — the reachable tool set is
 	// unchanged, only prompt bytes are saved on every specialist request.
-	// XALGORIX_ROLE_SCOPED_TOOLS, default false (off).
+	// AIDASTING_ROLE_SCOPED_TOOLS, default false (off).
 	RoleScopedTools bool
 	// LeanToolSchema drops example/workflow spans from the tool SchemaXML to
 	// shrink the per-call prompt for ALL agents while preserving every tool,
-	// parameter, and core description. XALGORIX_LEAN_TOOL_SCHEMA, default false.
+	// parameter, and core description. AIDASTING_LEAN_TOOL_SCHEMA, default false.
 	LeanToolSchema bool
 
 	// AdvancePastStuckTasks changes the stall response: when a scan makes no new
@@ -89,11 +89,11 @@ type Config struct {
 	// task still covers its remaining tasks. Bounded by MaxStuckAdvances
 	// consecutive no-progress advances so a scan blocked on everything still
 	// stops. Default off — behavior-changing, A/B before enabling.
-	// XALGORIX_ADVANCE_PAST_STUCK.
+	// AIDASTING_ADVANCE_PAST_STUCK.
 	AdvancePastStuckTasks bool
 	// MaxStuckAdvances bounds consecutive auto-advances without any new progress
 	// in between before the scan stops anyway (the blocked-on-everything
-	// backstop). XALGORIX_MAX_STUCK_ADVANCES, default 3; <=0 uses the default.
+	// backstop). AIDASTING_MAX_STUCK_ADVANCES, default 3; <=0 uses the default.
 	MaxStuckAdvances int
 
 	// BoundedContext enables information-complete bounded working context:
@@ -103,7 +103,7 @@ type Config struct {
 	// retrieves the byte-identical original). The recent window stays
 	// verbatim, so every byte the model could previously see remains
 	// reachable — it is fetched on demand instead of being resent on every
-	// iteration. XALGORIX_BOUNDED_CONTEXT, default true (on).
+	// iteration. AIDASTING_BOUNDED_CONTEXT, default true (on).
 	BoundedContext bool
 
 	// EpochCoverage enables epoch-based coverage convergence: per-endpoint
@@ -112,7 +112,7 @@ type Config struct {
 	// set, so class tasks can actually close and the scan reaches a clean
 	// terminal state instead of chasing a receding bar forever. No coverage is
 	// dropped — every discovered endpoint is folded into a later epoch and
-	// tested before finish. XALGORIX_EPOCH_COVERAGE, default true (on).
+	// tested before finish. AIDASTING_EPOCH_COVERAGE, default true (on).
 	EpochCoverage bool
 
 	// ConvergeReconcile closes out class-less exploratory plan tasks once every
@@ -122,7 +122,7 @@ type Config struct {
 	// (taskCoverageComplete) can never close them — left open they hold a scan in
 	// an unbounded churn at 100% systematic coverage. No measured coverage is
 	// dropped: the full matrix is already satisfied before anything closes.
-	// XALGORIX_CONVERGE_RECONCILE, default true (on).
+	// AIDASTING_CONVERGE_RECONCILE, default true (on).
 	ConvergeReconcile bool
 
 	// EndpointHygiene keeps the endpoint accounting (DiscoveredEndpoints,
@@ -130,7 +130,7 @@ type Config struct {
 	// the engine's own tool-config paths, unexpanded payload/template variables,
 	// OAST callbacks — that otherwise freezes into the coverage baseline as bogus
 	// obligations and prevents a scan from ever converging. It only drops
-	// non-endpoints, never a real route. XALGORIX_ENDPOINT_HYGIENE, default false.
+	// non-endpoints, never a real route. AIDASTING_ENDPOINT_HYGIENE, default false.
 	EndpointHygiene bool
 
 	// ConvergeFinish resolves the deepest non-convergence cause: the engine
@@ -144,32 +144,32 @@ type Config struct {
 	// structured methodology is done, per-route coverage clears a threshold, and
 	// no new finding appears for a sustained tail, the remaining per-endpoint
 	// class tasks close as coverage-sufficient with the residual (route,class)
-	// pairs recorded in the report. XALGORIX_CONVERGE_FINISH, default true (on).
+	// pairs recorded in the report. AIDASTING_CONVERGE_FINISH, default true (on).
 	ConvergeFinish bool
 
 	// ConvergeFinishIdle is the no-new-finding tail (iterations) for the
 	// ConvergeFinish principled finish, counted only once a scan is saturated
 	// (structured work done, class breadth past threshold). 0 uses the built-in
 	// default; negative disables the saturated finish.
-	// XALGORIX_CONVERGE_FINISH_IDLE, default 500.
+	// AIDASTING_CONVERGE_FINISH_IDLE, default 500.
 	ConvergeFinishIdle int
 
 	// ConvergeFinishLeadWindow is the one-time verification window (iterations)
 	// the principled finish grants when the tail elapses while the model still
 	// holds recent, high-confidence, unverified leads. 0 uses the built-in
 	// default; negative disables the window.
-	// XALGORIX_CONVERGE_FINISH_LEAD_WINDOW, default 100.
+	// AIDASTING_CONVERGE_FINISH_LEAD_WINDOW, default 100.
 	ConvergeFinishLeadWindow int
 
 	// ToolArchiveMinBytes is the minimum raw-output size a tool result must
 	// have before it is archived/stubbed. Smaller results stay in-context
 	// verbatim (they are cheap to carry and often high-signal).
-	// XALGORIX_TOOL_ARCHIVE_MIN_BYTES, default 1500.
+	// AIDASTING_TOOL_ARCHIVE_MIN_BYTES, default 1500.
 	ToolArchiveMinBytes int
 
 	// ToolArchiveActiveWindow is how many recent tool-result messages stay
 	// verbatim in the conversation before older ones are stubbed.
-	// XALGORIX_TOOL_ARCHIVE_ACTIVE_WINDOW, default 8.
+	// AIDASTING_TOOL_ARCHIVE_ACTIVE_WINDOW, default 8.
 	ToolArchiveActiveWindow int
 
 	// ContextCompactTokens is an OPTIONAL absolute override for the compaction
@@ -179,27 +179,27 @@ type Config struct {
 	// (the default "auto" mode), the trigger is derived from the model's
 	// context window instead — LLMContextWindow × ContextCompactRatio — so
 	// compaction only fires when the window is genuinely filling up rather than
-	// at an arbitrary fixed budget. XALGORIX_CONTEXT_COMPACT_TOKENS, default -1
+	// at an arbitrary fixed budget. AIDASTING_CONTEXT_COMPACT_TOKENS, default -1
 	// (auto / window-relative).
 	ContextCompactTokens int
 
 	// LLMContextWindow is the total context window (in tokens) of the
 	// configured model, used as the basis for window-relative auto-compaction.
-	// XALGORIX_LLM_CONTEXT_WINDOW, default 128000. Set this to your model's real
+	// AIDASTING_LLM_CONTEXT_WINDOW, default 128000. Set this to your model's real
 	// window (e.g. 1000000 for a 1M-token model) so compaction waits until the
 	// window is actually filling up instead of compacting far too early.
 	LLMContextWindow int
 
 	// ContextCompactRatio is the fraction of LLMContextWindow at which
 	// window-relative auto-compaction triggers (only used when
-	// ContextCompactTokens is in auto mode). XALGORIX_CONTEXT_COMPACT_RATIO,
+	// ContextCompactTokens is in auto mode). AIDASTING_CONTEXT_COMPACT_RATIO,
 	// default 0.75 — i.e. compact once the running context reaches ~75% of the
 	// window. Clamped to a sane 0.5–0.9 range. Compacting earlier than this
 	// tends to discard useful working context and hurt output quality.
 	ContextCompactRatio float64
 
 	// LLMTimeoutSeconds bounds a single outbound LLM request (the HTTP client
-	// timeout). XALGORIX_LLM_TIMEOUT_SECONDS, default 600 (10 minutes). Raise
+	// timeout). AIDASTING_LLM_TIMEOUT_SECONDS, default 600 (10 minutes). Raise
 	// it for slow backends: a local llama.cpp server on CPU can take well over
 	// 10 minutes to prefill a large prompt, and every request is aborted
 	// mid-generation with "context deadline exceeded" otherwise. Non-positive
@@ -215,36 +215,36 @@ type Config struct {
 	// trained on the XML dialect still produce executable calls. Requires a
 	// backend that speaks the OpenAI chat-completions tool protocol; Anthropic,
 	// Gemini and the Responses API keep using the XML path regardless.
-	// XALGORIX_NATIVE_TOOL_CALLS, default false.
+	// AIDASTING_NATIVE_TOOL_CALLS, default false.
 	NativeToolCalls bool
 
 	// Runtime settings
-	RuntimeBackend string // XALGORIX_RUNTIME_BACKEND — always "native"
-	Workspace      string // XALGORIX_WORKSPACE — workspace root dir
-	DataDir        string // Active per-installation data root. Defaults to ~/.xalgorix/data/. Override via XALGORIX_DATA_DIR.
+	RuntimeBackend string // AIDASTING_RUNTIME_BACKEND — always "native"
+	Workspace      string // AIDASTING_WORKSPACE — workspace root dir
+	DataDir        string // Active per-installation data root. Defaults to ~/.ai-dast-ing/data/. Override via AIDASTING_DATA_DIR.
 	WorkspaceRoot  string // Resolution root used by Filesystem_Tools when no Scan_Context.ScanDir is in effect. Equals DataDir.
 	legacyCWD      string // Captured os.Getwd() at config load time. Used only by the migration warning.
-	DisableBrowser bool   // XALGORIX_DISABLE_BROWSER
-	MaxIterations  int    // XALGORIX_MAX_ITERATIONS — 0 = unlimited
-	MinIterations  int    // XALGORIX_MIN_ITERATIONS — minimum testing floor (default 50)
+	DisableBrowser bool   // AIDASTING_DISABLE_BROWSER
+	MaxIterations  int    // AIDASTING_MAX_ITERATIONS — 0 = unlimited
+	MinIterations  int    // AIDASTING_MIN_ITERATIONS — minimum testing floor (default 50)
 	// IterationDelaySec optionally pauses (in seconds) between agent reasoning
 	// iterations to pace LLM request velocity and conserve provider rolling-window
-	// quotas. 0 = disabled (default). XALGORIX_ITERATION_DELAY.
+	// quotas. 0 = disabled (default). AIDASTING_ITERATION_DELAY.
 	IterationDelaySec float64
 	// MaxWildcardSubdomains optionally caps the number of full agent sessions
-	// spawned by one wildcard target. XALGORIX_MAX_WILDCARD_SUBDOMAINS,
+	// spawned by one wildcard target. AIDASTING_MAX_WILDCARD_SUBDOMAINS,
 	// default -1 (unlimited). Set a positive value only as an explicit
 	// emergency resource cap; coverage is the default priority.
 	MaxWildcardSubdomains int
 
 	// NoToolAbortAt is how many CONSECUTIVE no-tool-call responses force-stop a
-	// scan (the "reasoning loop" abort). XALGORIX_NO_TOOL_ABORT_AT, default 30.
+	// scan (the "reasoning loop" abort). AIDASTING_NO_TOOL_ABORT_AT, default 30.
 	// Set to 0 only when an operator explicitly wants unbounded recovery.
 	NoToolAbortAt int
 
 	// MaxFinishRejections is how many times the agent's finish call will be
 	// rejected by the gatekeeper before allowing a deadlock bypass.
-	// XALGORIX_MAX_FINISH_REJECTIONS, default 15.
+	// AIDASTING_MAX_FINISH_REJECTIONS, default 15.
 	MaxFinishRejections int
 
 	// TargetAuth carries operator-supplied authenticated-session credentials
@@ -252,21 +252,21 @@ type Config struct {
 	// surface (IDOR/BOLA, privilege escalation, business logic) — where the
 	// high-value bugs live. Format: one "Header-Name: value" per line or
 	// separated by ';'. e.g. "Cookie: session=abc; Authorization: Bearer xyz".
-	// XALGORIX_TARGET_AUTH. Applied automatically to the http_request tool and
+	// AIDASTING_TARGET_AUTH. Applied automatically to the http_request tool and
 	// surfaced to the agent for use with curl/other tools.
 	TargetAuth string
 
 	// TargetAuthSecondary is a SECOND account's credentials (same format as
 	// TargetAuth). It is NOT auto-applied — it is surfaced to the agent so it
 	// can prove horizontal access-control flaws (IDOR/BOLA): reach an object
-	// created by account A using account B's session. XALGORIX_TARGET_AUTH_B.
+	// created by account A using account B's session. AIDASTING_TARGET_AUTH_B.
 	TargetAuthSecondary string
 
 	// Out-of-band (OAST) callback infrastructure for confirming blind
 	// vulnerabilities (blind SSRF/RCE/XSS/XXE). OOBPublicURL is the address
-	// targets can reach (e.g. https://oob.xalgorix.com), OOBPort is the local
+	// targets can reach (e.g. https://oob.ai-dast-ing.com), OOBPort is the local
 	// listener port. OOB is enabled only when OOBPublicURL is set.
-	// XALGORIX_OOB_PUBLIC_URL / XALGORIX_OOB_PORT.
+	// AIDASTING_OOB_PUBLIC_URL / AIDASTING_OOB_PORT.
 	OOBPublicURL string
 	OOBPort      int
 
@@ -277,7 +277,7 @@ type Config struct {
 	// InteractshServer overrides the server list (comma-separated) and
 	// InteractshToken authenticates a self-hosted interactsh server. Set
 	// OOBDisable=true to turn OOB off entirely.
-	// XALGORIX_INTERACTSH_SERVER / XALGORIX_INTERACTSH_TOKEN / XALGORIX_OOB_DISABLE.
+	// AIDASTING_INTERACTSH_SERVER / AIDASTING_INTERACTSH_TOKEN / AIDASTING_OOB_DISABLE.
 	InteractshServer string
 	InteractshToken  string
 	OOBDisable       bool
@@ -293,36 +293,36 @@ type Config struct {
 	// exploit against the live target. Accepts a Git URL (shallow-cloned into
 	// the scan workspace) or an existing local directory path. When set, the
 	// code_search tool and a whitebox methodology are activated.
-	// XALGORIX_SOURCE_REPO.
+	// AIDASTING_SOURCE_REPO.
 	SourceRepo string
 
 	// ScanContext points at operator-supplied context artifacts — an OpenAPI /
 	// Swagger spec, a HAR capture, or a Postman collection (a single file or a
 	// directory of them). The engine parses them into a seeded attack surface
 	// (real endpoints + params + example bodies) and harvests any auth material,
-	// turning a blind black-box scan into an informed one. XALGORIX_SCAN_CONTEXT.
+	// turning a blind black-box scan into an informed one. AIDASTING_SCAN_CONTEXT.
 	ScanContext string
 
 	// ScanHeaders are operator-supplied custom HTTP headers ("Name: value")
 	// injected into all TARGET-facing scan traffic to identify an authorized
-	// Xalgorix run: the agent's HTTP client and, via their -H flag, bundled
+	// AI-DAST-ING run: the agent's HTTP client and, via their -H flag, bundled
 	// tools (httpx, nuclei). Built-in equivalent of Nuclei's -H/-header. Bug-
 	// bounty programs often require such a header (e.g. "X-Bug-Bounty: user");
 	// it also lets a target's WAF/SOC allow-list the scan. Never attached to
 	// non-target destinations (LLM APIs, notifications, the dashboard).
-	// XALGORIX_SCAN_HEADERS (';'/newline-separated) and/or
-	// XALGORIX_SCAN_HEADERS_FILE (one per line); repeatable -H on the CLI.
+	// AIDASTING_SCAN_HEADERS (';'/newline-separated) and/or
+	// AIDASTING_SCAN_HEADERS_FILE (one per line); repeatable -H on the CLI.
 	ScanHeaders []string
 
 	// Per-scan resource budgets with graceful early-stopping (MAPTA §2.7/§3.3).
 	// A scan halts cleanly (keeping findings already reported) once any cap is
 	// hit. 0 = unlimited (default), so behavior is unchanged unless configured.
-	// XALGORIX_MAX_TOOL_CALLS / XALGORIX_MAX_DURATION (seconds) / XALGORIX_MAX_TOKENS.
+	// AIDASTING_MAX_TOOL_CALLS / AIDASTING_MAX_DURATION (seconds) / AIDASTING_MAX_TOKENS.
 	MaxToolCalls   int
 	MaxDurationSec int
 	MaxTokens      int
 	// MaxNonProgressSec bounds active time without validated assessment evidence.
-	// XALGORIX_MAX_NON_PROGRESS defaults to one hour; 0 disables this clock.
+	// AIDASTING_MAX_NON_PROGRESS defaults to one hour; 0 disables this clock.
 	MaxNonProgressSec int
 	// PlanCompleteFindingIdle bounds how many iterations a scan may keep running
 	// AFTER its structural plan is fully exhausted (no pending/active tasks)
@@ -333,20 +333,20 @@ type Config struct {
 	// being proven, so a scan can run many thousands of iterations past the point
 	// of diminishing returns and dominate token usage. This cap ends the
 	// no-new-findings tail while a still-productive scan (one that keeps landing
-	// findings, which reset the counter) is never cut. XALGORIX_PLAN_COMPLETE_IDLE;
+	// findings, which reset the counter) is never cut. AIDASTING_PLAN_COMPLETE_IDLE;
 	// 0 = use the built-in default, a negative value disables the stop.
 	PlanCompleteFindingIdle int
 
 	// ScanRetentionDays controls automatic pruning of old scan output
-	// directories under DataDir. XALGORIX_SCAN_RETENTION_DAYS — when > 0, a
+	// directories under DataDir. AIDASTING_SCAN_RETENTION_DAYS — when > 0, a
 	// background job deletes scan directories whose finished/started time is
 	// older than this many days. 0 (default) disables retention so nothing is
 	// ever deleted automatically.
-	ScanRetentionDays int // XALGORIX_SCAN_RETENTION_DAYS — 0 = disabled (keep forever)
+	ScanRetentionDays int // AIDASTING_SCAN_RETENTION_DAYS — 0 = disabled (keep forever)
 
 	// Rate limiting & API settings
-	RateLimitRequests int // XALGORIX_RATE_LIMIT_REQUESTS — requests per window
-	RateLimitWindow   int // XALGORIX_RATE_LIMIT_WINDOW — window in seconds
+	RateLimitRequests int // AIDASTING_RATE_LIMIT_REQUESTS — requests per window
+	RateLimitWindow   int // AIDASTING_RATE_LIMIT_WINDOW — window in seconds
 	RateLimitRPS      float64
 	RateLimitBurst    int
 	TLSSkipVerify     bool
@@ -356,8 +356,8 @@ type Config struct {
 	CaidoAPIToken string // CAIDO_API_TOKEN
 
 	// Telemetry
-	Telemetry    bool   // XALGORIX_TELEMETRY
-	OTelEndpoint string // XALGORIX_OTEL_ENDPOINT
+	Telemetry    bool   // AIDASTING_TELEMETRY
+	OTelEndpoint string // AIDASTING_OTEL_ENDPOINT
 
 	// Web Search API
 	GeminiAPIKey string // GEMINI_API_KEY - for web search using Gemini
@@ -367,25 +367,25 @@ type Config struct {
 	AgentMailPod    string // AGENTMAIL_POD - AgentMail pod (e.g., "am_us_pod_47")
 
 	// Discord notifications
-	DiscordWebhook     string // XALGORIX_DISCORD_WEBHOOK - notification webhook URL
-	DiscordMinSeverity string // XALGORIX_DISCORD_MIN_SEVERITY - minimum severity to notify
+	DiscordWebhook     string // AIDASTING_DISCORD_WEBHOOK - notification webhook URL
+	DiscordMinSeverity string // AIDASTING_DISCORD_MIN_SEVERITY - minimum severity to notify
 
 	// Telegram notifications
-	TelegramBotToken    string // XALGORIX_TELEGRAM_BOT_TOKEN - bot token from @BotFather (secret)
-	TelegramChatID      string // XALGORIX_TELEGRAM_CHAT_ID - target chat/channel ID (numeric or @username)
-	TelegramMinSeverity string // XALGORIX_TELEGRAM_MIN_SEVERITY - minimum severity to notify
+	TelegramBotToken    string // AIDASTING_TELEGRAM_BOT_TOKEN - bot token from @BotFather (secret)
+	TelegramChatID      string // AIDASTING_TELEGRAM_CHAT_ID - target chat/channel ID (numeric or @username)
+	TelegramMinSeverity string // AIDASTING_TELEGRAM_MIN_SEVERITY - minimum severity to notify
 
 	// Scan-completion summary notification.
 	// When false (default) the "Scan Finished" summary is suppressed and only
 	// per-vulnerability alerts are sent; set true to also get an end-of-scan summary.
-	NotifyScanComplete bool // XALGORIX_NOTIFY_SCAN_COMPLETE - send the "Scan Finished" summary after every scan
+	NotifyScanComplete bool // AIDASTING_NOTIFY_SCAN_COMPLETE - send the "Scan Finished" summary after every scan
 
 	// Dashboard auth
-	Username     string // XALGORIX_USERNAME - dashboard login username
-	Password     string // XALGORIX_PASSWORD - dashboard login password (DEPRECATED: prefer PasswordHash)
-	PasswordHash string // XALGORIX_PASSWORD_HASH - bcrypt hash of the dashboard password (preferred)
-	// APITokens: machine-to-machine API tokens (XALGORIX_API_TOKEN, plus
-	// XALGORIX_API_TOKENS for comma-separated rotation sets). Completely
+	Username     string // AIDASTING_USERNAME - dashboard login username
+	Password     string // AIDASTING_PASSWORD - dashboard login password (DEPRECATED: prefer PasswordHash)
+	PasswordHash string // AIDASTING_PASSWORD_HASH - bcrypt hash of the dashboard password (preferred)
+	// APITokens: machine-to-machine API tokens (AIDASTING_API_TOKEN, plus
+	// AIDASTING_API_TOKENS for comma-separated rotation sets). Completely
 	// separate from dashboard credentials: they authenticate Authorization:
 	// Bearer API clients, never create browser sessions, and never interact
 	// with the human login rate limiter. The web layer matches against
@@ -395,16 +395,16 @@ type Config struct {
 	// Network binding
 	// BindAddr controls which interface the web server listens on. Defaults to
 	// 127.0.0.1 so a fresh install is not exposed to the network. Set
-	// XALGORIX_BIND=0.0.0.0 (or a specific interface IP) to expose externally —
+	// AIDASTING_BIND=0.0.0.0 (or a specific interface IP) to expose externally —
 	// but in that case Username + (Password|PasswordHash) MUST be configured or
 	// the server will refuse to start.
-	BindAddr string // XALGORIX_BIND - listen address (default 127.0.0.1)
+	BindAddr string // AIDASTING_BIND - listen address (default 127.0.0.1)
 
 	// AllowLocalTargets opts a self-hosted install into scanning locally-hosted
 	// apps — loopback, localhost, or one of this machine's own interface IPs
 	// (e.g. a demo/staging environment on the same box), which are blocked by
 	// default as "self". The dashboard's own listener is ALWAYS protected
-	// regardless of this flag. XALGORIX_ALLOW_LOCAL_TARGETS (default false).
+	// regardless of this flag. AIDASTING_ALLOW_LOCAL_TARGETS (default false).
 	// Leave OFF on any shared/hosted deployment — it would let a user reach
 	// the operator's own machine.
 	AllowLocalTargets bool
@@ -412,29 +412,29 @@ type Config struct {
 	// Auto-install gating — the LLM-driven terminal tool can call apt/cargo/npm
 	// for missing binaries. Letting that happen under sudo on a multi-user box
 	// is a privilege-escalation surface, so it's now opt-in.
-	AllowAutoInstall     bool // XALGORIX_ALLOW_AUTO_INSTALL - permit package auto-install (default false unless root)
-	AllowAutoInstallSudo bool // XALGORIX_AUTO_INSTALL_SUDO  - permit sudo-prefixed installs (default false)
+	AllowAutoInstall     bool // AIDASTING_ALLOW_AUTO_INSTALL - permit package auto-install (default false unless root)
+	AllowAutoInstallSudo bool // AIDASTING_AUTO_INSTALL_SUDO  - permit sudo-prefixed installs (default false)
 
 	// Proxy settings
-	UseProxy      bool   // XALGORIX_USE_PROXY — enable proxy support
-	ProxyRequired bool   // XALGORIX_PROXY_REQUIRED — require one configured proxy for target-facing HTTP/browser traffic
-	ProxyFile     string // XALGORIX_PROXY_FILE — path to proxies.txt
-	ProxyRotation string // XALGORIX_PROXY_ROTATION — "roundrobin" (default) or "random"
-	ProxyURL      string // XALGORIX_PROXY_URL — single proxy URL (overrides file)
+	UseProxy      bool   // AIDASTING_USE_PROXY — enable proxy support
+	ProxyRequired bool   // AIDASTING_PROXY_REQUIRED — require one configured proxy for target-facing HTTP/browser traffic
+	ProxyFile     string // AIDASTING_PROXY_FILE — path to proxies.txt
+	ProxyRotation string // AIDASTING_PROXY_ROTATION — "roundrobin" (default) or "random"
+	ProxyURL      string // AIDASTING_PROXY_URL — single proxy URL (overrides file)
 
 	// Paths
-	HomeDir     string // ~/.xalgorix
+	HomeDir     string // ~/.ai-dast-ing
 	SkillsDir   string // embedded or local skills directory
-	BrowserPath string // XALGORIX_BROWSER_PATH — override auto-download with custom Chrome path
+	BrowserPath string // AIDASTING_BROWSER_PATH — override auto-download with custom Chrome path
 
 	// Filesystem read deny-list. Reads outside the Allow_List are
 	// permitted by default so tools can use system wordlists, payload
 	// directories, and other shared assets. Entries here are
 	// canonicalized prefix matches that REVOKE that default for
 	// sensitive locations (~/.ssh, ~/.aws, /etc/shadow, etc.). Set
-	// XALGORIX_READ_DENY_LIST to a colon-separated list of additional
+	// AIDASTING_READ_DENY_LIST to a colon-separated list of additional
 	// roots; defaults are merged in. See sandbox.Policy.CheckRead.
-	ReadDenyList []string // XALGORIX_READ_DENY_LIST
+	ReadDenyList []string // AIDASTING_READ_DENY_LIST
 }
 
 var (
@@ -454,19 +454,19 @@ func Get() *Config {
 // It first loads env files so config works even under sudo.
 func load() *Config {
 	// Load env files (lower priority first, later files override)
-	loadEnvFile("/etc/xalgorix.env")
+	loadEnvFile("/etc/ai-dast-ing.env")
 	// Try the actual user's home (works even under sudo)
 	if sudoUser := os.Getenv("SUDO_USER"); sudoUser != "" {
-		loadEnvFile(filepath.Join("/home", sudoUser, ".xalgorix.env"))
+		loadEnvFile(filepath.Join("/home", sudoUser, ".ai-dast-ing.env"))
 	}
 	home, err := os.UserHomeDir()
 	if err != nil {
 		log.Printf("Warning: failed to get home directory: %v (using /root)", err)
 		home = "/root"
 	}
-	loadEnvFile(filepath.Join(home, ".xalgorix.env"))
+	loadEnvFile(filepath.Join(home, ".ai-dast-ing.env"))
 
-	xalgorixHome := filepath.Join(home, ".xalgorix")
+	aidastingHome := filepath.Join(home, ".ai-dast-ing")
 
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -476,18 +476,18 @@ func load() *Config {
 	// Capture the user's *original* intent for Data_Dir / Workspace selection
 	// before the backwards-compat shim runs. The migration-warning
 	// suppression check (R7.4) needs to see whether the user explicitly
-	// pinned a workspace path; if we sampled XALGORIX_DATA_DIR after the
+	// pinned a workspace path; if we sampled AIDASTING_DATA_DIR after the
 	// shim ran, the shim's synthetic value would always look like an
 	// override and we'd never warn legitimate cases.
-	originalDataDirEnv := os.Getenv("XALGORIX_DATA_DIR")
-	originalWorkspaceEnv := os.Getenv("XALGORIX_WORKSPACE")
-	// Backwards-compat shim for legacy XALGORIX_WORKSPACE: if it's set and
-	// XALGORIX_DATA_DIR is not, treat XALGORIX_WORKSPACE as if it were
-	// XALGORIX_DATA_DIR and emit a deprecation notice. External scripts that
+	originalDataDirEnv := os.Getenv("AIDASTING_DATA_DIR")
+	originalWorkspaceEnv := os.Getenv("AIDASTING_WORKSPACE")
+	// Backwards-compat shim for legacy AIDASTING_WORKSPACE: if it's set and
+	// AIDASTING_DATA_DIR is not, treat AIDASTING_WORKSPACE as if it were
+	// AIDASTING_DATA_DIR and emit a deprecation notice. External scripts that
 	// pin a workspace path therefore keep working without change.
 	if originalWorkspaceEnv != "" && originalDataDirEnv == "" {
-		log.Printf("[config] WARN XALGORIX_WORKSPACE is deprecated; please use XALGORIX_DATA_DIR=%s", originalWorkspaceEnv)
-		_ = os.Setenv("XALGORIX_DATA_DIR", originalWorkspaceEnv)
+		log.Printf("[config] WARN AIDASTING_WORKSPACE is deprecated; please use AIDASTING_DATA_DIR=%s", originalWorkspaceEnv)
+		_ = os.Setenv("AIDASTING_DATA_DIR", originalWorkspaceEnv)
 	}
 	// Resolve the per-installation Data_Dir (R6.1–R6.3, R6.7). On failure we
 	// emit a non-fatal warning and fall back to $CWD so the binary doesn't
@@ -499,52 +499,52 @@ func load() *Config {
 		dataDir = cwd
 	}
 	// Workspace is now an alias for DataDir (R6.4). The legacy
-	// XALGORIX_WORKSPACE env var is honored above as a backwards-compat shim.
+	// AIDASTING_WORKSPACE env var is honored above as a backwards-compat shim.
 	workspace := dataDir
 
 	cfg := &Config{
 		// LLM
-		LLM:                      envOr("XALGORIX_LLM", ""),
-		LLMProvider:              envOr("XALGORIX_LLM_PROVIDER", ""),
-		APIBase:                  envOr("XALGORIX_API_BASE", ""),
-		APIKey:                   envOr("XALGORIX_API_KEY", ""),
-		APIKeys:                  ParseAPIKeyList(envOr("XALGORIX_API_KEYS", "")),
-		KeyPoolStrategy:          envOr("XALGORIX_KEY_POOL_STRATEGY", "roundrobin"),
-		DisableAutoDelegate:      envOrBool("XALGORIX_DISABLE_AUTO_DELEGATE", false),
-		DisabledSpecialists:      envOrStringSlice("XALGORIX_DISABLED_SPECIALISTS"),
-		Checklist:                envOrChecklist(envOr("XALGORIX_CHECKLIST", "full")),
-		LLMProfile:               envOr("XALGORIX_LLM_PROFILE", ""),
-		ReasoningEffort:          envOr("XALGORIX_REASONING_EFFORT", "high"),
-		Language:                 NormalizeLanguage(envOr("XALGORIX_LANGUAGE", DefaultLanguage)),
-		OllamaCompatible:         envOrBool("XALGORIX_OLLAMA_COMPATIBLE", false),
-		Temperature:              envOrFloatPtr("XALGORIX_TEMPERATURE", 0.2),
-		LLMMaxRetries:            envOrInt("XALGORIX_LLM_MAX_RETRIES", 5),
-		MaxRateLimitWaitSec:      envOrInt("XALGORIX_MAX_RATE_LIMIT_WAIT", 30*60),
-		MaxOutputTokens:          envOrInt("XALGORIX_MAX_OUTPUT_TOKENS", 8192),
-		ContextCompactTokens:     envOrInt("XALGORIX_CONTEXT_COMPACT_TOKENS", -1),
-		RoleScopedTools:          envOrBool("XALGORIX_ROLE_SCOPED_TOOLS", false),
-		LeanToolSchema:           envOrBool("XALGORIX_LEAN_TOOL_SCHEMA", false),
-		AdvancePastStuckTasks:    envOrBool("XALGORIX_ADVANCE_PAST_STUCK", false),
-		MaxStuckAdvances:         envOrInt("XALGORIX_MAX_STUCK_ADVANCES", 3),
-		BoundedContext:           envOrBool("XALGORIX_BOUNDED_CONTEXT", true),
-		EpochCoverage:            envOrBool("XALGORIX_EPOCH_COVERAGE", true),
-		ConvergeReconcile:        envOrBool("XALGORIX_CONVERGE_RECONCILE", true),
-		EndpointHygiene:          envOrBool("XALGORIX_ENDPOINT_HYGIENE", false),
-		ConvergeFinish:           envOrBool("XALGORIX_CONVERGE_FINISH", true),
-		ConvergeFinishIdle:       envOrInt("XALGORIX_CONVERGE_FINISH_IDLE", 500),
-		ConvergeFinishLeadWindow: envOrInt("XALGORIX_CONVERGE_FINISH_LEAD_WINDOW", 100),
-		ToolArchiveMinBytes:      envOrInt("XALGORIX_TOOL_ARCHIVE_MIN_BYTES", 1500),
-		ToolArchiveActiveWindow:  envOrInt("XALGORIX_TOOL_ARCHIVE_ACTIVE_WINDOW", 8),
-		LLMContextWindow:         envOrInt("XALGORIX_LLM_CONTEXT_WINDOW", 128000),
-		ContextCompactRatio:      envOrFloat("XALGORIX_CONTEXT_COMPACT_RATIO", 0.75),
-		LLMTimeoutSeconds:        envOrInt("XALGORIX_LLM_TIMEOUT_SECONDS", 600),
-		NativeToolCalls:          envOrBool("XALGORIX_NATIVE_TOOL_CALLS", false),
-		MemCompTimeout:           envOrInt("XALGORIX_MEMORY_COMPRESSOR_TIMEOUT", 30),
+		LLM:                      envOr("AIDASTING_LLM", ""),
+		LLMProvider:              envOr("AIDASTING_LLM_PROVIDER", ""),
+		APIBase:                  envOr("AIDASTING_API_BASE", ""),
+		APIKey:                   envOr("AIDASTING_API_KEY", ""),
+		APIKeys:                  ParseAPIKeyList(envOr("AIDASTING_API_KEYS", "")),
+		KeyPoolStrategy:          envOr("AIDASTING_KEY_POOL_STRATEGY", "roundrobin"),
+		DisableAutoDelegate:      envOrBool("AIDASTING_DISABLE_AUTO_DELEGATE", false),
+		DisabledSpecialists:      envOrStringSlice("AIDASTING_DISABLED_SPECIALISTS"),
+		Checklist:                envOrChecklist(envOr("AIDASTING_CHECKLIST", "full")),
+		LLMProfile:               envOr("AIDASTING_LLM_PROFILE", ""),
+		ReasoningEffort:          envOr("AIDASTING_REASONING_EFFORT", "high"),
+		Language:                 NormalizeLanguage(envOr("AIDASTING_LANGUAGE", DefaultLanguage)),
+		OllamaCompatible:         envOrBool("AIDASTING_OLLAMA_COMPATIBLE", false),
+		Temperature:              envOrFloatPtr("AIDASTING_TEMPERATURE", 0.2),
+		LLMMaxRetries:            envOrInt("AIDASTING_LLM_MAX_RETRIES", 5),
+		MaxRateLimitWaitSec:      envOrInt("AIDASTING_MAX_RATE_LIMIT_WAIT", 30*60),
+		MaxOutputTokens:          envOrInt("AIDASTING_MAX_OUTPUT_TOKENS", 8192),
+		ContextCompactTokens:     envOrInt("AIDASTING_CONTEXT_COMPACT_TOKENS", -1),
+		RoleScopedTools:          envOrBool("AIDASTING_ROLE_SCOPED_TOOLS", false),
+		LeanToolSchema:           envOrBool("AIDASTING_LEAN_TOOL_SCHEMA", false),
+		AdvancePastStuckTasks:    envOrBool("AIDASTING_ADVANCE_PAST_STUCK", false),
+		MaxStuckAdvances:         envOrInt("AIDASTING_MAX_STUCK_ADVANCES", 3),
+		BoundedContext:           envOrBool("AIDASTING_BOUNDED_CONTEXT", true),
+		EpochCoverage:            envOrBool("AIDASTING_EPOCH_COVERAGE", true),
+		ConvergeReconcile:        envOrBool("AIDASTING_CONVERGE_RECONCILE", true),
+		EndpointHygiene:          envOrBool("AIDASTING_ENDPOINT_HYGIENE", false),
+		ConvergeFinish:           envOrBool("AIDASTING_CONVERGE_FINISH", true),
+		ConvergeFinishIdle:       envOrInt("AIDASTING_CONVERGE_FINISH_IDLE", 500),
+		ConvergeFinishLeadWindow: envOrInt("AIDASTING_CONVERGE_FINISH_LEAD_WINDOW", 100),
+		ToolArchiveMinBytes:      envOrInt("AIDASTING_TOOL_ARCHIVE_MIN_BYTES", 1500),
+		ToolArchiveActiveWindow:  envOrInt("AIDASTING_TOOL_ARCHIVE_ACTIVE_WINDOW", 8),
+		LLMContextWindow:         envOrInt("AIDASTING_LLM_CONTEXT_WINDOW", 128000),
+		ContextCompactRatio:      envOrFloat("AIDASTING_CONTEXT_COMPACT_RATIO", 0.75),
+		LLMTimeoutSeconds:        envOrInt("AIDASTING_LLM_TIMEOUT_SECONDS", 600),
+		NativeToolCalls:          envOrBool("AIDASTING_NATIVE_TOOL_CALLS", false),
+		MemCompTimeout:           envOrInt("AIDASTING_MEMORY_COMPRESSOR_TIMEOUT", 30),
 
 		// Gemini content-filter posture (native Gemini API path only). Default
 		// BLOCK_NONE so authorized security-testing output is not refused;
 		// DEFAULT / "" restores Google's server-side defaults.
-		GeminiSafetyThreshold: envOr("XALGORIX_GEMINI_SAFETY", "BLOCK_NONE"),
+		GeminiSafetyThreshold: envOr("AIDASTING_GEMINI_SAFETY", "BLOCK_NONE"),
 
 		// Runtime
 		RuntimeBackend:          "native", // Always native in Go version
@@ -552,47 +552,47 @@ func load() *Config {
 		DataDir:                 dataDir,
 		WorkspaceRoot:           dataDir,
 		legacyCWD:               cwd,
-		DisableBrowser:          envOrBool("XALGORIX_DISABLE_BROWSER", false),
-		MaxIterations:           envOrInt("XALGORIX_MAX_ITERATIONS", 0),
-		MinIterations:           envOrInt("XALGORIX_MIN_ITERATIONS", 50),
-		IterationDelaySec:       envOrFloat("XALGORIX_ITERATION_DELAY", 0),
-		MaxWildcardSubdomains:   envOrInt("XALGORIX_MAX_WILDCARD_SUBDOMAINS", -1),
-		NoToolAbortAt:           envOrInt("XALGORIX_NO_TOOL_ABORT_AT", 30),
-		MaxFinishRejections:     envOrInt("XALGORIX_MAX_FINISH_REJECTIONS", 15),
-		TargetAuth:              envOr("XALGORIX_TARGET_AUTH", ""),
-		TargetAuthSecondary:     envOr("XALGORIX_TARGET_AUTH_B", ""),
-		OOBPublicURL:            envOr("XALGORIX_OOB_PUBLIC_URL", ""),
-		OOBPort:                 envOrInt("XALGORIX_OOB_PORT", 0),
-		InteractshServer:        envOr("XALGORIX_INTERACTSH_SERVER", ""),
-		InteractshToken:         envOr("XALGORIX_INTERACTSH_TOKEN", ""),
-		OOBDisable:              envOrBool("XALGORIX_OOB_DISABLE", false),
-		OOBInteractions:         envOr("XALGORIX_OOB_INTERACTIONS", ""),
-		SourceRepo:              envOr("XALGORIX_SOURCE_REPO", ""),
-		ScanContext:             envOr("XALGORIX_SCAN_CONTEXT", ""),
+		DisableBrowser:          envOrBool("AIDASTING_DISABLE_BROWSER", false),
+		MaxIterations:           envOrInt("AIDASTING_MAX_ITERATIONS", 0),
+		MinIterations:           envOrInt("AIDASTING_MIN_ITERATIONS", 50),
+		IterationDelaySec:       envOrFloat("AIDASTING_ITERATION_DELAY", 0),
+		MaxWildcardSubdomains:   envOrInt("AIDASTING_MAX_WILDCARD_SUBDOMAINS", -1),
+		NoToolAbortAt:           envOrInt("AIDASTING_NO_TOOL_ABORT_AT", 30),
+		MaxFinishRejections:     envOrInt("AIDASTING_MAX_FINISH_REJECTIONS", 15),
+		TargetAuth:              envOr("AIDASTING_TARGET_AUTH", ""),
+		TargetAuthSecondary:     envOr("AIDASTING_TARGET_AUTH_B", ""),
+		OOBPublicURL:            envOr("AIDASTING_OOB_PUBLIC_URL", ""),
+		OOBPort:                 envOrInt("AIDASTING_OOB_PORT", 0),
+		InteractshServer:        envOr("AIDASTING_INTERACTSH_SERVER", ""),
+		InteractshToken:         envOr("AIDASTING_INTERACTSH_TOKEN", ""),
+		OOBDisable:              envOrBool("AIDASTING_OOB_DISABLE", false),
+		OOBInteractions:         envOr("AIDASTING_OOB_INTERACTIONS", ""),
+		SourceRepo:              envOr("AIDASTING_SOURCE_REPO", ""),
+		ScanContext:             envOr("AIDASTING_SCAN_CONTEXT", ""),
 		ScanHeaders:             loadScanHeaders(),
-		MaxToolCalls:            envOrInt("XALGORIX_MAX_TOOL_CALLS", 0),
-		MaxDurationSec:          envOrInt("XALGORIX_MAX_DURATION", 0),
-		MaxTokens:               envOrInt("XALGORIX_MAX_TOKENS", 0),
-		MaxNonProgressSec:       envOrInt("XALGORIX_MAX_NON_PROGRESS", 3600),
-		PlanCompleteFindingIdle: envOrInt("XALGORIX_PLAN_COMPLETE_IDLE", 0),
+		MaxToolCalls:            envOrInt("AIDASTING_MAX_TOOL_CALLS", 0),
+		MaxDurationSec:          envOrInt("AIDASTING_MAX_DURATION", 0),
+		MaxTokens:               envOrInt("AIDASTING_MAX_TOKENS", 0),
+		MaxNonProgressSec:       envOrInt("AIDASTING_MAX_NON_PROGRESS", 3600),
+		PlanCompleteFindingIdle: envOrInt("AIDASTING_PLAN_COMPLETE_IDLE", 0),
 
 		// Scan retention: 0 disables automatic pruning (keep forever).
-		ScanRetentionDays: envOrInt("XALGORIX_SCAN_RETENTION_DAYS", 0),
+		ScanRetentionDays: envOrInt("AIDASTING_SCAN_RETENTION_DAYS", 0),
 
 		// Rate limiting (defaults: 60 requests per 60 seconds)
-		RateLimitRequests: envOrInt("XALGORIX_RATE_LIMIT_REQUESTS", 60),
-		RateLimitWindow:   envOrInt("XALGORIX_RATE_LIMIT_WINDOW", 60),
-		RateLimitRPS:      envOrFloat("XALGORIX_RATE_RPS", 10),
-		RateLimitBurst:    envOrInt("XALGORIX_RATE_BURST", 20),
-		TLSSkipVerify:     envOrBool("XALGORIX_TLS_SKIP_VERIFY", envOrBool("XALGORIX_TLS_INSECURE_SKIP_VERIFY", false)),
+		RateLimitRequests: envOrInt("AIDASTING_RATE_LIMIT_REQUESTS", 60),
+		RateLimitWindow:   envOrInt("AIDASTING_RATE_LIMIT_WINDOW", 60),
+		RateLimitRPS:      envOrFloat("AIDASTING_RATE_RPS", 10),
+		RateLimitBurst:    envOrInt("AIDASTING_RATE_BURST", 20),
+		TLSSkipVerify:     envOrBool("AIDASTING_TLS_SKIP_VERIFY", envOrBool("AIDASTING_TLS_INSECURE_SKIP_VERIFY", false)),
 
 		// Caido
 		CaidoPort:     envOrInt("CAIDO_PORT", 0), // 0 = auto-detect
 		CaidoAPIToken: envOr("CAIDO_API_TOKEN", ""),
 
 		// Telemetry
-		Telemetry:    envOrBool("XALGORIX_TELEMETRY", true),
-		OTelEndpoint: envOr("XALGORIX_OTEL_ENDPOINT", ""),
+		Telemetry:    envOrBool("AIDASTING_TELEMETRY", true),
+		OTelEndpoint: envOr("AIDASTING_OTEL_ENDPOINT", ""),
 
 		// Web Search API
 		GeminiAPIKey:    envOr("GEMINI_API_KEY", ""),
@@ -600,59 +600,59 @@ func load() *Config {
 		AgentMailPod:    envOr("AGENTMAIL_POD", ""),
 
 		// Discord notifications
-		DiscordWebhook:     envOr("XALGORIX_DISCORD_WEBHOOK", ""),
-		DiscordMinSeverity: envOr("XALGORIX_DISCORD_MIN_SEVERITY", ""),
+		DiscordWebhook:     envOr("AIDASTING_DISCORD_WEBHOOK", ""),
+		DiscordMinSeverity: envOr("AIDASTING_DISCORD_MIN_SEVERITY", ""),
 
 		// Telegram notifications
-		TelegramBotToken:    envOr("XALGORIX_TELEGRAM_BOT_TOKEN", ""),
-		TelegramChatID:      envOr("XALGORIX_TELEGRAM_CHAT_ID", ""),
-		TelegramMinSeverity: envOr("XALGORIX_TELEGRAM_MIN_SEVERITY", ""),
+		TelegramBotToken:    envOr("AIDASTING_TELEGRAM_BOT_TOKEN", ""),
+		TelegramChatID:      envOr("AIDASTING_TELEGRAM_CHAT_ID", ""),
+		TelegramMinSeverity: envOr("AIDASTING_TELEGRAM_MIN_SEVERITY", ""),
 
 		// Scan-completion summary notification (opt-in; default off).
-		NotifyScanComplete: envOrBool("XALGORIX_NOTIFY_SCAN_COMPLETE", false),
+		NotifyScanComplete: envOrBool("AIDASTING_NOTIFY_SCAN_COMPLETE", false),
 
 		// Dashboard auth
-		Username:     envOr("XALGORIX_USERNAME", ""),
-		Password:     envOr("XALGORIX_PASSWORD", ""),
-		PasswordHash: envOr("XALGORIX_PASSWORD_HASH", ""),
-		APITokens:    appendAPITokens(envOr("XALGORIX_API_TOKEN", ""), envOr("XALGORIX_API_TOKENS", "")),
+		Username:     envOr("AIDASTING_USERNAME", ""),
+		Password:     envOr("AIDASTING_PASSWORD", ""),
+		PasswordHash: envOr("AIDASTING_PASSWORD_HASH", ""),
+		APITokens:    appendAPITokens(envOr("AIDASTING_API_TOKEN", ""), envOr("AIDASTING_API_TOKENS", "")),
 
 		// Network binding — loopback-only by default.
-		BindAddr: envOr("XALGORIX_BIND", "127.0.0.1"),
+		BindAddr: envOr("AIDASTING_BIND", "127.0.0.1"),
 
 		// Self-hosted opt-in to scan locally-hosted apps (off by default; the
 		// dashboard's own listener stays protected regardless).
-		AllowLocalTargets: envOrBool("XALGORIX_ALLOW_LOCAL_TARGETS", false),
+		AllowLocalTargets: envOrBool("AIDASTING_ALLOW_LOCAL_TARGETS", false),
 
 		// Auto-install gates — default off for non-root; root sessions keep the
 		// historical behavior so existing systemd deployments keep working.
-		AllowAutoInstall:     envOrBool("XALGORIX_ALLOW_AUTO_INSTALL", os.Getuid() == 0),
-		AllowAutoInstallSudo: envOrBool("XALGORIX_AUTO_INSTALL_SUDO", false),
+		AllowAutoInstall:     envOrBool("AIDASTING_ALLOW_AUTO_INSTALL", os.Getuid() == 0),
+		AllowAutoInstallSudo: envOrBool("AIDASTING_AUTO_INSTALL_SUDO", false),
 
 		// Proxy
-		UseProxy:      envOrBool("XALGORIX_USE_PROXY", false),
-		ProxyRequired: envOrBool("XALGORIX_PROXY_REQUIRED", false),
-		ProxyFile:     envOr("XALGORIX_PROXY_FILE", ""),
-		ProxyRotation: envOr("XALGORIX_PROXY_ROTATION", "roundrobin"),
-		ProxyURL:      envOr("XALGORIX_PROXY_URL", ""),
+		UseProxy:      envOrBool("AIDASTING_USE_PROXY", false),
+		ProxyRequired: envOrBool("AIDASTING_PROXY_REQUIRED", false),
+		ProxyFile:     envOr("AIDASTING_PROXY_FILE", ""),
+		ProxyRotation: envOr("AIDASTING_PROXY_ROTATION", "roundrobin"),
+		ProxyURL:      envOr("AIDASTING_PROXY_URL", ""),
 
 		// Paths
-		HomeDir:     xalgorixHome,
-		SkillsDir:   filepath.Join(xalgorixHome, "skills"),
-		BrowserPath: envOr("XALGORIX_BROWSER_PATH", ""),
+		HomeDir:     aidastingHome,
+		SkillsDir:   filepath.Join(aidastingHome, "skills"),
+		BrowserPath: envOr("AIDASTING_BROWSER_PATH", ""),
 
 		// Filesystem deny-list. Defaults applied in resolveReadDenyList
 		// (sensitive home and system paths plus the scanner's own
 		// credential files); user list extends them.
-		ReadDenyList: resolveReadDenyList(home, dataDir, os.Getenv("XALGORIX_READ_DENY_LIST")),
+		ReadDenyList: resolveReadDenyList(home, dataDir, os.Getenv("AIDASTING_READ_DENY_LIST")),
 	}
 
 	// Debug: show loaded config so users can verify correct env was picked up.
-	// Gated behind XALGORIX_DEBUG_CONFIG so it doesn't pollute every CLI
+	// Gated behind AIDASTING_DEBUG_CONFIG so it doesn't pollute every CLI
 	// invocation; the install/setup flows that benefit from this can opt in
 	// by exporting the var, and the dashboard logs an explicit "Loaded
 	// config" message at boot anyway.
-	if envOrBool("XALGORIX_DEBUG_CONFIG", false) {
+	if envOrBool("AIDASTING_DEBUG_CONFIG", false) {
 		maskedKey := ""
 		if len(cfg.APIKey) > 8 {
 			maskedKey = cfg.APIKey[:4] + "****" + cfg.APIKey[len(cfg.APIKey)-4:]
@@ -667,8 +667,8 @@ func load() *Config {
 	log.Printf("[config] Data_Dir=%s Workspace_Root=%s", cfg.DataDir, cfg.WorkspaceRoot)
 
 	// R7: emit the Migration_Warning when a legacy $CWD layout is detected.
-	// Suppressed by an explicit XALGORIX_DATA_DIR or the legacy
-	// XALGORIX_WORKSPACE override (R7.4); idempotence (R7.3) is provided by
+	// Suppressed by an explicit AIDASTING_DATA_DIR or the legacy
+	// AIDASTING_WORKSPACE override (R7.4); idempotence (R7.3) is provided by
 	// configOnce since this only runs from load().
 	suppressMigrationWarning := originalDataDirEnv != "" || originalWorkspaceEnv != ""
 	maybeEmitMigrationWarning(cwd, cfg.DataDir, suppressMigrationWarning)
@@ -707,13 +707,13 @@ func (c *Config) Validate() error {
 	// surface this as a hard error rather than silently scribbling files
 	// into the user's working directory.
 	if c.DataDir == "" {
-		return fmt.Errorf("DataDir is empty — Data_Dir resolution failed; check XALGORIX_DATA_DIR or HOME and verify the binary can create ~/.xalgorix/data with mode 0o700")
+		return fmt.Errorf("DataDir is empty — Data_Dir resolution failed; check AIDASTING_DATA_DIR or HOME and verify the binary can create ~/.ai-dast-ing/data with mode 0o700")
 	}
 	if c.LLM == "" {
-		return fmt.Errorf("XALGORIX_LLM is required. Set it to a provider-native model ID such as 'gpt-5.6' or 'claude-fable-5'")
+		return fmt.Errorf("AIDASTING_LLM is required. Set it to a provider-native model ID such as 'gpt-5.6' or 'claude-fable-5'")
 	}
 	if c.APIKey == "" && c.LLMProfile == "" && !c.providerAllowsNoAuth() {
-		return fmt.Errorf("XALGORIX_API_KEY is required for the selected provider. Run 'xalgorix --setup' to configure it")
+		return fmt.Errorf("AIDASTING_API_KEY is required for the selected provider. Run 'ai-dast-ing --setup' to configure it")
 	}
 	return nil
 }
@@ -743,7 +743,7 @@ func (c *Config) providerAllowsNoAuth() bool {
 func CheckEnvFile() error {
 	envPath := EnvFilePath()
 	if _, err := os.Stat(envPath); os.IsNotExist(err) {
-		return fmt.Errorf("configuration file not found: %s\n\nRun: xalgorix --setup", envPath)
+		return fmt.Errorf("configuration file not found: %s\n\nRun: ai-dast-ing --setup", envPath)
 	} else if err != nil {
 		return fmt.Errorf("inspect configuration file: %w", err)
 	}
@@ -754,25 +754,25 @@ func CheckEnvFile() error {
 	}
 	candidate := &Config{
 		DataDir:     "configured",
-		LLM:         values["XALGORIX_LLM"],
-		LLMProvider: values["XALGORIX_LLM_PROVIDER"],
-		APIKey:      values["XALGORIX_API_KEY"],
-		LLMProfile:  values["XALGORIX_LLM_PROFILE"],
+		LLM:         values["AIDASTING_LLM"],
+		LLMProvider: values["AIDASTING_LLM_PROVIDER"],
+		APIKey:      values["AIDASTING_API_KEY"],
+		LLMProfile:  values["AIDASTING_LLM_PROFILE"],
 	}
 	if err := candidate.Validate(); err != nil {
-		return fmt.Errorf("configuration file %s is incomplete: %w\n\nRun: xalgorix --setup", envPath, err)
+		return fmt.Errorf("configuration file %s is incomplete: %w\n\nRun: ai-dast-ing --setup", envPath, err)
 	}
 	return nil
 }
 
 // resolveDataDir picks the active Data_Dir, canonicalizes it, and creates it
 // with mode 0o700 if it doesn't exist yet (R6.1, R6.2, R6.3). When the env
-// var XALGORIX_DATA_DIR is unset it falls back to ~/.xalgorix/data/. Existing
+// var AIDASTING_DATA_DIR is unset it falls back to ~/.ai-dast-ing/data/. Existing
 // directories are tightened to 0o700 so we never trust looser ambient perms.
 func resolveDataDir(home string) (string, error) {
-	raw := os.Getenv("XALGORIX_DATA_DIR")
+	raw := os.Getenv("AIDASTING_DATA_DIR")
 	if raw == "" {
-		raw = filepath.Join(home, ".xalgorix", "data")
+		raw = filepath.Join(home, ".ai-dast-ing", "data")
 	}
 	abs, err := filepath.Abs(raw)
 	if err != nil {
@@ -788,9 +788,9 @@ func resolveDataDir(home string) (string, error) {
 
 // maybeEmitMigrationWarning emits a single WARN-level [MIGRATION] log line
 // when the binary is launched from a directory that looks like the legacy
-// $CWD-rooted Xalgorix workspace layout (notes.json, _schedules/,
+// $CWD-rooted AI-DAST-ING workspace layout (notes.json, _schedules/,
 // vulnerabilities.json, or YYYY-MM-DD/scan-* output dirs) and the user has
-// not pinned the workspace via XALGORIX_DATA_DIR or XALGORIX_WORKSPACE.
+// not pinned the workspace via AIDASTING_DATA_DIR or AIDASTING_WORKSPACE.
 //
 // Idempotence (R7.3) is provided by configOnce since the only call site is
 // load(). This function never reads, copies, modifies, or deletes any
@@ -827,21 +827,21 @@ func maybeEmitMigrationWarning(cwd, dataDir string, suppressed bool) {
 	log.Printf("[MIGRATION] Detected legacy workspace layout under %s "+
 		"(matched %q). The default data directory has changed in this "+
 		"release to %s. To keep writing to the legacy location, run with "+
-		"XALGORIX_DATA_DIR=%s", cwd, found, dataDir, cwd)
+		"AIDASTING_DATA_DIR=%s", cwd, found, dataDir, cwd)
 }
 
 // loadScanHeaders assembles the operator-configured scan/attribution headers
-// from XALGORIX_SCAN_HEADERS (';'/newline-separated) and an optional
-// XALGORIX_SCAN_HEADERS_FILE (one "Name: value" per line), de-duplicated with
+// from AIDASTING_SCAN_HEADERS (';'/newline-separated) and an optional
+// AIDASTING_SCAN_HEADERS_FILE (one "Name: value" per line), de-duplicated with
 // the env entries taking precedence. A missing/unreadable file is a non-fatal
 // warning so a scan still runs (just without the file's headers).
 func loadScanHeaders() []string {
-	env := scanheaders.Parse(os.Getenv("XALGORIX_SCAN_HEADERS"))
+	env := scanheaders.Parse(os.Getenv("AIDASTING_SCAN_HEADERS"))
 	var fromFile []string
-	if path := strings.TrimSpace(os.Getenv("XALGORIX_SCAN_HEADERS_FILE")); path != "" {
+	if path := strings.TrimSpace(os.Getenv("AIDASTING_SCAN_HEADERS_FILE")); path != "" {
 		hs, err := scanheaders.ParseFile(path)
 		if err != nil {
-			log.Printf("[config] Warning: XALGORIX_SCAN_HEADERS_FILE %q: %v", path, err)
+			log.Printf("[config] Warning: AIDASTING_SCAN_HEADERS_FILE %q: %v", path, err)
 		}
 		fromFile = hs
 	}
@@ -876,7 +876,7 @@ func envOrFloat(key string, fallback float64) float64 {
 // envOrFloatPtr reads a float from the env and returns a pointer.
 // This lets callers distinguish "not set" (returns &fallback) from
 // "explicitly set to 0.0" (returns &0.0). Used by Temperature so that
-// setting XALGORIX_TEMPERATURE=0 sends temperature=0.0 to the API
+// setting AIDASTING_TEMPERATURE=0 sends temperature=0.0 to the API
 // instead of omitting it.
 func envOrFloatPtr(key string, fallback float64) *float64 {
 	if v := os.Getenv(key); v != "" {
@@ -1030,7 +1030,7 @@ func defaultReadDenyList(home string) []string {
 	}
 }
 
-// scannerCredentialPaths lists the files where Xalgorix keeps its own
+// scannerCredentialPaths lists the files where AI-DAST-ING keeps its own
 // credentials: the dotenv files load() reads at startup (dashboard
 // password, API tokens, provider keys), the provider key store and auth
 // profile store at the Data_Dir root, and the CLI credential files the
@@ -1043,21 +1043,21 @@ func scannerCredentialPaths(home, dataDir string) []string {
 		home = "/root"
 	}
 	out := []string{
-		"/etc/xalgorix.env",
-		"/root/.xalgorix.env",
-		filepath.Join(home, ".xalgorix.env"),
+		"/etc/ai-dast-ing.env",
+		"/root/.ai-dast-ing.env",
+		filepath.Join(home, ".ai-dast-ing.env"),
 		// OAuth driver credential sources (internal/auth/driver_*.go).
 		filepath.Join(home, ".claude", ".credentials.json"),
 		filepath.Join(home, ".config", "anthropic", "credentials.json"),
 		filepath.Join(home, ".codex", "auth.json"),
 	}
 	if sudoUser := strings.TrimSpace(os.Getenv("SUDO_USER")); sudoUser != "" {
-		out = append(out, filepath.Join("/home", sudoUser, ".xalgorix.env"))
+		out = append(out, filepath.Join("/home", sudoUser, ".ai-dast-ing.env"))
 	}
 	if codexHome := strings.TrimSpace(os.Getenv("CODEX_HOME")); codexHome != "" {
 		out = append(out, filepath.Join(codexHome, "auth.json"))
 	}
-	if codexFile := strings.TrimSpace(os.Getenv("XALGORIX_CODEX_AUTH_FILE")); codexFile != "" {
+	if codexFile := strings.TrimSpace(os.Getenv("AIDASTING_CODEX_AUTH_FILE")); codexFile != "" {
 		out = append(out, codexFile)
 	}
 	if dataDir != "" {
@@ -1073,7 +1073,7 @@ func scannerCredentialPaths(home, dataDir string) []string {
 
 // resolveReadDenyList composes the default deny-list and the scanner's
 // own credential files with any extra entries supplied via
-// XALGORIX_READ_DENY_LIST. Entries in the env var are colon-separated
+// AIDASTING_READ_DENY_LIST. Entries in the env var are colon-separated
 // (Linux PATH convention); an empty string yields the defaults. Empty
 // tokens are skipped. The sandbox applies the result to reads and,
 // with precedence over the write Allow_List, to writes.
@@ -1094,7 +1094,7 @@ func resolveReadDenyList(home, dataDir, raw string) []string {
 
 // ParseAPIKeyList splits a comma- (or whitespace/newline-) separated
 // list of API keys into a clean, de-duplicated slice, preserving the
-// original order. Used for XALGORIX_API_KEYS, the operator-facing key
+// original order. Used for AIDASTING_API_KEYS, the operator-facing key
 // pool that the LLM client rotates across to spread provider rate
 // limits.
 func ParseAPIKeyList(raw string) []string {
@@ -1117,7 +1117,7 @@ func ParseAPIKeyList(raw string) []string {
 	return out
 }
 
-// envOrChecklist validates the XALGORIX_CHECKLIST value.
+// envOrChecklist validates the AIDASTING_CHECKLIST value.
 func envOrChecklist(raw string) string {
 	v := strings.ToLower(strings.TrimSpace(raw))
 	if v == "professional" {

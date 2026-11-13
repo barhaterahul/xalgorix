@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
 )
 
 const testPasswdBody = "root:x:0:0:root:/root:/bin/sh\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\n"
@@ -89,10 +89,10 @@ func TestVerifyPathTraversalRejectsPatchedAndOutOfScope(t *testing.T) {
 // Opt-in integration oracle for the digest-pinned Grafana pair. The test never
 // targets a public deployment and does not spend LLM tokens.
 func TestVerifyPathTraversalGrafanaPair(t *testing.T) {
-	vulnerable := os.Getenv("XALGORIX_GRAFANA_VULN_URL")
-	fixed := os.Getenv("XALGORIX_GRAFANA_FIXED_URL")
+	vulnerable := os.Getenv("AIDASTING_GRAFANA_VULN_URL")
+	fixed := os.Getenv("AIDASTING_GRAFANA_FIXED_URL")
 	if vulnerable == "" && fixed == "" {
-		t.Skip("set both XALGORIX_GRAFANA_VULN_URL and XALGORIX_GRAFANA_FIXED_URL for the local Docker oracle")
+		t.Skip("set both AIDASTING_GRAFANA_VULN_URL and AIDASTING_GRAFANA_FIXED_URL for the local Docker oracle")
 	}
 	for _, raw := range []string{vulnerable, fixed} {
 		u, err := url.Parse(raw)

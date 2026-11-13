@@ -205,12 +205,12 @@ export default function SettingsPage() {
   }, [llm.data]);
 
   useEffect(() => {
-    const webhook = envValue(environment.data, "XALGORIX_DISCORD_WEBHOOK");
-    const minSeverity = envValue(environment.data, "XALGORIX_DISCORD_MIN_SEVERITY");
-    const telegramBotToken = envValue(environment.data, "XALGORIX_TELEGRAM_BOT_TOKEN");
-    const telegramChatId = envValue(environment.data, "XALGORIX_TELEGRAM_CHAT_ID");
-    const telegramMinSeverity = envValue(environment.data, "XALGORIX_TELEGRAM_MIN_SEVERITY");
-    const notifyScanComplete = envValue(environment.data, "XALGORIX_NOTIFY_SCAN_COMPLETE") === "true";
+    const webhook = envValue(environment.data, "AIDASTING_DISCORD_WEBHOOK");
+    const minSeverity = envValue(environment.data, "AIDASTING_DISCORD_MIN_SEVERITY");
+    const telegramBotToken = envValue(environment.data, "AIDASTING_TELEGRAM_BOT_TOKEN");
+    const telegramChatId = envValue(environment.data, "AIDASTING_TELEGRAM_CHAT_ID");
+    const telegramMinSeverity = envValue(environment.data, "AIDASTING_TELEGRAM_MIN_SEVERITY");
+    const notifyScanComplete = envValue(environment.data, "AIDASTING_NOTIFY_SCAN_COMPLETE") === "true";
     setNotificationForm({ webhook, minSeverity, telegramBotToken, telegramChatId, telegramMinSeverity, notifyScanComplete });
   }, [environment.data]);
 
@@ -229,9 +229,9 @@ export default function SettingsPage() {
 
   // Adopt the operator's configured output language as the dashboard UI
   // language when this browser has no explicit preference yet, so a fresh
-  // install honors XALGORIX_LANGUAGE. An explicit in-browser choice wins.
+  // install honors AIDASTING_LANGUAGE. An explicit in-browser choice wins.
   useEffect(() => {
-    const configured = envValue(environment.data, "XALGORIX_LANGUAGE");
+    const configured = envValue(environment.data, "AIDASTING_LANGUAGE");
     if (configured) syncLanguageFromServer(configured);
   }, [environment.data]);
 
@@ -264,7 +264,7 @@ export default function SettingsPage() {
   // Local runtimes (Ollama, LM Studio) default to a loopback endpoint that
   // a container cannot reach, so their base URL must be editable the same
   // way a custom provider's is. Without this the operator has no way to
-  // point Xalgorix at a non-default host/port (e.g. llama.cpp on
+  // point AI-DAST-ING at a non-default host/port (e.g. llama.cpp on
   // 172.17.0.1:8080).
   const isCustomProvider = selectedProvider?.id === "custom";
   const isLocalRuntime = (selectedProvider?.authMethods ?? []).includes("none");
@@ -401,7 +401,7 @@ export default function SettingsPage() {
       // OAuth providers (e.g. Codex ChatGPT subscription) finish their
       // sign-in through the OAuth modal, which persists a profile keyed
       // "<provider>:<profileId>". Saving the LLM tab must point the active
-      // credential pointer (XALGORIX_LLM_PROFILE) at that profile —
+      // credential pointer (AIDASTING_LLM_PROFILE) at that profile —
       // otherwise the backend keeps the previous (legacy) provider and only
       // the model changes. Prefer an explicitly-selected profile key.
       req.activeProfileKey =
@@ -463,7 +463,7 @@ export default function SettingsPage() {
               <CardHeader>
                 <CardTitle>{t("settings.card.llmProvider")}</CardTitle>
                 <CardDescription>
-                  Saved to {llmForm.envFile || "~/.xalgorix.env"} and used by new scans.
+                  Saved to {llmForm.envFile || "~/.ai-dast-ing.env"} and used by new scans.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-5">
@@ -1145,12 +1145,12 @@ export default function SettingsPage() {
                     onClick={async () => {
                       setSavedNotifications(false);
                       await updateEnvironment.mutateAsync({
-                        XALGORIX_DISCORD_WEBHOOK: notificationForm.webhook,
-                        XALGORIX_DISCORD_MIN_SEVERITY: notificationForm.minSeverity,
-                        XALGORIX_TELEGRAM_BOT_TOKEN: notificationForm.telegramBotToken,
-                        XALGORIX_TELEGRAM_CHAT_ID: notificationForm.telegramChatId,
-                        XALGORIX_TELEGRAM_MIN_SEVERITY: notificationForm.telegramMinSeverity,
-                        XALGORIX_NOTIFY_SCAN_COMPLETE: notificationForm.notifyScanComplete ? "true" : "false",
+                        AIDASTING_DISCORD_WEBHOOK: notificationForm.webhook,
+                        AIDASTING_DISCORD_MIN_SEVERITY: notificationForm.minSeverity,
+                        AIDASTING_TELEGRAM_BOT_TOKEN: notificationForm.telegramBotToken,
+                        AIDASTING_TELEGRAM_CHAT_ID: notificationForm.telegramChatId,
+                        AIDASTING_TELEGRAM_MIN_SEVERITY: notificationForm.telegramMinSeverity,
+                        AIDASTING_NOTIFY_SCAN_COMPLETE: notificationForm.notifyScanComplete ? "true" : "false",
                       });
                       setSavedNotifications(true);
                       setTimeout(() => setSavedNotifications(false), 2500);
@@ -1290,7 +1290,7 @@ export default function SettingsPage() {
                     onChange={(e) =>
                       setMailForm({ ...mailForm, pod: e.target.value })
                     }
-                    placeholder="xalgorix-prod"
+                    placeholder="ai-dast-ing-prod"
                     className="font-mono"
                   />
                 </div>
@@ -1353,7 +1353,7 @@ export default function SettingsPage() {
                     <div>
                       <p className="text-sm font-medium">Environment variables</p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        Editing {environment.data?.envFile || "~/.xalgorix.env"}. Masked secrets are preserved unless you replace or clear them.
+                        Editing {environment.data?.envFile || "~/.ai-dast-ing.env"}. Masked secrets are preserved unless you replace or clear them.
                       </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
@@ -1873,7 +1873,7 @@ function BackupMigrationCard({
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "xalgorix-settings-backup.json";
+      a.download = "ai-dast-ing-settings-backup.json";
       document.body.appendChild(a);
       a.click();
       a.remove();

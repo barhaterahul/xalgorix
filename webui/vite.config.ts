@@ -34,7 +34,7 @@ const MOCK_PORT = Number(process.env.VITE_MOCK_PORT) || 8787;
 function mockBackendPlugin(): PluginOption {
   let child: ChildProcess | null = null;
   return {
-    name: "xalgorix:mock-backend",
+    name: "ai-dast-ing:mock-backend",
     apply: "serve",
     configureServer(server) {
       if (process.env.VITE_DISABLE_MOCK === "1" || process.env.VITE_API_TARGET) {

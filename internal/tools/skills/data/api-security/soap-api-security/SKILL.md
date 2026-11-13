@@ -107,7 +107,7 @@ size). Many stacks cap expansion — a rejected document is a miss.
 - Entity expansion rejected by parser limits (protection working)
 - Error strings echoing input without parser-level effect
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `http_request`/curl for precise envelope and header control
 - Python for generated XML payloads and entity expansion chains
 - `oob_callback` for blind XXE confirmation

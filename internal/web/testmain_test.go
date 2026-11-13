@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
 )
 
 // realEnvFile is the env file of the account running the tests, and
@@ -15,9 +15,9 @@ var realEnvFile, realEnvFileBefore string
 
 // TestMain points HOME at a temp dir before any test runs. Settings handlers
 // persist through applyEnvironmentUpdates into config.EnvFilePath(), which is
-// $HOME/.xalgorix.env, so without this any test that saves a setting rewrites
+// $HOME/.ai-dast-ing.env, so without this any test that saves a setting rewrites
 // the real file. On 2026-11-12 the suite ran as root on a production scanner
-// and TestKeyPool_InputValidation replaced /root/.xalgorix.env's API keys.
+// and TestKeyPool_InputValidation replaced /root/.ai-dast-ing.env's API keys.
 // Tests that set their own HOME with t.Setenv still work: it is restored to
 // the temp HOME afterwards.
 //
@@ -33,13 +33,13 @@ func runWithTempHome(m *testing.M) int {
 	realEnvFile = config.EnvFilePath()
 	realEnvFileBefore = envFileState(realEnvFile)
 
-	home, err := os.MkdirTemp("", "xalgorix-web-test-home-")
+	home, err := os.MkdirTemp("", "ai-dast-ing-web-test-home-")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "create temp HOME: %v\n", err)
 		return 1
 	}
 	defer func() { _ = os.RemoveAll(home) }()
-	// config.load also reads /home/$SUDO_USER/.xalgorix.env.
+	// config.load also reads /home/$SUDO_USER/.ai-dast-ing.env.
 	for key, value := range map[string]string{"HOME": home, "SUDO_USER": ""} {
 		if err := os.Setenv(key, value); err != nil {
 			fmt.Fprintf(os.Stderr, "set %s: %v\n", key, err)

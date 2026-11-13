@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
 )
 
 // The legacy (no-resolver) path must swap the configured key for the

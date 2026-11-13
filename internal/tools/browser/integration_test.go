@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
 )
 
 // action is a shorthand for browserActionWithContext using the test's context ID.
@@ -739,10 +739,10 @@ func TestVerifyXSS_POST_Reflected(t *testing.T) {
 // The scanner never receives this URL or payload; this only validates the
 // benchmark's ground truth and browser execution proof against the local stack.
 func TestDiscoverClientRoutes_GrafanaPair(t *testing.T) {
-	vulnerable := os.Getenv("XALGORIX_GRAFANA_VULN_URL")
-	fixed := os.Getenv("XALGORIX_GRAFANA_FIXED_URL")
+	vulnerable := os.Getenv("AIDASTING_GRAFANA_VULN_URL")
+	fixed := os.Getenv("AIDASTING_GRAFANA_FIXED_URL")
 	if vulnerable == "" && fixed == "" {
-		t.Skip("set both XALGORIX_GRAFANA_VULN_URL and XALGORIX_GRAFANA_FIXED_URL for the local Docker oracle")
+		t.Skip("set both AIDASTING_GRAFANA_VULN_URL and AIDASTING_GRAFANA_FIXED_URL for the local Docker oracle")
 	}
 	for _, tc := range []struct {
 		name, base    string
@@ -791,10 +791,10 @@ func TestDiscoverClientRoutes_GrafanaPair(t *testing.T) {
 }
 
 func TestVerifyXSS_GrafanaPathPair(t *testing.T) {
-	vulnerable := os.Getenv("XALGORIX_GRAFANA_VULN_URL")
-	fixed := os.Getenv("XALGORIX_GRAFANA_FIXED_URL")
+	vulnerable := os.Getenv("AIDASTING_GRAFANA_VULN_URL")
+	fixed := os.Getenv("AIDASTING_GRAFANA_FIXED_URL")
 	if vulnerable == "" && fixed == "" {
-		t.Skip("set both XALGORIX_GRAFANA_VULN_URL and XALGORIX_GRAFANA_FIXED_URL for the local Docker oracle")
+		t.Skip("set both AIDASTING_GRAFANA_VULN_URL and AIDASTING_GRAFANA_FIXED_URL for the local Docker oracle")
 	}
 	for _, tc := range []struct {
 		name, base string

@@ -5,12 +5,12 @@ import "fmt"
 
 // localScopeRule returns the scope paragraph about local/internal addresses.
 // By default it forbids scanning them (they're the operator's own machine). On
-// a self-hosted install that opted in via XALGORIX_ALLOW_LOCAL_TARGETS, the
+// a self-hosted install that opted in via AIDASTING_ALLOW_LOCAL_TARGETS, the
 // configured target may itself be local, so we tell the agent to test it —
 // the dashboard's own listener is still protected by the scope guard.
 func localScopeRule(allowLocal bool) string {
 	if allowLocal {
-		return "**LOCAL TARGETS ARE IN SCOPE (self-hosted mode):** This installation is configured to test locally-hosted apps. If the target above is a loopback/localhost/private/link-local address, it IS your intended target — test it fully. The one thing you must never touch is the Xalgorix dashboard's own listener."
+		return "**LOCAL TARGETS ARE IN SCOPE (self-hosted mode):** This installation is configured to test locally-hosted apps. If the target above is a loopback/localhost/private/link-local address, it IS your intended target — test it fully. The one thing you must never touch is the AI-DAST-ING dashboard's own listener."
 	}
 	return "**⛔ STRICTLY FORBIDDEN — NEVER scan these (they are the local server, NOT the target):**\n" +
 		"- 127.0.0.1, localhost, 0.0.0.0, ::1 (loopback addresses)\n" +

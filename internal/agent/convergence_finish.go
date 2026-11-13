@@ -1,7 +1,7 @@
 package agent
 
 // convergence_finish.go implements the OPTIONAL principled finish
-// (XALGORIX_CONVERGE_FINISH, default on). It is inert when the flag is off.
+// (AIDASTING_CONVERGE_FINISH, default on). It is inert when the flag is off.
 //
 // Problem it solves
 // -----------------
@@ -49,7 +49,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
 )
 
 const (

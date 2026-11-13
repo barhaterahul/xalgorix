@@ -21,7 +21,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/xalgord/xalgorix/v4/internal/methodology"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/methodology"
 )
 
 // phaseScope is the resolved phase filter for one plan build or subsystem

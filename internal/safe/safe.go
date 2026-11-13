@@ -1,5 +1,5 @@
 // Package safe provides panic-recovery and counter primitives that every
-// long-running goroutine, tool invocation, and HTTP handler in xalgorix
+// long-running goroutine, tool invocation, and HTTP handler in ai-dast-ing
 // shares. It is the lowest layer of the stability stack: a panic in a
 // recovered region produces exactly one structured log line, increments
 // the appropriate counter, and (optionally) promotes the panic value to a

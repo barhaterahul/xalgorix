@@ -255,7 +255,7 @@ export default function NewScanPage() {
           {t("newScan.heading")}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground text-pretty">
-          Configure target, scope, and methodology phases. Xalgorix orchestrates
+          Configure target, scope, and methodology phases. AI-DAST-ING orchestrates
           recon and active probes, then synthesizes findings with the agent.
         </p>
       </div>
@@ -316,12 +316,12 @@ export default function NewScanPage() {
               <span className="font-medium text-foreground">HAR capture</span>, or{" "}
               <span className="font-medium text-foreground">Postman collection</span>,{" "}
               <span className="font-medium text-foreground">Burp export</span>, or an{" "}
-              <span className="font-medium text-foreground">Android APK</span>. Xalgorix
+              <span className="font-medium text-foreground">Android APK</span>. AI-DAST-ING
               seeds the scan with the target&apos;s real endpoints and parameters (and any captured
               session), so it tests the actual attack surface instead of relying on crawling. This
               is the single biggest boost to black-box coverage. You can attach{" "}
               <span className="font-medium text-foreground">multiple files at once</span> — e.g. a
-              Postman collection plus its environment — and Xalgorix resolves{" "}
+              Postman collection plus its environment — and AI-DAST-ING resolves{" "}
               <code className="text-foreground">{"{{variables}}"}</code> and auth across them.
             </p>
             <div className="flex items-center gap-3">

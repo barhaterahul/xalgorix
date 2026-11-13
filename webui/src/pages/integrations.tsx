@@ -43,10 +43,10 @@ export default function IntegrationsPage() {
   const ai = version.data?.ai;
   const usesVercelGateway = ai?.gateway === "vercel";
   const discordWebhook = environment.data?.variables.find(
-    (variable) => variable.key === "XALGORIX_DISCORD_WEBHOOK",
+    (variable) => variable.key === "AIDASTING_DISCORD_WEBHOOK",
   );
   const telegramToken = environment.data?.variables.find(
-    (variable) => variable.key === "XALGORIX_TELEGRAM_BOT_TOKEN",
+    (variable) => variable.key === "AIDASTING_TELEGRAM_BOT_TOKEN",
   );
 
   const integrations: Integration[] = [

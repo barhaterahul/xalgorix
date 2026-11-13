@@ -1,4 +1,4 @@
-# Xalgorix — AI autonomous penetration testing platform (Kali, batteries-included).
+# AI-DAST-ING — AI autonomous penetration testing platform (Kali, batteries-included).
 #
 # The runtime is based on Kali Linux and pulls in Kali's pentest metapackages,
 # so hundreds of offensive-security tools are preinstalled. On top of that every
@@ -14,13 +14,13 @@
 # This is a large image (many GB — the full Kali toolset + wordlists + Go/Rust
 # toolchains). That is intentional; size is traded for a complete toolbox.
 #
-# Build:  docker build -t xalgorix .
+# Build:  docker build -t ai-dast-ing .
 # Run:    docker run --rm -p 9137:9137 \
 #           --privileged \
-#           -e XALGORIX_LLM=openai/gpt-5.6 \
-#           -e XALGORIX_API_KEY=your_provider_api_key \
-#           -v xalgorix-data:/data \
-#           ghcr.io/xalgord/xalgorix:latest
+#           -e AIDASTING_LLM=openai/gpt-5.6 \
+#           -e AIDASTING_API_KEY=your_provider_api_key \
+#           -v ai-dast-ing-data:/data \
+#           ghcr.io/barhaterahul/ai-dast-ing:latest
 #
 # --privileged gives the toolset the same host-like access it has when run
 # natively as root. Docker's DEFAULT sandbox drops capabilities (NET_ADMIN, …)
@@ -69,7 +69,7 @@ COPY . .
 COPY --from=webui /src/internal/web/static ./internal/web/static
 ARG VERSION=docker
 RUN CGO_ENABLED=0 go build -ldflags "-s -w -X main.version=${VERSION}" \
-    -o /out/xalgorix ./cmd/xalgorix/
+    -o /out/ai-dast-ing ./cmd/ai-dast-ing/
 
 # Latest versions of the Go tools the engine knows how to auto-install
 # (packageMap → goTools), into /go/bin. Best-effort per tool so one flaky
@@ -196,8 +196,8 @@ RUN getcap -r / 2>/dev/null | awk '{print $1}' | while read -r f; do \
 COPY --from=gobuild /usr/local/go /usr/local/go
 # Prebuilt latest Go security tools → on PATH via /root/go/bin.
 COPY --from=gobuild /go/bin/ /root/go/bin/
-# The xalgorix binary itself.
-COPY --from=gobuild /out/xalgorix /usr/local/bin/xalgorix
+# The ai-dast-ing binary itself.
+COPY --from=gobuild /out/ai-dast-ing /usr/local/bin/ai-dast-ing
 
 ENV PATH="/usr/local/go/bin:/root/go/bin:/root/.cargo/bin:/root/.local/bin:${PATH}" \
     GOBIN=/root/go/bin \
@@ -298,11 +298,11 @@ RUN if [ -x /root/go/bin/httpx ]; then ln -sf /root/go/bin/httpx /usr/bin/httpx;
 RUN if [ -x /root/go/bin/nuclei ]; then ln -sf /root/go/bin/nuclei /usr/bin/nuclei; \
     else echo "WARN: ProjectDiscovery nuclei not present in /root/go/bin"; fi
 
-ENV XALGORIX_BIND=0.0.0.0 \
-    XALGORIX_BROWSER_PATH=/usr/bin/chromium \
-    XALGORIX_DATA_DIR=/data \
-    XALGORIX_ALLOW_AUTO_INSTALL=1 \
-    XALGORIX_NO_AUTO_UPDATE=1
+ENV AIDASTING_BIND=0.0.0.0 \
+    AIDASTING_BROWSER_PATH=/usr/bin/chromium \
+    AIDASTING_DATA_DIR=/data \
+    AIDASTING_ALLOW_AUTO_INSTALL=1 \
+    AIDASTING_NO_AUTO_UPDATE=1
 
 # Entrypoint generates dashboard credentials when none are supplied (the image
 # binds 0.0.0.0, which the engine won't do without auth) so a plain

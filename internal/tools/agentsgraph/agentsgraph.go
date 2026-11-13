@@ -13,7 +13,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/tools"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
 )
 
 const (
@@ -66,10 +66,10 @@ type Graph struct {
 }
 
 // EffectiveMaxConcurrentAgents returns the configured maximum number of subagents
-// executing simultaneously per scan. When XALGORIX_MAX_CONCURRENT_AGENTS is set to 1,
+// executing simultaneously per scan. When AIDASTING_MAX_CONCURRENT_AGENTS is set to 1,
 // specialists run serially one at a time. Defaults to DefaultMaxConcurrentAgents (3).
 func EffectiveMaxConcurrentAgents() int {
-	if raw := strings.TrimSpace(os.Getenv("XALGORIX_MAX_CONCURRENT_AGENTS")); raw != "" {
+	if raw := strings.TrimSpace(os.Getenv("AIDASTING_MAX_CONCURRENT_AGENTS")); raw != "" {
 		if n, err := strconv.Atoi(raw); err == nil && n > 0 {
 			if n > 10 {
 				n = 10

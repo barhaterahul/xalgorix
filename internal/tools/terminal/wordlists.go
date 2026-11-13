@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-const bundledWebWordlistRelativePath = "tmp/wordlists/xalgorix-web-common.txt"
+const bundledWebWordlistRelativePath = "tmp/wordlists/ai-dast-ing-web-common.txt"
 
 // bundledWebWordlist is intentionally compact. It is a last-resort list for
 // prebuilt-binary installs where ffuf is present but the host does not have a
@@ -55,7 +55,7 @@ type wordlistReplacement struct {
 // normalizeCommandWordlists replaces a missing, literal system wordlist used
 // by a content-discovery tool. It first looks for the identical path suffix in
 // alternate SecLists roots (including the case-sensitive SecLists/seclists
-// variants), then common distro wordlists, and finally materializes Xalgorix's
+// variants), then common distro wordlists, and finally materializes AI-DAST-ING's
 // embedded fallback under the scan-local tmp/ directory.
 func normalizeCommandWordlists(command, workDir string) (string, string, error) {
 	return normalizeCommandWordlistsWithLocations(
@@ -258,7 +258,7 @@ func materializeBundledWebWordlist(workDir string) (string, error) {
 		return "", fmt.Errorf("inspect scan-local wordlist: %w", statErr)
 	}
 
-	tmp, err := os.CreateTemp(dir, ".xalgorix-web-common-*")
+	tmp, err := os.CreateTemp(dir, ".ai-dast-ing-web-common-*")
 	if err != nil {
 		return "", fmt.Errorf("create temporary wordlist: %w", err)
 	}

@@ -108,7 +108,7 @@ escalation candidate (ownership/role/MI/federation observed)
 - CA policies blocking the escalation context
 - Service principals disabled or credential-expired
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `terminal_execute` with az CLI + `az rest` (Graph) throughout
 - Python/MSAL for audience-specific token minting
 - Ledger: candidate paths with tenant-wide vs scoped impact; before/after proof for each verified escalation

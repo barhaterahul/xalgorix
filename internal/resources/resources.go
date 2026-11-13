@@ -98,8 +98,8 @@ type ToolLease struct {
 var (
 	// CPU: percentage of cores that constitutes the threshold.
 	// e.g., on 12 cores, 70% = load 8.4, 90% = load 10.8
-	cpuCautionPct  = envFloat("XALGORIX_CPU_CAUTION_PCT", 70)
-	cpuCriticalPct = envFloat("XALGORIX_CPU_CRITICAL_PCT", 90)
+	cpuCautionPct  = envFloat("AIDASTING_CPU_CAUTION_PCT", 70)
+	cpuCriticalPct = envFloat("AIDASTING_CPU_CRITICAL_PCT", 90)
 
 	// RAM: minimum free RAM in MB.
 	// Auto-scaled in init() based on total system RAM.
@@ -107,14 +107,14 @@ var (
 	ramCriticalMB int64
 
 	// Disk: minimum free disk in MB.
-	diskCautionMB  = envInt64("XALGORIX_DISK_CAUTION_MB", 2048)  // 2 GB
-	diskCriticalMB = envInt64("XALGORIX_DISK_CRITICAL_MB", 1024) // 1 GB
+	diskCautionMB  = envInt64("AIDASTING_DISK_CAUTION_MB", 2048)  // 2 GB
+	diskCriticalMB = envInt64("AIDASTING_DISK_CRITICAL_MB", 1024) // 1 GB
 
 	// Optional operator-defined concurrent instance capacity. When set, this is
 	// authoritative for scan admission; when unset, live RAM headroom computes
 	// the capacity automatically. Tool execution remains resource-throttled in
 	// either mode.
-	manualMaxInstances = envOptionalInt("XALGORIX_MAX_INSTANCES")
+	manualMaxInstances = envOptionalInt("AIDASTING_MAX_INSTANCES")
 
 	// Estimated load-average budget consumed by one heavy terminal tool.
 	heavyToolCPULoad float64
@@ -148,17 +148,17 @@ func init() {
 	cores := runtime.NumCPU()
 	totalMB, _ := readMemInfo()
 
-	// XALGORIX_SCAN_CPU_LOAD was a per-scan CPU budget input for the legacy
+	// AIDASTING_SCAN_CPU_LOAD was a per-scan CPU budget input for the legacy
 	// admission model that gated new scans on CPU load. Admission is now
 	// RAM-only; if an operator still has the env var set we log a one-time
 	// deprecation notice so they know it's a no-op.
-	if _, ok := os.LookupEnv("XALGORIX_SCAN_CPU_LOAD"); ok {
-		log.Printf("[RESOURCES] XALGORIX_SCAN_CPU_LOAD is deprecated and ignored; scan admission is now RAM-only. Use XALGORIX_HEAVY_TOOL_CPU_LOAD to tune per-tool CPU throttling.")
+	if _, ok := os.LookupEnv("AIDASTING_SCAN_CPU_LOAD"); ok {
+		log.Printf("[RESOURCES] AIDASTING_SCAN_CPU_LOAD is deprecated and ignored; scan admission is now RAM-only. Use AIDASTING_HEAVY_TOOL_CPU_LOAD to tune per-tool CPU throttling.")
 	}
 
-	heavyToolCPULoad = envFloatDefault("XALGORIX_HEAVY_TOOL_CPU_LOAD", autoHeavyToolCPULoad(cores))
-	scanOverheadMB = envInt64Default("XALGORIX_SCAN_OVERHEAD_MB", autoScanOverheadMB(totalMB))
-	scanMemoryBudgetMB = envInt64Default("XALGORIX_SCAN_MEMORY_BUDGET_MB", autoScanMemoryBudgetMB(totalMB, cores))
+	heavyToolCPULoad = envFloatDefault("AIDASTING_HEAVY_TOOL_CPU_LOAD", autoHeavyToolCPULoad(cores))
+	scanOverheadMB = envInt64Default("AIDASTING_SCAN_OVERHEAD_MB", autoScanOverheadMB(totalMB))
+	scanMemoryBudgetMB = envInt64Default("AIDASTING_SCAN_MEMORY_BUDGET_MB", autoScanMemoryBudgetMB(totalMB, cores))
 
 	// ── RAM thresholds ──
 	// Caution: 25% of total RAM (4GB VPS → 1024MB, 24GB → 6144MB)
@@ -171,15 +171,15 @@ func init() {
 	if autoCritical < 256 {
 		autoCritical = 256
 	}
-	ramCautionMB = envInt64("XALGORIX_RAM_CAUTION_MB", autoCaution)
-	ramCriticalMB = envInt64("XALGORIX_RAM_CRITICAL_MB", autoCritical)
+	ramCautionMB = envInt64("AIDASTING_RAM_CAUTION_MB", autoCaution)
+	ramCriticalMB = envInt64("AIDASTING_RAM_CRITICAL_MB", autoCritical)
 
 	if scanMemoryBudgetMB < 1024 {
-		log.Printf("[RESOURCES] XALGORIX_SCAN_MEMORY_BUDGET_MB=%d too low, using 1024", scanMemoryBudgetMB)
+		log.Printf("[RESOURCES] AIDASTING_SCAN_MEMORY_BUDGET_MB=%d too low, using 1024", scanMemoryBudgetMB)
 		scanMemoryBudgetMB = 1024
 	}
 	if scanOverheadMB < 128 {
-		log.Printf("[RESOURCES] XALGORIX_SCAN_OVERHEAD_MB=%d too low, using 128", scanOverheadMB)
+		log.Printf("[RESOURCES] AIDASTING_SCAN_OVERHEAD_MB=%d too low, using 128", scanOverheadMB)
 		scanOverheadMB = 128
 	}
 
@@ -190,7 +190,7 @@ func init() {
 	// control still uses a dynamic memory estimate, but hard limiting is only
 	// applied when the operator explicitly configures it.
 	var toolMemLimitMB int64
-	if override, ok := envOptionalInt64("XALGORIX_HEAVY_TOOL_MEM_LIMIT_MB"); ok {
+	if override, ok := envOptionalInt64("AIDASTING_HEAVY_TOOL_MEM_LIMIT_MB"); ok {
 		toolMemLimitMB = override
 	}
 	HeavyToolMemLimitBytes = toolMemLimitMB * 1024 * 1024
@@ -303,7 +303,7 @@ func currentLevelForStats(stats SystemStats) (Level, string) {
 //     and tool output) and is otherwise not a slot multiplier.
 //
 // Algorithm:
-//   - If XALGORIX_MAX_INSTANCES is explicitly configured, use it as the total
+//   - If AIDASTING_MAX_INSTANCES is explicitly configured, use it as the total
 //     instance capacity instead of the RAM-derived estimate.
 //   - Otherwise compute RAM slots from available RAM and per-instance memory
 //     budget.
@@ -402,7 +402,7 @@ func effectiveMaxInstancesForAdmissionStats(
 	effective := runningCount + availableSlots
 	capacityMode := "adaptive"
 	if manualMaxInstances > 0 {
-		// Setting XALGORIX_MAX_INSTANCES is an explicit operator decision about
+		// Setting AIDASTING_MAX_INSTANCES is an explicit operator decision about
 		// how many scan coordinators this host should admit. Do not silently
 		// replace it with a smaller RAM estimate; the tool-lease layer still
 		// throttles memory/CPU-heavy subprocesses under pressure.
@@ -572,11 +572,11 @@ func hostReserveMB(totalMB int64) int64 {
 }
 
 // configureGoRuntimeLimits sets the Go runtime's soft memory limit and GC
-// percentage. XALGORIX_GO_MEM_LIMIT_MB takes precedence (0 leaves the runtime
+// percentage. AIDASTING_GO_MEM_LIMIT_MB takes precedence (0 leaves the runtime
 // limit unchanged). Otherwise a GOMEMLIMIT the runtime already applied is left
 // alone. Otherwise the limit scales with host RAM (autoGoMemoryLimitMB).
 func configureGoRuntimeLimits(totalMB int64) {
-	override, hasOverride := envOptionalInt64("XALGORIX_GO_MEM_LIMIT_MB")
+	override, hasOverride := envOptionalInt64("AIDASTING_GO_MEM_LIMIT_MB")
 	if !hasOverride {
 		// The runtime ignores an empty GOMEMLIMIT, so treat it as unset.
 		if os.Getenv("GOMEMLIMIT") != "" {
@@ -1062,7 +1062,7 @@ func LiveMaxInstances() int {
 	return n
 }
 
-// ProtectCurrentProcess lowers the OOM-killer score for the xalgorix parent
+// ProtectCurrentProcess lowers the OOM-killer score for the ai-dast-ing parent
 // process. Child scan tools are assigned a higher score when they launch, so
 // under memory pressure the kernel should kill a tool before the web service.
 func ProtectCurrentProcess() {
@@ -1071,11 +1071,11 @@ func ProtectCurrentProcess() {
 	}
 	if err := os.WriteFile("/proc/self/oom_score_adj", []byte("-500"), 0644); err != nil { //nolint:gosec // G306: procfs ignores the file mode
 		if !os.IsPermission(err) {
-			log.Printf("[RESOURCES] Cannot protect xalgorix from OOM killer: %v", err)
+			log.Printf("[RESOURCES] Cannot protect ai-dast-ing from OOM killer: %v", err)
 		}
 		return
 	}
-	log.Printf("[RESOURCES] xalgorix OOM score set to -500")
+	log.Printf("[RESOURCES] ai-dast-ing OOM score set to -500")
 }
 
 // ── Portable host metrics ──

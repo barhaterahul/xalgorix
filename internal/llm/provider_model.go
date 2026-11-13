@@ -4,7 +4,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/xalgord/xalgorix/v4/internal/providers"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
 )
 
 // normalizeProviderModel applies provider-specific normalization without

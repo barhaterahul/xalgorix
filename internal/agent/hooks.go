@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
 )
 
 // ── Hook Events ──────────────────────────────────────────────────────────────
@@ -337,7 +337,7 @@ type ScanState struct {
 	TotalNoToolResponses int
 
 	// NoToolAbortLimit is the consecutive no-tool-call count at which the scan
-	// force-stops (from config XALGORIX_NO_TOOL_ABORT_AT). 0 = never give up;
+	// force-stops (from config AIDASTING_NO_TOOL_ABORT_AT). 0 = never give up;
 	// the loaded default is 30, which bounds malformed-output loops while still
 	// allowing normal parser recovery. Set from cfg when the agent initializes
 	// ScanState; see noToolAbortLimit for the explicit-zero behavior.
@@ -455,7 +455,7 @@ type ScanState struct {
 	OASTVerificationNudged       map[string]bool // raw callback tokens already routed to class-aware verify_oob
 	OASTVerificationReminders    map[string]int  // bounded re-nudges when a positive poll is followed by more polling instead of verify_oob
 
-	// ── Epoch-based coverage convergence (XALGORIX_EPOCH_COVERAGE) ──
+	// ── Epoch-based coverage convergence (AIDASTING_EPOCH_COVERAGE) ──
 	// EpochCoverage mirrors cfg.EpochCoverage (set once at scan start) so the
 	// coverage predicates stay pure functions of ScanState.
 	EpochCoverage bool
@@ -3366,7 +3366,7 @@ After that note succeeds, resume your scan plan from the first uncompleted task.
 
 Your previous response was discarded because it contained provider control tokens or malformed tool syntax and could not execute. Do not repeat it, do not emit [[, and do not output prose-only planning.
 
-Your NEXT response must contain exactly one executable Xalgorix XML call, for example:
+Your NEXT response must contain exactly one executable AI-DAST-ING XML call, for example:
 <function=terminal_execute>
 <parameter=command>curl -sk https://TARGET/path</parameter>
 </function>`, malformedReason)}
@@ -3804,13 +3804,13 @@ func reconcilePlan(state *ScanState) {
 	// Scrub scanner-side noise from endpoint accounting before any coverage math
 	// runs, so a baseline frozen from polluted DiscoveredEndpoints self-heals and
 	// bogus obligations stop holding the scan open (no-op unless the
-	// XALGORIX_ENDPOINT_HYGIENE flag is on).
+	// AIDASTING_ENDPOINT_HYGIENE flag is on).
 	if state.EndpointHygiene {
 		sanitizeEndpointState(state)
 	}
 	// Open epoch 1 once there is surface to freeze, so every coverage
 	// evaluation below sees a stable denominator (no-op unless the
-	// XALGORIX_EPOCH_COVERAGE flag is on).
+	// AIDASTING_EPOCH_COVERAGE flag is on).
 	ensureCoverageEpoch(state)
 	for _, t := range state.Plan.Tasks {
 		if t.Status != TaskPending && t.Status != TaskActive {

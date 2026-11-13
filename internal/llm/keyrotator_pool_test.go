@@ -3,7 +3,7 @@ package llm
 import (
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
 )
 
 func TestKeyRotatorContains(t *testing.T) {
@@ -24,7 +24,7 @@ func TestKeyRotatorContains(t *testing.T) {
 }
 
 // Reproduces the production config that pinned all traffic to one key:
-// XALGORIX_API_KEY empty, both keys supplied via XALGORIX_API_KEYS, and a
+// AIDASTING_API_KEY empty, both keys supplied via AIDASTING_API_KEYS, and a
 // provider profile that resolves every request to the first pooled key. The old
 // gate (ep.APIKey == cfg.APIKey) failed because the pooled key != empty primary,
 // so rotation never fired. It must now round-robin across BOTH keys.

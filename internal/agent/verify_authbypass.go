@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
-	"github.com/xalgord/xalgorix/v4/internal/scopeguard"
-	"github.com/xalgord/xalgorix/v4/internal/tools"
-	"github.com/xalgord/xalgorix/v4/internal/tools/httpclient"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scopeguard"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/httpclient"
 )
 
 // verify_authbypass confirms an authentication/authorization ENFORCEMENT bypass
@@ -110,7 +110,7 @@ func (a *Agent) verifyAuthBypassTool(args map[string]string) (tools.Result, erro
 	// if it is also served, remember its body so a variant that merely returns
 	// that same shell is not mistaken for a reached protected handler.
 	catchAllNorm := ""
-	softURL := origin + canonicalPath + "-xalgorix-nonexistent-" + strconv.FormatInt(time.Now().UnixNano(), 36) + query
+	softURL := origin + canonicalPath + "-ai-dast-ing-nonexistent-" + strconv.FormatInt(time.Now().UnixNano(), 36) + query
 	if soft, softErr := httpclient.SendRaw(httpclient.RawRequest{
 		Method: "GET", URL: softURL, FollowRedirects: false, TimeoutSec: 30,
 	}); softErr == nil && soft.StatusCode >= 200 && soft.StatusCode < 300 {

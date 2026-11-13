@@ -3,7 +3,7 @@ package llm
 import (
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
 )
 
 // Kimi K2.6 / K3 reject any temperature other than 1 ("only 1 is allowed for
@@ -33,7 +33,7 @@ func TestModelRequiresFixedTemperature(t *testing.T) {
 
 // For a fixed-temperature model, effectiveTemperature must always return 1 —
 // even after the agent's per-role SetTemperature override (e.g. validator 0.0)
-// and regardless of the configured XALGORIX_TEMPERATURE.
+// and regardless of the configured AIDASTING_TEMPERATURE.
 func TestEffectiveTemperature_FixedModelIgnoresOverrideAndConfig(t *testing.T) {
 	half := 0.5
 	c := NewClient(&config.Config{LLM: "openai/kimi-k2.6", APIKey: "k", Temperature: &half})

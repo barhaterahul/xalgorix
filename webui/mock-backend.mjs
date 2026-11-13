@@ -146,7 +146,7 @@ const llmSettings = {
   maxIterations: 40,
   geminiApiKey: "",
   hasGeminiApiKey: false,
-  envFile: "~/.xalgorix.env",
+  envFile: "~/.ai-dast-ing.env",
   provider: "",
   authMethod: "api_key",
   profiles: [],
@@ -453,7 +453,7 @@ const server = http.createServer(async (req, res) => {
   if (reportMatch && method === "GET") {
     const id = reportMatch[1];
     const html = `<!doctype html><html><body style="font-family:sans-serif">
-<h1>Xalgorix scan report</h1>
+<h1>AI-DAST-ING scan report</h1>
 <p>Report for scan <code>${id}</code> (mock build).</p>
 </body></html>`;
     return send(res, html, 200, { "content-type": "text/html; charset=utf-8" });
@@ -501,7 +501,7 @@ const server = http.createServer(async (req, res) => {
     return send(res, llmSettings);
   }
   if (method === "GET" && url === "/api/settings/environment") {
-    return send(res, { envFile: "~/.xalgorix.env", variables: [], restartRequired: false });
+    return send(res, { envFile: "~/.ai-dast-ing.env", variables: [], restartRequired: false });
   }
   if (method === "GET" && url === "/api/legacy-import/status") {
     return send(res, { count: 0, dismissed: true });

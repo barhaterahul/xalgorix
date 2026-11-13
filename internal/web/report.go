@@ -18,8 +18,8 @@ import (
 
 	"github.com/go-pdf/fpdf"
 
-	"github.com/xalgord/xalgorix/v4/internal/methodology"
-	"github.com/xalgord/xalgorix/v4/internal/reporting"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/methodology"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/reporting"
 )
 
 type reportPalette struct {
@@ -682,7 +682,7 @@ func (s *Server) generateReport(scan *ScanRecord) (string, error) {
 	pdf.Ln(8)
 	pdf.SetFont("Helvetica", "B", 10)
 	setColor(white)
-	pdf.CellFormat(182, 5, "Xalgorix", "", 1, "L", false, 0, "")
+	pdf.CellFormat(182, 5, "AI-DAST-ING", "", 1, "L", false, 0, "")
 	pdf.SetFont("Helvetica", "", 8)
 	setColor(gray)
 	pdf.CellFormat(182, 5, tr("Autonomous AI-powered security assessment"), "", 1, "L", false, 0, "")
@@ -872,7 +872,7 @@ func (s *Server) generateReport(scan *ScanRecord) (string, error) {
 	pdf.SetFont("Helvetica", "", 9)
 	setColor(white)
 	pdf.SetX(10)
-	pdf.MultiCell(190, 4.5, tr("Xalgorix follows a comprehensive 22-phase penetration testing methodology "+
+	pdf.MultiCell(190, 4.5, tr("AI-DAST-ING follows a comprehensive 22-phase penetration testing methodology "+
 		"aligned with OWASP, PTES, and industry best practices. Each phase is executed by an autonomous AI agent "+
 		"with tool access to terminal, browser, and specialized security utilities."), "", "L", false)
 	pdf.Ln(4)
@@ -1802,7 +1802,7 @@ func (s *Server) generateReport(scan *ScanRecord) (string, error) {
 	if strings.TrimSpace(reportID) == "" {
 		reportID = "scan"
 	}
-	filename := fmt.Sprintf("xalgorix_report_%s.pdf", reportID)
+	filename := fmt.Sprintf("aidasting_report_%s.pdf", reportID)
 	// Try saving to the scan directory first, fall back to dataDir
 	outPath := filepath.Join(s.currentScanDir, filename)
 	if s.currentScanDir == "" {

@@ -136,7 +136,7 @@ var contentDiscoveryArtifactMarkers = []string{
 func isContentDiscoveryArtifact(path string) bool {
 	lp := strings.ToLower(strings.SplitN(path, "?", 2)[0])
 	// The engine's own 404-baseline control probe (random hex suffix).
-	if strings.Contains(lp, "__xalgorix") || strings.Contains(lp, "nonexistent_control") {
+	if strings.Contains(lp, "__ai-dast-ing") || strings.Contains(lp, "nonexistent_control") {
 		return true
 	}
 	for _, m := range contentDiscoveryArtifactMarkers {

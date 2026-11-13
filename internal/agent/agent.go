@@ -17,29 +17,29 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/attacksurface"
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/llm"
-	"github.com/xalgord/xalgorix/v4/internal/safe"
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
-	"github.com/xalgord/xalgorix/v4/internal/scopeguard"
-	"github.com/xalgord/xalgorix/v4/internal/tools"
-	"github.com/xalgord/xalgorix/v4/internal/tools/agentmail"
-	"github.com/xalgord/xalgorix/v4/internal/tools/agentsgraph"
-	"github.com/xalgord/xalgorix/v4/internal/tools/browser"
-	"github.com/xalgord/xalgorix/v4/internal/tools/codesearch"
-	"github.com/xalgord/xalgorix/v4/internal/tools/fileedit"
-	"github.com/xalgord/xalgorix/v4/internal/tools/finish"
-	"github.com/xalgord/xalgorix/v4/internal/tools/httpclient"
-	"github.com/xalgord/xalgorix/v4/internal/tools/notes"
-	oobtool "github.com/xalgord/xalgorix/v4/internal/tools/oob"
-	"github.com/xalgord/xalgorix/v4/internal/tools/pageagent"
-	"github.com/xalgord/xalgorix/v4/internal/tools/proxy"
-	"github.com/xalgord/xalgorix/v4/internal/tools/python"
-	"github.com/xalgord/xalgorix/v4/internal/tools/reporting"
-	skillstool "github.com/xalgord/xalgorix/v4/internal/tools/skills"
-	"github.com/xalgord/xalgorix/v4/internal/tools/terminal"
-	"github.com/xalgord/xalgorix/v4/internal/tools/websearch"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/attacksurface"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/llm"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/safe"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scopeguard"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/agentmail"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/agentsgraph"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/browser"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/codesearch"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/fileedit"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/finish"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/httpclient"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/notes"
+	oobtool "github.com/barhaterahul/ai-dast-ing/v4/internal/tools/oob"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/pageagent"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/proxy"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/python"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/reporting"
+	skillstool "github.com/barhaterahul/ai-dast-ing/v4/internal/tools/skills"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/terminal"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/websearch"
 )
 
 var thinkRegex = regexp.MustCompile(`(?s)<think>.*?</think>`)
@@ -885,7 +885,7 @@ func (a *Agent) maybeAutoDelegate(targets []string) string {
 		a.state.ReconOnlyMode || a.state.DelegationAttempted {
 		return ""
 	}
-	// Single-agent mode (XALGORIX_DISABLE_AUTO_DELEGATE=true, or every
+	// Single-agent mode (AIDASTING_DISABLE_AUTO_DELEGATE=true, or every
 	// specialist lane operator-disabled): an intentional configuration, not
 	// a failure state. No wave, no defer diagnostics, no reminders — and
 	// DelegationAttempted must NEVER be set, because finish/adaptive logic
@@ -1201,7 +1201,7 @@ func (a *Agent) delegationEnabled() bool {
 }
 
 // specialistDisabled reports whether the named specialist lane is turned off
-// via XALGORIX_DISABLED_SPECIALISTS (comma-separated lane names). Names match
+// via AIDASTING_DISABLED_SPECIALISTS (comma-separated lane names). Names match
 // the profile Role exactly and are matched case-insensitively.
 func (a *Agent) specialistDisabled(role string) bool {
 	if a == nil || a.cfg == nil || len(a.cfg.DisabledSpecialists) == 0 {
@@ -2299,7 +2299,7 @@ func (a *Agent) Run(targets []string, instruction string) {
 		}
 		// Enforce the tool-call budget WITHIN the batch. overBudget is only
 		// checked at iteration start, so a single response emitting many calls
-		// could otherwise blow past XALGORIX_MAX_TOOL_CALLS. Truncate the batch
+		// could otherwise blow past AIDASTING_MAX_TOOL_CALLS. Truncate the batch
 		// to the remaining allowance so the cap is honored precisely.
 		requestedCalls := len(toolCalls)
 		allowedCalls := requestedCalls

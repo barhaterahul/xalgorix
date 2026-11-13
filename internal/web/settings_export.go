@@ -21,8 +21,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/auth"
-	"github.com/xalgord/xalgorix/v4/internal/llm"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/auth"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/llm"
 )
 
 // settingsExportVersion identifies the backup format. Bump on breaking
@@ -82,7 +82,7 @@ func (s *Server) handleSettingsExport(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Header().Set("Content-Disposition", `attachment; filename="xalgorix-settings-backup.json"`)
+	w.Header().Set("Content-Disposition", `attachment; filename="ai-dast-ing-settings-backup.json"`)
 	writeJSONStatus(w, http.StatusOK, out)
 }
 

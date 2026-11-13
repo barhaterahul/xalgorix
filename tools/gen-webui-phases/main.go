@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/xalgord/xalgorix/v4/internal/methodology"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/methodology"
 )
 
 // gen-webui-phases regenerates webui/src/methodology-phases.json from the

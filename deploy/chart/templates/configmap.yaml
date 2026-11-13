@@ -2,9 +2,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "xalgorix.configMapName" . }}
+  name: {{ include "ai-dast-ing.configMapName" . }}
   labels:
-    {{- include "xalgorix.labels" . | nindent 4 }}
+    {{- include "ai-dast-ing.labels" . | nindent 4 }}
 data:
 {{- range $key, $value := .Values.env.config }}
   {{ $key }}: {{ $value | quote }}

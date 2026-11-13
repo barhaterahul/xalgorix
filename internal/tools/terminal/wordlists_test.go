@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
 )
 
 func TestPortableSecListsRootsIncludeBothCaseSpellings(t *testing.T) {
@@ -243,7 +243,7 @@ printf 'WORDLIST=%s\n' "$wordlist"
 		scanctx.Deactivate(sc.ID)
 	}()
 
-	missing := "/opt/SecLists/Discovery/Web-Content/xalgorix-issue-630-missing.txt"
+	missing := "/opt/SecLists/Discovery/Web-Content/ai-dast-ing-issue-630-missing.txt"
 	output, exitCode := runShellInternal(sc.ID, "ffuf -u https://example.test/FUZZ -w "+missing)
 	if exitCode != 0 {
 		t.Fatalf("runShellInternal() exit = %d, output:\n%s", exitCode, output)

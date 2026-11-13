@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/providers"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
 )
 
 func TestDiscoverProviderModelsOpenAICompatible(t *testing.T) {
@@ -117,8 +117,8 @@ func TestProviderModelsURLsPreservesZAIV4(t *testing.T) {
 }
 
 func TestModelDiscoveryConfigMatchesActiveProviderByLLMProvider(t *testing.T) {
-	// Providers routed via XALGORIX_LLM_PROVIDER (for example DeepSeek) persist a
-	// bare, provider-native model name with no "<provider>/" prefix on XALGORIX_LLM
+	// Providers routed via AIDASTING_LLM_PROVIDER (for example DeepSeek) persist a
+	// bare, provider-native model name with no "<provider>/" prefix on AIDASTING_LLM
 	// (LLMProvider="deepseek", LLM="deepseek-v4-pro"). Discovery must recognize the
 	// active provider from LLMProvider and reuse the saved credentials instead of
 	// failing with "save or select credentials before scanning models".

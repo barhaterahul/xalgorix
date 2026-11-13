@@ -341,7 +341,7 @@ export default function ScanDetailPage() {
           <CardHeader>
             <CardTitle className="text-sm">{t("scanDetail.phaseProgress")}</CardTitle>
             <CardDescription>
-              Xalgorix runs a {PHASES.length}-phase autonomous methodology.
+              AI-DAST-ING runs a {PHASES.length}-phase autonomous methodology.
               Currently:{" "}
               <span className="text-foreground">
                 {currentPhaseLabel(scan.current_phase)}
@@ -1218,7 +1218,7 @@ function EventsTab({
         events={events}
         filter={filter}
         onFilterChange={setFilter}
-        exportFilePrefix={`xalgorix-${target || scanId}-events`}
+        exportFilePrefix={`ai-dast-ing-${target || scanId}-events`}
         exportScope={scanId}
         emptyTitle="No events yet"
         emptyDescription="Once the scan starts producing output it will stream here."

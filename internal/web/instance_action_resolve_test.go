@@ -212,7 +212,7 @@ func TestExactStopHeaderNeverResolvesCanonicalRecordAlias(t *testing.T) {
 	s.instances[inst.ID] = inst
 
 	req := httptest.NewRequest(http.MethodPost, "/api/instances/canonical-record/stop", nil)
-	req.Header.Set("X-Xalgorix-Exact-Instance", "1")
+	req.Header.Set("X-AI-DAST-ING-Exact-Instance", "1")
 	rr := httptest.NewRecorder()
 	s.handleInstanceAction(rr, req)
 	if rr.Code != http.StatusNotFound {

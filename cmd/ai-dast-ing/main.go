@@ -1,4 +1,4 @@
-// Xalgorix — Autonomous AI Pentesting Engine
+// AI-DAST-ING — Autonomous AI Pentesting Engine
 package main
 
 import (
@@ -16,12 +16,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/proxy"
-	"github.com/xalgord/xalgorix/v4/internal/resources"
-	"github.com/xalgord/xalgorix/v4/internal/scanheaders"
-	"github.com/xalgord/xalgorix/v4/internal/tui"
-	"github.com/xalgord/xalgorix/v4/internal/web"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/proxy"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/resources"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanheaders"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tui"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/web"
 )
 
 // version can be set by the release build with -ldflags. Tagged Go installs
@@ -64,7 +64,7 @@ func main() {
 			fmt.Fprintf(os.Stderr, "\n%s\n", crashMsg)
 
 			// Also log to a file so it survives systemd journal rotation
-			if f, err := os.OpenFile("/tmp/xalgorix-crash.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600); err == nil {
+			if f, err := os.OpenFile("/tmp/ai-dast-ing-crash.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600); err == nil {
 				_, _ = fmt.Fprintf(f, "\n=== CRASH @ %s ===\n%s\n", time.Now().Format(time.RFC3339), crashMsg)
 				f.Close()
 			}
@@ -106,7 +106,7 @@ func main() {
 	}
 
 	if args.version {
-		fmt.Printf("xalgorix v%s\n", version)
+		fmt.Printf("ai-dast-ing v%s\n", version)
 		os.Exit(0)
 	}
 
@@ -131,7 +131,7 @@ func main() {
 	}
 
 	if args.update {
-		fmt.Println("Updating xalgorix to latest version...")
+		fmt.Println("Updating ai-dast-ing to latest version...")
 
 		// Fetch latest release info from GitHub
 		latestVer, downloadURL := fetchLatestRelease()
@@ -139,7 +139,7 @@ func main() {
 			fmt.Fprintf(os.Stderr, "❌ Failed to fetch latest version from GitHub\n")
 			fmt.Fprintf(os.Stderr, "   This is usually caused by GitHub API rate limiting (60 req/hour for unauthenticated users).\n")
 			fmt.Fprintf(os.Stderr, "   Try again in a few minutes, or update manually:\n")
-			fmt.Fprintf(os.Stderr, "   wget -O $(which xalgorix) https://github.com/xalgorix/xalgorix/releases/latest/download/xalgorix-linux-amd64\n")
+			fmt.Fprintf(os.Stderr, "   wget -O $(which ai-dast-ing) https://github.com/ai-dast-ing/ai-dast-ing/releases/latest/download/ai-dast-ing-linux-amd64\n")
 			os.Exit(1)
 		}
 
@@ -171,13 +171,13 @@ func main() {
 	goInstallFallback:
 		// Fallback: use go install with explicit version
 		fmt.Printf("Installing v%s via go install...\n", latestVer)
-		cmd := exec.Command("go", "install", "-v", "-ldflags", "-X main.version="+latestVer, "github.com/xalgord/xalgorix/v4/cmd/xalgorix@v"+latestVer)
+		cmd := exec.Command("go", "install", "-v", "-ldflags", "-X main.version="+latestVer, "github.com/barhaterahul/ai-dast-ing/v4/cmd/ai-dast-ing@v"+latestVer)
 		// GOPRIVATE makes the toolchain skip the public proxy and checksum DB
 		// for our module path; GOSUMDB=off avoids hitting sum.golang.org for
 		// this private module. (GONOSUMCHECK / GONOSUMDB are not real env vars.)
 		cmd.Env = append(os.Environ(),
 			"GOPROXY=direct",
-			"GOPRIVATE=github.com/xalgord/*",
+			"GOPRIVATE=github.com/barhaterahul/*",
 			"GOSUMDB=off",
 		)
 		cmd.Stdout = os.Stdout
@@ -185,7 +185,7 @@ func main() {
 		if err := cmd.Run(); err != nil {
 			fmt.Fprintf(os.Stderr, "❌ Update failed: %v\n", err)
 			fmt.Fprintf(os.Stderr, "\nManual install:\n")
-			fmt.Fprintf(os.Stderr, "  GOPROXY=direct GOPRIVATE=github.com/xalgord/* GOSUMDB=off go install -v github.com/xalgord/xalgorix/v4/cmd/xalgorix@v%s\n", latestVer)
+			fmt.Fprintf(os.Stderr, "  GOPROXY=direct GOPRIVATE=github.com/barhaterahul/* GOSUMDB=off go install -v github.com/barhaterahul/ai-dast-ing/v4/cmd/ai-dast-ing@v%s\n", latestVer)
 			os.Exit(1)
 		}
 
@@ -195,7 +195,7 @@ func main() {
 		if goPath == "" {
 			goPath = filepath.Join(os.Getenv("HOME"), "go")
 		}
-		goBinPath := filepath.Join(goPath, "bin", "xalgorix")
+		goBinPath := filepath.Join(goPath, "bin", "ai-dast-ing")
 		if goBinPath != installPath {
 			if _, err := os.Stat(goBinPath); err == nil {
 				// On Linux, you can't overwrite a running binary ("text file busy").
@@ -226,8 +226,8 @@ func main() {
 
 	// -------------------------------------------------------------------------
 	// Proxy initialisation — must run before any outbound HTTP requests.
-	// Reads XALGORIX_USE_PROXY, XALGORIX_PROXY_URL, XALGORIX_PROXY_FILE and
-	// XALGORIX_PROXY_ROTATION from the already-loaded config.
+	// Reads AIDASTING_USE_PROXY, AIDASTING_PROXY_URL, AIDASTING_PROXY_FILE and
+	// AIDASTING_PROXY_ROTATION from the already-loaded config.
 	// When USE_PROXY is false (the default) this is a no-op and all existing
 	// behavior is preserved.
 	// -------------------------------------------------------------------------
@@ -279,12 +279,12 @@ func main() {
 
 		fmt.Print(tui.Banner)
 		fmt.Println()
-		fmt.Printf("\n  Xalgorix Web UI starting on port %d...\n", port)
+		fmt.Printf("\n  AI-DAST-ING Web UI starting on port %d...\n", port)
 		printServiceAccessInfo(cfg, port)
 		fmt.Println()
 
 		// Opt-in profiling: starts a loopback pprof listener only when
-		// XALGORIX_PPROF_ADDR is set (disabled by default). See pprof.go.
+		// AIDASTING_PPROF_ADDR is set (disabled by default). See pprof.go.
 		web.StartDebugServerFromEnv()
 
 		srv := web.NewServer(cfg, port)
@@ -297,7 +297,7 @@ func main() {
 
 	// A code-first scan (--code-scan review|provision) makes the source the
 	// subject, so --target is not required — but --source (or
-	// XALGORIX_SOURCE_REPO) must supply the codebase.
+	// AIDASTING_SOURCE_REPO) must supply the codebase.
 	codeScan := strings.ToLower(strings.TrimSpace(args.codeScan))
 	if args.source != "" {
 		cfg.SourceRepo = args.source
@@ -317,7 +317,7 @@ func main() {
 	if err := cfg.Validate(); err != nil {
 		fmt.Fprintf(os.Stderr, "Configuration error: %s\n\n", err)
 		fmt.Fprintln(os.Stderr, "Run the interactive setup wizard:")
-		fmt.Fprintln(os.Stderr, "  xalgorix --setup")
+		fmt.Fprintln(os.Stderr, "  ai-dast-ing --setup")
 		os.Exit(1)
 	}
 
@@ -448,9 +448,9 @@ func printUsage() {
 	fmt.Println("  Autonomous AI Pentesting Engine")
 	fmt.Println()
 	fmt.Println("Usage:")
-	fmt.Println("  xalgorix --setup                Interactive first-time setup")
-	fmt.Printf("  xalgorix --web                  Start the Web UI (default port %d)\n", defaultWebPort)
-	fmt.Println("  xalgorix --target <url> [flags]  Run a scan in CLI mode")
+	fmt.Println("  ai-dast-ing --setup                Interactive first-time setup")
+	fmt.Printf("  ai-dast-ing --web                  Start the Web UI (default port %d)\n", defaultWebPort)
+	fmt.Println("  ai-dast-ing --target <url> [flags]  Run a scan in CLI mode")
 	fmt.Println()
 	fmt.Println("Modes:")
 	fmt.Println("      --setup               Configure provider, model, and API key interactively")
@@ -473,7 +473,7 @@ func printUsage() {
 	fmt.Println("  -s, --source <repo|path>  Codebase to scan (git URL or local path)")
 	fmt.Println("      --code-scan <mode>    Code-first scan: 'review' (SAST, no target)")
 	fmt.Println("                            or 'provision' (build+run source, then DAST)")
-	fmt.Println("  -m, --model <name>        LLM model (overrides XALGORIX_LLM)")
+	fmt.Println("  -m, --model <name>        LLM model (overrides AIDASTING_LLM)")
 	fmt.Println("  -v, --version             Show version")
 	fmt.Println("  -up, --update             Update to latest version")
 	fmt.Println("  --start                  Start as background service")
@@ -482,50 +482,50 @@ func printUsage() {
 	fmt.Println("  -h, --help                Show help")
 	fmt.Println()
 	fmt.Println("Proxy:")
-	fmt.Println("  XALGORIX_USE_PROXY=true             Enable proxy routing")
-	fmt.Println("  XALGORIX_PROXY_REQUIRED=true        Require single upstream proxy for target HTTP/browser traffic")
-	fmt.Println("  XALGORIX_PROXY_URL=ip:port          Single proxy (HTTP/SOCKS5)")
-	fmt.Println("  XALGORIX_PROXY_FILE=proxies.txt     Proxy list with rotation")
-	fmt.Println("  XALGORIX_PROXY_ROTATION=roundrobin  Rotation: roundrobin or random")
+	fmt.Println("  AIDASTING_USE_PROXY=true             Enable proxy routing")
+	fmt.Println("  AIDASTING_PROXY_REQUIRED=true        Require single upstream proxy for target HTTP/browser traffic")
+	fmt.Println("  AIDASTING_PROXY_URL=ip:port          Single proxy (HTTP/SOCKS5)")
+	fmt.Println("  AIDASTING_PROXY_FILE=proxies.txt     Proxy list with rotation")
+	fmt.Println("  AIDASTING_PROXY_ROTATION=roundrobin  Rotation: roundrobin or random")
 	fmt.Println()
 	fmt.Println("Examples:")
-	fmt.Println("  xalgorix --setup")
-	fmt.Println("  xalgorix --web")
-	fmt.Println("  xalgorix --web --port 8080")
-	fmt.Println("  xalgorix --target https://example.com")
-	fmt.Println("  xalgorix --target https://example.com --instruction \"Focus on auth\"")
-	fmt.Println("  xalgorix --source ./my-app --code-scan review")
-	fmt.Println("  xalgorix --source https://github.com/org/app.git --code-scan provision")
+	fmt.Println("  ai-dast-ing --setup")
+	fmt.Println("  ai-dast-ing --web")
+	fmt.Println("  ai-dast-ing --web --port 8080")
+	fmt.Println("  ai-dast-ing --target https://example.com")
+	fmt.Println("  ai-dast-ing --target https://example.com --instruction \"Focus on auth\"")
+	fmt.Println("  ai-dast-ing --source ./my-app --code-scan review")
+	fmt.Println("  ai-dast-ing --source https://github.com/org/app.git --code-scan provision")
 	fmt.Println()
 	fmt.Println("Service Commands:")
-	fmt.Println("  xalgorix --start      Start Web UI in background")
-	fmt.Println("  xalgorix --stop       Stop running Web UI")
-	fmt.Println("  xalgorix --uninstall  Remove xalgorix from system")
+	fmt.Println("  ai-dast-ing --start      Start Web UI in background")
+	fmt.Println("  ai-dast-ing --stop       Stop running Web UI")
+	fmt.Println("  ai-dast-ing --uninstall  Remove ai-dast-ing from system")
 	fmt.Println()
 	fmt.Println("Environment:")
-	fmt.Println("  XALGORIX_LLM              Frontier model ID (e.g. openai/gpt-5.6)")
-	fmt.Println("  XALGORIX_API_KEY           API key")
-	fmt.Println("  XALGORIX_API_BASE          API base URL")
-	fmt.Println("  XALGORIX_MAX_ITERATIONS    Max iterations (0 = unlimited)")
-	fmt.Println("  XALGORIX_SCAN_HEADERS      Identifying header(s) for target traffic; ';' or newline separated")
-	fmt.Println("  XALGORIX_SCAN_HEADERS_FILE File of headers, one 'Name: value' per line")
+	fmt.Println("  AIDASTING_LLM              Frontier model ID (e.g. openai/gpt-5.6)")
+	fmt.Println("  AIDASTING_API_KEY           API key")
+	fmt.Println("  AIDASTING_API_BASE          API base URL")
+	fmt.Println("  AIDASTING_MAX_ITERATIONS    Max iterations (0 = unlimited)")
+	fmt.Println("  AIDASTING_SCAN_HEADERS      Identifying header(s) for target traffic; ';' or newline separated")
+	fmt.Println("  AIDASTING_SCAN_HEADERS_FILE File of headers, one 'Name: value' per line")
 	fmt.Println()
 }
 
-// handleStart installs and starts xalgorix as a systemd service
+// handleStart installs and starts ai-dast-ing as a systemd service
 func handleStart() {
 	// Determine install path — use the same resolver as --update
 	installPath := resolveInstallPath()
 
 	// Check if binary exists
 	if _, err := os.Stat(installPath); os.IsNotExist(err) {
-		fmt.Printf("❌ Xalgorix not found at %s\n", installPath)
-		fmt.Println("   Install with: xalgorix --update")
+		fmt.Printf("❌ AI-DAST-ING not found at %s\n", installPath)
+		fmt.Println("   Install with: ai-dast-ing --update")
 		os.Exit(1)
 	}
 
-	// Kill any existing xalgorix processes first (ignore if none running)
-	_ = exec.Command("pkill", "-f", "xalgorix.*--web").Run()
+	// Kill any existing ai-dast-ing processes first (ignore if none running)
+	_ = exec.Command("pkill", "-f", "ai-dast-ing.*--web").Run()
 	time.Sleep(1 * time.Second)
 
 	// Also kill anything using the default web port (ignore if port is free)
@@ -548,13 +548,13 @@ func handleStart() {
 		home = "/root"
 	}
 	// The active workspace root is now owned by config.resolveDataDir
-	// (XALGORIX_DATA_DIR / ~/.xalgorix/data) per Task 3.6 / R6.4. The
+	// (AIDASTING_DATA_DIR / ~/.ai-dast-ing/data) per Task 3.6 / R6.4. The
 	// systemd unit no longer derives a $CWD-style "workspace" path; its
 	// WorkingDirectory is just $HOME so relative paths in operator-supplied
 	// env vars resolve predictably.
 	serviceContent := serviceUnitContent(home, installPath)
 	// Try to write service file (requires sudo)
-	servicePath := "/etc/systemd/system/xalgorix.service"
+	servicePath := "/etc/systemd/system/ai-dast-ing.service"
 	// systemd unit files are conventionally world-readable (0644) and
 	// contain no secrets; secrets come from the referenced env file.
 	err := os.WriteFile(servicePath, []byte(serviceContent), 0644) //nolint:gosec // G306: systemd unit file is conventionally 0644
@@ -580,13 +580,13 @@ func handleStart() {
 		log.Printf("Warning: systemctl daemon-reload failed: %v", err)
 	}
 
-	cmd = exec.Command("systemctl", "enable", "xalgorix")
+	cmd = exec.Command("systemctl", "enable", "ai-dast-ing")
 	if err := cmd.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "⚠️  Failed to enable service: %v\n", err)
 	}
 
 	// Start the service
-	cmd = exec.Command("systemctl", "start", "xalgorix")
+	cmd = exec.Command("systemctl", "start", "ai-dast-ing")
 	if err := cmd.Run(); err != nil {
 		// systemd is present but couldn't start the unit (e.g. it's degraded
 		// or we lack privileges). Don't leave the operator with nothing —
@@ -596,15 +596,15 @@ func handleStart() {
 		return
 	}
 
-	fmt.Println("✅ Xalgorix installed and started as systemd service!")
+	fmt.Println("✅ AI-DAST-ING installed and started as systemd service!")
 	printServiceAccessInfo(config.Get(), defaultWebPort)
-	fmt.Println("   Logs:   journalctl -u xalgorix -f")
-	fmt.Println("   Status: systemctl status xalgorix")
+	fmt.Println("   Logs:   journalctl -u ai-dast-ing -f")
+	fmt.Println("   Status: systemctl status ai-dast-ing")
 }
 
 func serviceUnitContent(home, installPath string) string {
 	return fmt.Sprintf(`[Unit]
-Description=Xalgorix - Autonomous AI Pentesting Engine
+Description=AI-DAST-ING - Autonomous AI Pentesting Engine
 After=network.target
 
 [Service]
@@ -613,7 +613,7 @@ User=root
 WorkingDirectory=%s
 Environment="PATH=%s/go/bin:%s/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 Environment="GOPATH=%s/go"
-EnvironmentFile=%s/.xalgorix.env
+EnvironmentFile=%s/.ai-dast-ing.env
 ExecStart=%s --web
 Restart=always
 RestartSec=10
@@ -642,7 +642,7 @@ func systemdAvailable() bool {
 }
 
 func startBackground() {
-	logFile, err := os.OpenFile("/tmp/xalgorix.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
+	logFile, err := os.OpenFile("/tmp/ai-dast-ing.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "❌ Failed to open log file: %v\n", err)
 		os.Exit(1)
@@ -657,27 +657,27 @@ func startBackground() {
 		homeDir = "/root"
 	}
 	// Task 3.6 / R6.4: don't re-derive a workspace from $CWD or invent a
-	// new ~/xalgorix-workspace tree. The active Data_Dir is owned by
+	// new ~/ai-dast-ing-workspace tree. The active Data_Dir is owned by
 	// config.resolveDataDir; we just run from $HOME so relative paths the
 	// operator supplies via env vars resolve predictably.
-	startCmd := exec.Command("/bin/bash", "-c", "source "+homeDir+"/.xalgorix.env && "+installPath+" --web")
+	startCmd := exec.Command("/bin/bash", "-c", "source "+homeDir+"/.ai-dast-ing.env && "+installPath+" --web")
 	startCmd.Stdout = logFile
 	startCmd.Stderr = logFile
 	startCmd.Dir = homeDir
 	startCmd.Env = os.Environ()
 
 	if err := startCmd.Start(); err != nil {
-		fmt.Fprintf(os.Stderr, "❌ Failed to start xalgorix: %v\n", err)
+		fmt.Fprintf(os.Stderr, "❌ Failed to start ai-dast-ing: %v\n", err)
 		os.Exit(1)
 	}
 
-	fmt.Println("✅ Xalgorix started in background!")
+	fmt.Println("✅ AI-DAST-ING started in background!")
 	printServiceAccessInfo(config.Get(), defaultWebPort)
-	fmt.Println("   Logs:   tail -f /tmp/xalgorix.log")
+	fmt.Println("   Logs:   tail -f /tmp/ai-dast-ing.log")
 	fmt.Printf("   PID:    %d\n", startCmd.Process.Pid)
 }
 
-// handleStop stops the xalgorix service
+// handleStop stops the ai-dast-ing service
 func handleStop() {
 	// Try to send stop notification to Discord first
 	go func() {
@@ -691,22 +691,22 @@ func handleStop() {
 	time.Sleep(500 * time.Millisecond)
 
 	// Try systemctl first (with sudo)
-	cmd := exec.Command("sudo", "systemctl", "stop", "xalgorix")
+	cmd := exec.Command("sudo", "systemctl", "stop", "ai-dast-ing")
 	err := cmd.Run()
 
 	if err != nil {
 		// Fallback: pkill (exclude the current --stop process)
-		cmd = exec.Command("pkill", "-f", "xalgorix.*--web")
+		cmd = exec.Command("pkill", "-f", "ai-dast-ing.*--web")
 		_ = cmd.Run()
 	}
 
-	fmt.Println("✅ Xalgorix stopped!")
+	fmt.Println("✅ AI-DAST-ING stopped!")
 }
 
-// handleRestart restarts the xalgorix service
+// handleRestart restarts the ai-dast-ing service
 func handleRestart() {
 	// Try systemctl first (with sudo)
-	cmd := exec.Command("sudo", "systemctl", "restart", "xalgorix")
+	cmd := exec.Command("sudo", "systemctl", "restart", "ai-dast-ing")
 	err := cmd.Run()
 
 	if err != nil {
@@ -716,17 +716,17 @@ func handleRestart() {
 		return
 	}
 
-	fmt.Println("✅ Xalgorix restarted!")
+	fmt.Println("✅ AI-DAST-ING restarted!")
 	printServiceAccessInfo(config.Get(), defaultWebPort)
 }
 
-// handleRestartWhenIdle asks a running xalgorix --web process to restart once
+// handleRestartWhenIdle asks a running ai-dast-ing --web process to restart once
 // it is idle (all scans finished, no tools running) by sending it SIGUSR1.
 // The actual restart is performed by the server's restart-when-idle watcher.
 func handleRestartWhenIdle() {
 	// pkill -f matches against the full command line. The current process is
-	// "xalgorix --restart-when-idle" (no "--web"), so it never signals itself.
-	const pattern = "xalgorix.*--web"
+	// "ai-dast-ing --restart-when-idle" (no "--web"), so it never signals itself.
+	const pattern = "ai-dast-ing.*--web"
 	signalCmds := [][]string{
 		{"pkill", "--signal", "USR1", "-f", pattern},
 		{"sudo", "pkill", "--signal", "USR1", "-f", pattern},
@@ -739,15 +739,15 @@ func handleRestartWhenIdle() {
 		}
 	}
 	if !signaled {
-		fmt.Fprintln(os.Stderr, "❌ No running xalgorix --web process found to signal (or insufficient permissions).")
-		fmt.Fprintln(os.Stderr, "   Start the service first with: xalgorix --start")
+		fmt.Fprintln(os.Stderr, "❌ No running ai-dast-ing --web process found to signal (or insufficient permissions).")
+		fmt.Fprintln(os.Stderr, "   Start the service first with: ai-dast-ing --start")
 		os.Exit(1)
 	}
 	fmt.Println("✅ Graceful restart scheduled.")
-	fmt.Println("   Xalgorix will restart automatically once all running scans finish")
+	fmt.Println("   AI-DAST-ING will restart automatically once all running scans finish")
 	fmt.Println("   and no tools are active. Watch progress with:")
-	fmt.Println("     journalctl -u xalgorix -f      (systemd)")
-	fmt.Println("     tail -f /tmp/xalgorix.log      (background mode)")
+	fmt.Println("     journalctl -u ai-dast-ing -f      (systemd)")
+	fmt.Println("     tail -f /tmp/ai-dast-ing.log      (background mode)")
 }
 
 func printServiceAccessInfo(cfg *config.Config, port int) {
@@ -765,7 +765,7 @@ func serviceAccessLines(cfg *config.Config, port int) []string {
 	if isLoopbackBind(bindAddr) {
 		return []string{
 			fmt.Sprintf("   Web UI: http://localhost:%d (loopback only)", port),
-			"   External access: set XALGORIX_BIND=0.0.0.0 plus XALGORIX_USERNAME and XALGORIX_PASSWORD in ~/.xalgorix.env, then restart.",
+			"   External access: set AIDASTING_BIND=0.0.0.0 plus AIDASTING_USERNAME and AIDASTING_PASSWORD in ~/.ai-dast-ing.env, then restart.",
 		}
 	}
 
@@ -780,7 +780,7 @@ func serviceAccessLines(cfg *config.Config, port int) []string {
 		fmt.Sprintf("   Web UI: http://%s:%d (network-exposed)", host, port),
 	}
 	if !dashboardAuthConfigured(cfg) {
-		lines = append(lines, "   Warning: external bind requires XALGORIX_USERNAME and XALGORIX_PASSWORD or XALGORIX_PASSWORD_HASH; the server will refuse to start without auth.")
+		lines = append(lines, "   Warning: external bind requires AIDASTING_USERNAME and AIDASTING_PASSWORD or AIDASTING_PASSWORD_HASH; the server will refuse to start without auth.")
 	}
 	lines = append(lines, fmt.Sprintf("   If remote clients still cannot connect, open TCP port %d in the host firewall or cloud security group.", port))
 	return lines
@@ -799,12 +799,12 @@ func dashboardAuthConfigured(cfg *config.Config) bool {
 	return cfg != nil && cfg.Username != "" && (cfg.Password != "" || cfg.PasswordHash != "")
 }
 
-// handleUninstall removes xalgorix from the system
+// handleUninstall removes ai-dast-ing from the system
 func handleUninstall() {
-	fmt.Println("🗑️  Uninstalling Xalgorix...")
+	fmt.Println("🗑️  Uninstalling AI-DAST-ING...")
 
 	// Stop the service first
-	cmd := exec.Command("pkill", "-f", "xalgorix")
+	cmd := exec.Command("pkill", "-f", "ai-dast-ing")
 	_ = cmd.Run()
 
 	// Determine install path — use the same resolver as --update
@@ -825,29 +825,29 @@ func handleUninstall() {
 	// Ask about data removal
 	fmt.Println()
 	fmt.Println("📁 Data directories (not removed automatically):")
-	fmt.Println("   ~/.xalgorix/         - Configuration, skills, and scan data")
+	fmt.Println("   ~/.ai-dast-ing/         - Configuration, skills, and scan data")
 	fmt.Println()
 	fmt.Println("To remove data manually:")
-	fmt.Println("   rm -rf ~/.xalgorix")
+	fmt.Println("   rm -rf ~/.ai-dast-ing")
 
 	fmt.Println()
 	fmt.Println("✅ Uninstall complete!")
 }
 
 // autoUpdateInterval is how often a CLI invocation may hit the GitHub API.
-// Without a TTL every `xalgorix --target ...` invocation blocks for up to
+// Without a TTL every `ai-dast-ing --target ...` invocation blocks for up to
 // 15s waiting on GitHub — annoying for users and rate-limit-prone.
 const autoUpdateInterval = 6 * time.Hour
 
 // autoUpdateCheckPath returns the timestamp marker for the last successful
-// update check. Using ~/.xalgorix/last_update_check so it survives across
+// update check. Using ~/.ai-dast-ing/last_update_check so it survives across
 // invocations and lives next to the rest of our local state.
 func autoUpdateCheckPath() string {
 	home := os.Getenv("HOME")
 	if home == "" {
 		home = "/root"
 	}
-	dir := filepath.Join(home, ".xalgorix")
+	dir := filepath.Join(home, ".ai-dast-ing")
 	_ = os.MkdirAll(dir, 0o700)
 	return filepath.Join(dir, "last_update_check")
 }
@@ -876,8 +876,8 @@ func touchAutoUpdateMarker() {
 func autoUpdate() {
 	// Opt-out for immutable/managed deployments (containers, packaged installs).
 	// In a container the binary must NOT rewrite itself — updates come from
-	// pulling a new image tag — so the Docker image sets XALGORIX_NO_AUTO_UPDATE=1.
-	if v := strings.TrimSpace(os.Getenv("XALGORIX_NO_AUTO_UPDATE")); v == "1" || strings.EqualFold(v, "true") {
+	// pulling a new image tag — so the Docker image sets AIDASTING_NO_AUTO_UPDATE=1.
+	if v := strings.TrimSpace(os.Getenv("AIDASTING_NO_AUTO_UPDATE")); v == "1" || strings.EqualFold(v, "true") {
 		return
 	}
 	if autoUpdateThrottled() {
@@ -903,22 +903,22 @@ func autoUpdate() {
 	if downloadURL != "" {
 		fmt.Println("   Downloading update...")
 		if err := installBinary(downloadURL, installPath); err != nil {
-			fmt.Printf("   ⚠️  Download failed: %v (run 'xalgorix --update' manually)\n", err)
+			fmt.Printf("   ⚠️  Download failed: %v (run 'ai-dast-ing --update' manually)\n", err)
 			return
 		}
 	} else {
 		// Fallback to go install
 		fmt.Println("   Installing update via go install...")
-		cmd := exec.Command("go", "install", "-v", "-ldflags", "-X main.version="+latestVer, "github.com/xalgord/xalgorix/v4/cmd/xalgorix@v"+latestVer)
+		cmd := exec.Command("go", "install", "-v", "-ldflags", "-X main.version="+latestVer, "github.com/barhaterahul/ai-dast-ing/v4/cmd/ai-dast-ing@v"+latestVer)
 		cmd.Env = append(os.Environ(),
 			"GOPROXY=direct",
-			"GOPRIVATE=github.com/xalgord/*",
+			"GOPRIVATE=github.com/barhaterahul/*",
 			"GOSUMDB=off",
 		)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		if err := cmd.Run(); err != nil {
-			fmt.Printf("   ⚠️  Auto-update failed: %v (run 'xalgorix --update' manually)\n", err)
+			fmt.Printf("   ⚠️  Auto-update failed: %v (run 'ai-dast-ing --update' manually)\n", err)
 			return
 		}
 
@@ -927,7 +927,7 @@ func autoUpdate() {
 		if goPath == "" {
 			goPath = filepath.Join(os.Getenv("HOME"), "go")
 		}
-		goBinPath := filepath.Join(goPath, "bin", "xalgorix")
+		goBinPath := filepath.Join(goPath, "bin", "ai-dast-ing")
 		if goBinPath != installPath {
 			if _, statErr := os.Stat(goBinPath); statErr == nil {
 				_ = os.Remove(installPath)
@@ -999,11 +999,11 @@ func execRestart(path string, argv, env []string) error {
 func fetchLatestRelease() (version string, downloadURL string) {
 	client := &http.Client{Timeout: 15 * time.Second}
 
-	req, err := http.NewRequest("GET", "https://api.github.com/repos/xalgorix/xalgorix/releases/latest", nil)
+	req, err := http.NewRequest("GET", "https://api.github.com/repos/ai-dast-ing/ai-dast-ing/releases/latest", nil)
 	if err != nil {
 		return "", ""
 	}
-	req.Header.Set("User-Agent", "xalgorix/"+version)
+	req.Header.Set("User-Agent", "ai-dast-ing/"+version)
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -1039,9 +1039,9 @@ func fetchLatestRelease() (version string, downloadURL string) {
 		return "", ""
 	}
 
-	wantName := fmt.Sprintf("xalgorix-%s-%s", runtime.GOOS, runtime.GOARCH)
+	wantName := fmt.Sprintf("ai-dast-ing-%s-%s", runtime.GOOS, runtime.GOARCH)
 	for _, asset := range release.Assets {
-		if asset.Name == wantName || asset.Name == "xalgorix" {
+		if asset.Name == wantName || asset.Name == "ai-dast-ing" {
 			return ver, asset.BrowserDownloadURL
 		}
 	}
@@ -1051,11 +1051,11 @@ func fetchLatestRelease() (version string, downloadURL string) {
 
 // fetchLatestTag uses the git tags API as a fallback when releases API is rate-limited.
 func fetchLatestTag(client *http.Client) (string, string) {
-	req, err := http.NewRequest("GET", "https://api.github.com/repos/xalgorix/xalgorix/tags?per_page=1", nil)
+	req, err := http.NewRequest("GET", "https://api.github.com/repos/ai-dast-ing/ai-dast-ing/tags?per_page=1", nil)
 	if err != nil {
 		return "", ""
 	}
-	req.Header.Set("User-Agent", "xalgorix/"+version)
+	req.Header.Set("User-Agent", "ai-dast-ing/"+version)
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -1079,12 +1079,12 @@ func fetchLatestTag(client *http.Client) (string, string) {
 		return "", ""
 	}
 
-	wantName := fmt.Sprintf("xalgorix-%s-%s", runtime.GOOS, runtime.GOARCH)
-	downloadURL := fmt.Sprintf("https://github.com/xalgorix/xalgorix/releases/download/v%s/%s", ver, wantName)
+	wantName := fmt.Sprintf("ai-dast-ing-%s-%s", runtime.GOOS, runtime.GOARCH)
+	downloadURL := fmt.Sprintf("https://github.com/ai-dast-ing/ai-dast-ing/releases/download/v%s/%s", ver, wantName)
 	return ver, downloadURL
 }
 
-// resolveInstallPath determines where the xalgorix binary should be installed.
+// resolveInstallPath determines where the ai-dast-ing binary should be installed.
 func resolveInstallPath() string {
 	if execPath, err := os.Executable(); err == nil {
 		if resolved, err := filepath.EvalSymlinks(execPath); err == nil {
@@ -1096,7 +1096,7 @@ func resolveInstallPath() string {
 	if goPath == "" {
 		goPath = filepath.Join(os.Getenv("HOME"), "go")
 	}
-	return filepath.Join(goPath, "bin", "xalgorix")
+	return filepath.Join(goPath, "bin", "ai-dast-ing")
 }
 
 // installBinary downloads a binary from url and installs it to destPath.

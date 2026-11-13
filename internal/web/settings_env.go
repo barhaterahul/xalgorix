@@ -14,8 +14,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/auth"
-	"github.com/xalgord/xalgorix/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/auth"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
 )
 
 type envSettingDefinition struct {
@@ -56,7 +56,7 @@ type llmSettingsResponse struct {
 	GeminiAPIKey            string `json:"geminiApiKey"`
 	HasGeminiAPIKey         bool   `json:"hasGeminiApiKey"`
 	// APIKeyPool is the masked view of the configured key pool
-	// (XALGORIX_API_KEYS) that outbound requests rotate across to
+	// (AIDASTING_API_KEYS) that outbound requests rotate across to
 	// spread provider rate limits.
 	APIKeyPool                []string `json:"apiKeyPool"`
 	HasAPIKeyPool             bool     `json:"hasApiKeyPool"`
@@ -64,7 +64,7 @@ type llmSettingsResponse struct {
 	EnvironmentRestartWarning bool     `json:"environmentRestartWarning"`
 	// v4.4.22: catalog-aware fields driving the new LLM Settings
 	// tab. Provider mirrors the active provider id derived from
-	// LLMProfile (or the legacy XALGORIX_LLM "<provider>/<model>"
+	// LLMProfile (or the legacy AIDASTING_LLM "<provider>/<model>"
 	// prefix when no profile is active). AuthMethod tracks which
 	// branch the resolver currently dispatches through. Profiles
 	// is the masked list of saved profiles for the active
@@ -125,108 +125,108 @@ func allEnvSettingDefinitions() []envSettingDefinition {
 		autoInstallDefault = "true"
 	}
 	return []envSettingDefinition{
-		{Key: "XALGORIX_LLM", Label: "LLM model", Category: "LLM", Description: "Provider-native model ID used by scans and post-scan chat. For best results, choose a current frontier model with strong reasoning and tool calling.", Placeholder: "gpt-5.6", InputType: "text"},
-		{Key: "XALGORIX_LLM_PROVIDER", Label: "LLM provider", Category: "LLM", Description: "Explicit provider ID used to route the selected model without adding a provider prefix to its model name.", Placeholder: "ollama", InputType: "text"},
-		{Key: "XALGORIX_API_KEY", Label: "LLM API key", Category: "LLM", Description: "Provider API key for the configured model.", Placeholder: "sk-...", InputType: "secret", Sensitive: true},
-		{Key: "XALGORIX_API_KEYS", Label: "LLM API key pool", Category: "LLM", Description: "Additional provider API keys for rate-limit rotation, comma-separated. Combined with the LLM API key above, outbound requests rotate across the pool and a key that hits a provider rate limit is skipped for a short cooldown. Effective for new scans.", Placeholder: "key1,key2,key3", InputType: "secret", Sensitive: true},
-		{Key: "XALGORIX_API_BASE", Label: "API base URL", Category: "LLM", Description: "Optional custom provider endpoint. Leave blank to use provider defaults.", Placeholder: "https://api.openai.com/v1", InputType: "url"},
-		{Key: "XALGORIX_LLM_PROFILE", Label: "Active LLM profile", Category: "LLM", Description: "Active credential pointer (\"<provider>:<profileId>\"). Set by the LLM Settings tab; takes precedence over XALGORIX_API_KEY/XALGORIX_LLM when present.", Placeholder: "openai:default", InputType: "text"},
-		{Key: "XALGORIX_REASONING_EFFORT", Label: "Reasoning effort", Category: "LLM", Description: "Reasoning depth for providers that support it.", DefaultValue: "high", InputType: "select", Options: []string{"none", "low", "medium", "high", "xhigh"}},
-		{Key: "XALGORIX_LANGUAGE", Label: "Output language", Category: "LLM", Description: "Language for AI-generated human-readable output: agent reasoning, notes, vulnerability findings, report content, and post-scan chat. Technical tokens (payloads, commands, URLs, CVE/CWE IDs) always stay in their original form. English is the default. Non-Latin languages render in the dashboard and HTML report automatically; for the PDF export, also set a CJK font path below.", DefaultValue: "en", InputType: "select", Options: []string{"en", "zh-CN"}},
-		{Key: "XALGORIX_PDF_CJK_FONT", Label: "PDF CJK font path", Category: "LLM", Description: "Absolute path to a TrueType (.ttf) font with CJK glyphs, used to render non-Latin languages (e.g. Simplified Chinese) in the exported PDF report. Only .ttf is supported (not .ttc/.otf). Leave blank for English. Takes effect on restart.", Placeholder: "/usr/share/fonts/truetype/noto/NotoSansSC-Regular.ttf", InputType: "path", RequiresRestart: true},
-		{Key: "XALGORIX_OLLAMA_COMPATIBLE", Label: "Ollama-compatible endpoint", Category: "LLM", Description: "Force Ollama reasoning semantics for a custom endpoint that does not use port 11434.", DefaultValue: "false", InputType: "boolean"},
-		{Key: "XALGORIX_LLM_MAX_RETRIES", Label: "LLM max retries", Category: "LLM", Description: "Retry count for transient LLM provider failures.", DefaultValue: "5", InputType: "number"},
-		{Key: "XALGORIX_MAX_RATE_LIMIT_WAIT", Label: "Provider rate-limit wait (seconds)", Category: "LLM", Description: "Maximum cumulative wait after a provider 429/usage-window error before stopping the scan. Default 1800 seconds; use a negative value only to disable the safety cap.", DefaultValue: "1800", InputType: "number"},
-		{Key: "XALGORIX_MAX_OUTPUT_TOKENS", Label: "Max output tokens", Category: "LLM", Description: "Per-call completion cap (max_tokens). Reasoning models spend part of this on hidden thinking before a tool call, so a small provider default can truncate large calls. Clamped to a 1024 floor.", DefaultValue: "8192", InputType: "number"},
-		{Key: "XALGORIX_LLM_CONTEXT_WINDOW", Label: "LLM context window (tokens)", Category: "LLM", Description: "Total context window of your model, in tokens. Auto-compaction fires at a fraction of this (see compaction ratio) so the running context is only compacted when the window is genuinely filling up. Set to your model's real window (e.g. 1000000 for a 1M-token model). Default 128000.", DefaultValue: "128000", InputType: "number"},
-		{Key: "XALGORIX_LLM_TIMEOUT_SECONDS", Label: "LLM request timeout (seconds)", Category: "LLM", Description: "Hard limit for a single LLM request, in seconds. Default 600 (10 minutes), which suits hosted APIs. Raise it for slow local backends: a llama.cpp server on CPU can need 20+ minutes just to prefill a large prompt, and every request dies with a timeout before it can answer. Applies to LLM clients created after the change — restart to be sure.", DefaultValue: "600", InputType: "number"},
-		{Key: "XALGORIX_NATIVE_TOOL_CALLS", Label: "Native tool calling (OpenAI-compatible backends)", Category: "LLM", Description: "Send tool definitions as an OpenAI-style `tools` array and read calls from `tool_calls`, instead of requiring the model to emit XML tags inside its text. llama-server derives a grammar from the schema, so a malformed call becomes impossible, and models that were never trained on the XML dialect can still drive tools. Only affects OpenAI-compatible endpoints (llama.cpp, Ollama, vLLM, OpenAI); Anthropic, Gemini and the Responses API keep using XML. Default false.", DefaultValue: "false", InputType: "boolean"},
-		{Key: "XALGORIX_CONTEXT_COMPACT_RATIO", Label: "Context compaction ratio", Category: "LLM", Description: "Fraction of the context window at which to auto-compact (0.5–0.9). Default 0.75 = compact at ~75% full. Compacting earlier discards useful working context and hurts output quality; going higher risks hitting the provider's hard limit first.", DefaultValue: "0.75", InputType: "number"},
-		{Key: "XALGORIX_CONTEXT_COMPACT_TOKENS", Label: "Context compaction budget (tokens, override)", Category: "LLM", Description: "Optional ABSOLUTE override for the compaction trigger. Leave at -1 (auto) to derive the trigger from the context window × ratio above. Set a positive token count to force a fixed budget instead. 0 disables auto-compaction. Default -1 (auto).", DefaultValue: "-1", InputType: "number"},
-		{Key: "XALGORIX_MEMORY_COMPRESSOR_TIMEOUT", Label: "Memory compressor timeout", Category: "LLM", Description: "Timeout in seconds for context compression.", DefaultValue: "30", InputType: "number"},
-		{Key: "XALGORIX_BOUNDED_CONTEXT", Label: "Bounded working context (token saver)", Category: "LLM", Description: "Archive the complete raw output of every tool result to disk and replace tool-result messages older than the active window below with compact retrieval stubs. The model fetches the byte-identical original via read_tool_output when needed — no information is lost, aged raw output just stops being resent on every iteration. Measured fleet impact: 40-60% input-token reduction. Applies to NEW scans.", DefaultValue: "true", InputType: "boolean"},
-		{Key: "XALGORIX_EPOCH_COVERAGE", Label: "Epoch-based coverage convergence", Category: "Runtime", Description: "Measure per-endpoint coverage completion against a frozen surface snapshot that advances in bounded epochs, instead of the live-growing discovered set. On large or still-growing attack surfaces this lets coverage tasks actually close so the scan reaches a clean terminal state instead of chasing a receding bar until a watchdog. No coverage is dropped: every discovered endpoint is folded into a later epoch and tested before finish. Applies to NEW scans.", DefaultValue: "true", InputType: "boolean"},
-		{Key: "XALGORIX_TOOL_ARCHIVE_ACTIVE_WINDOW", Label: "Bounded context: active window", Category: "LLM", Description: "How many recent tool-result messages stay verbatim in the conversation before older ones become retrieval stubs (used by bounded working context above).", DefaultValue: "8", InputType: "number"},
-		{Key: "XALGORIX_TOOL_ARCHIVE_MIN_BYTES", Label: "Bounded context: archive threshold (bytes)", Category: "LLM", Description: "Minimum raw-output size before a tool result is archived/stubbed. Smaller results stay in-context verbatim.", DefaultValue: "1500", InputType: "number"},
-		{Key: "XALGORIX_ROLE_SCOPED_TOOLS", Label: "Role-scoped specialist tools (token saver)", Category: "LLM", Description: "Withhold documentation of role-foreign tools (e.g. browser tools from the authz specialist) from delegated specialists' prompts. Hidden tools remain callable and are listed in a compact index, so the reachable tool set is unchanged. Applies to NEW scans.", DefaultValue: "false", InputType: "boolean"},
-		{Key: "XALGORIX_LLM_MAX_INFLIGHT", Label: "LLM max in-flight concurrency", Category: "LLM", Description: "Maximum concurrent requests sent to the LLM provider across all scans and subagents. Clamps token velocity to prevent exhausting provider rolling-window rate limits or quotas. Default is 4 × MaxInstances. Takes effect after restart.", Placeholder: "4", InputType: "number", RequiresRestart: true},
-		{Key: "XALGORIX_MAX_ITERATIONS", Label: "Max iterations", Category: "Runtime", Description: "Maximum agent iterations per scan. 0 means unlimited.", DefaultValue: "0", InputType: "number"},
-		{Key: "XALGORIX_MIN_ITERATIONS", Label: "Min iterations (testing floor)", Category: "Runtime", Description: "Minimum testing floor in iterations before the gatekeeper permits finish. Ensures deep probing (OAST, ReDoS, fuzzing) before concluding.", DefaultValue: "50", InputType: "number"},
-		{Key: "XALGORIX_NO_TOOL_ABORT_AT", Label: "No-tool loop limit", Category: "Runtime", Description: "Consecutive assistant responses without a parsed tool call before cleanly stopping. Default 30; 0 disables this safety limit.", DefaultValue: "30", InputType: "number"},
-		{Key: "XALGORIX_MAX_WILDCARD_SUBDOMAINS", Label: "Wildcard subdomain cap", Category: "Runtime", Description: "Optional maximum full LLM sessions expanded from one wildcard target. Default -1 means unlimited; set a positive value only for an explicit emergency resource cap.", DefaultValue: "-1", InputType: "number"},
-		{Key: "XALGORIX_MAX_FINISH_REJECTIONS", Label: "Max finish rejections", Category: "Runtime", Description: "Number of times the agent's finish call will be rejected by the gatekeeper before allowing a deadlock bypass, enforcing deeper testing coverage.", DefaultValue: "15", InputType: "number"},
-		{Key: "XALGORIX_CONVERGE_FINISH_IDLE", Label: "Principled finish: no-finding tail (iterations)", Category: "Runtime", Description: "When the principled finish (XALGORIX_CONVERGE_FINISH) is on, a saturated scan finalizes after this many consecutive iterations without a new validated finding. Each new finding, and each new hypothesis the agent records (up to 5 times per scan), restarts the count. Higher values test longer before closing. Applies to new scans.", DefaultValue: "500", InputType: "number"},
-		{Key: "XALGORIX_CONVERGE_FINISH_LEAD_WINDOW", Label: "Principled finish: lead verification window (iterations)", Category: "Runtime", Description: "When the no-finding tail elapses while the agent still holds recent high-confidence unverified leads, it gets one final window of this many iterations to verify or reject them before the scan finalizes. -1 disables the window. Applies to new scans.", DefaultValue: "100", InputType: "number"},
-		{Key: "XALGORIX_MAX_CONCURRENT_AGENTS", Label: "Max concurrent subagents", Category: "Runtime", Description: "Maximum delegated specialist subagents executing simultaneously per scan. Set to 1 to run specialists serially one at a time. Default 3.", DefaultValue: "3", InputType: "number", RequiresRestart: true},
-		{Key: "XALGORIX_ITERATION_DELAY", Label: "Iteration delay (seconds)", Category: "Runtime", Description: "Pause in seconds between agent reasoning iterations. Paces LLM request velocity to stay within rolling-window provider rate limits. 0 disables delay (default). Takes effect immediately.", DefaultValue: "0", InputType: "number"},
-		{Key: "XALGORIX_MAX_TOOL_CALLS", Label: "Max tool calls (budget)", Category: "Runtime", Description: "Per-scan tool-call cap; the scan stops cleanly when reached (findings preserved). 0 = unlimited.", DefaultValue: "0", InputType: "number", RequiresRestart: true},
-		{Key: "XALGORIX_MAX_DURATION", Label: "Max duration seconds (budget)", Category: "Runtime", Description: "Per-scan wall-clock cap in seconds; the scan stops cleanly when reached. 0 = unlimited.", DefaultValue: "0", InputType: "number", RequiresRestart: true},
-		{Key: "XALGORIX_MAX_TOKENS", Label: "Max LLM tokens (budget)", Category: "Runtime", Description: "Per-scan total-token cap; the scan stops cleanly when reached. 0 = unlimited.", DefaultValue: "0", InputType: "number", RequiresRestart: true},
-		{Key: "XALGORIX_TARGET_AUTH", Label: "Target auth (authenticated scanning)", Category: "Runtime", Description: "Authenticated-session credentials for the target so the agent tests post-auth surface (IDOR/BOLA, privilege escalation, business logic). One 'Header-Name: value' per line or separated by ';'. e.g. 'Cookie: session=abc; Authorization: Bearer xyz'. Auto-applied to http_request.", Placeholder: "Cookie: session=...; Authorization: Bearer ...", InputType: "text", Sensitive: true, RequiresRestart: true},
-		{Key: "XALGORIX_SCAN_HEADERS", Label: "Scan headers (attribution)", Category: "Runtime", Description: "Identifying header(s) added to ALL target-facing scan traffic (agent HTTP client + httpx/nuclei via -H) so an authorized Xalgorix run is attributable in the target's logs and can be allow-listed by its WAF/SOC. Bug-bounty programs often require one, e.g. 'X-Bug-Bounty: <handle>'. One 'Header-Name: value' per entry, separated by ';'. Never attached to LLM APIs, notifications, or the dashboard.", Placeholder: "X-Bug-Bounty: ulises2k; X-Scan-ID: engagement-42", InputType: "text", RequiresRestart: true},
-		{Key: "XALGORIX_SCAN_HEADERS_FILE", Label: "Scan headers file", Category: "Runtime", Description: "Path to a file of scan/attribution headers, one 'Name: value' per line ('#' comments and blank lines ignored). Merged with XALGORIX_SCAN_HEADERS; the inline value wins on a name clash.", Placeholder: "/path/to/scan-headers.txt", InputType: "path", RequiresRestart: true},
-		{Key: "XALGORIX_OOB_PUBLIC_URL", Label: "OOB callback URL", Category: "OOB", Description: "Public address targets can reach for out-of-band verification of blind vulns (blind SSRF/RCE/XSS/XXE), e.g. https://oob.example.com. Enables the self-hosted oob_callback listener. Leave blank to use the zero-config interactsh backend.", Placeholder: "https://oob.example.com", InputType: "url", RequiresRestart: true},
-		{Key: "XALGORIX_OOB_PORT", Label: "OOB listener port", Category: "OOB", Description: "Local port the OOB callback listener binds (0.0.0.0). Expose/reverse-proxy it to the OOB callback URL above.", Placeholder: "8888", InputType: "number", RequiresRestart: true},
-		{Key: "XALGORIX_OOB_INTERACTIONS", Label: "OOB interaction types", Category: "OOB", Description: "Which out-of-band interaction types count as a callback (proof). All selected = default (any DNS/HTTP/SMTP hit is proof). Deselect DNS to suppress DNS-only false positives from cloud infra (e.g. AWS resolvers that merely resolve the callback host). HTTP also covers HTTPS. Other interactsh channels (LDAP for JNDI/Log4Shell, SMB, FTP) are always kept. Note the self-hosted listener (OOB callback URL) only ever reports HTTP(S), so a DNS-only selection suppresses all of its callbacks.", DefaultValue: "dns,http,smtp", InputType: "multiselect", Options: []string{"dns", "http", "smtp"}, RequiresRestart: true},
-		{Key: "XALGORIX_SOURCE_REPO", Label: "Whitebox source (repo/path)", Category: "Runtime", Description: "Enable whitebox / source-assisted assessment. A Git URL (shallow-cloned) or a local directory path to the target's source. Activates the code_search tool and source→sink→exploit methodology — where RCE, injection, and secret-exposure bugs are found.", Placeholder: "https://github.com/org/app.git", InputType: "text", RequiresRestart: true},
+		{Key: "AIDASTING_LLM", Label: "LLM model", Category: "LLM", Description: "Provider-native model ID used by scans and post-scan chat. For best results, choose a current frontier model with strong reasoning and tool calling.", Placeholder: "gpt-5.6", InputType: "text"},
+		{Key: "AIDASTING_LLM_PROVIDER", Label: "LLM provider", Category: "LLM", Description: "Explicit provider ID used to route the selected model without adding a provider prefix to its model name.", Placeholder: "ollama", InputType: "text"},
+		{Key: "AIDASTING_API_KEY", Label: "LLM API key", Category: "LLM", Description: "Provider API key for the configured model.", Placeholder: "sk-...", InputType: "secret", Sensitive: true},
+		{Key: "AIDASTING_API_KEYS", Label: "LLM API key pool", Category: "LLM", Description: "Additional provider API keys for rate-limit rotation, comma-separated. Combined with the LLM API key above, outbound requests rotate across the pool and a key that hits a provider rate limit is skipped for a short cooldown. Effective for new scans.", Placeholder: "key1,key2,key3", InputType: "secret", Sensitive: true},
+		{Key: "AIDASTING_API_BASE", Label: "API base URL", Category: "LLM", Description: "Optional custom provider endpoint. Leave blank to use provider defaults.", Placeholder: "https://api.openai.com/v1", InputType: "url"},
+		{Key: "AIDASTING_LLM_PROFILE", Label: "Active LLM profile", Category: "LLM", Description: "Active credential pointer (\"<provider>:<profileId>\"). Set by the LLM Settings tab; takes precedence over AIDASTING_API_KEY/AIDASTING_LLM when present.", Placeholder: "openai:default", InputType: "text"},
+		{Key: "AIDASTING_REASONING_EFFORT", Label: "Reasoning effort", Category: "LLM", Description: "Reasoning depth for providers that support it.", DefaultValue: "high", InputType: "select", Options: []string{"none", "low", "medium", "high", "xhigh"}},
+		{Key: "AIDASTING_LANGUAGE", Label: "Output language", Category: "LLM", Description: "Language for AI-generated human-readable output: agent reasoning, notes, vulnerability findings, report content, and post-scan chat. Technical tokens (payloads, commands, URLs, CVE/CWE IDs) always stay in their original form. English is the default. Non-Latin languages render in the dashboard and HTML report automatically; for the PDF export, also set a CJK font path below.", DefaultValue: "en", InputType: "select", Options: []string{"en", "zh-CN"}},
+		{Key: "AIDASTING_PDF_CJK_FONT", Label: "PDF CJK font path", Category: "LLM", Description: "Absolute path to a TrueType (.ttf) font with CJK glyphs, used to render non-Latin languages (e.g. Simplified Chinese) in the exported PDF report. Only .ttf is supported (not .ttc/.otf). Leave blank for English. Takes effect on restart.", Placeholder: "/usr/share/fonts/truetype/noto/NotoSansSC-Regular.ttf", InputType: "path", RequiresRestart: true},
+		{Key: "AIDASTING_OLLAMA_COMPATIBLE", Label: "Ollama-compatible endpoint", Category: "LLM", Description: "Force Ollama reasoning semantics for a custom endpoint that does not use port 11434.", DefaultValue: "false", InputType: "boolean"},
+		{Key: "AIDASTING_LLM_MAX_RETRIES", Label: "LLM max retries", Category: "LLM", Description: "Retry count for transient LLM provider failures.", DefaultValue: "5", InputType: "number"},
+		{Key: "AIDASTING_MAX_RATE_LIMIT_WAIT", Label: "Provider rate-limit wait (seconds)", Category: "LLM", Description: "Maximum cumulative wait after a provider 429/usage-window error before stopping the scan. Default 1800 seconds; use a negative value only to disable the safety cap.", DefaultValue: "1800", InputType: "number"},
+		{Key: "AIDASTING_MAX_OUTPUT_TOKENS", Label: "Max output tokens", Category: "LLM", Description: "Per-call completion cap (max_tokens). Reasoning models spend part of this on hidden thinking before a tool call, so a small provider default can truncate large calls. Clamped to a 1024 floor.", DefaultValue: "8192", InputType: "number"},
+		{Key: "AIDASTING_LLM_CONTEXT_WINDOW", Label: "LLM context window (tokens)", Category: "LLM", Description: "Total context window of your model, in tokens. Auto-compaction fires at a fraction of this (see compaction ratio) so the running context is only compacted when the window is genuinely filling up. Set to your model's real window (e.g. 1000000 for a 1M-token model). Default 128000.", DefaultValue: "128000", InputType: "number"},
+		{Key: "AIDASTING_LLM_TIMEOUT_SECONDS", Label: "LLM request timeout (seconds)", Category: "LLM", Description: "Hard limit for a single LLM request, in seconds. Default 600 (10 minutes), which suits hosted APIs. Raise it for slow local backends: a llama.cpp server on CPU can need 20+ minutes just to prefill a large prompt, and every request dies with a timeout before it can answer. Applies to LLM clients created after the change — restart to be sure.", DefaultValue: "600", InputType: "number"},
+		{Key: "AIDASTING_NATIVE_TOOL_CALLS", Label: "Native tool calling (OpenAI-compatible backends)", Category: "LLM", Description: "Send tool definitions as an OpenAI-style `tools` array and read calls from `tool_calls`, instead of requiring the model to emit XML tags inside its text. llama-server derives a grammar from the schema, so a malformed call becomes impossible, and models that were never trained on the XML dialect can still drive tools. Only affects OpenAI-compatible endpoints (llama.cpp, Ollama, vLLM, OpenAI); Anthropic, Gemini and the Responses API keep using XML. Default false.", DefaultValue: "false", InputType: "boolean"},
+		{Key: "AIDASTING_CONTEXT_COMPACT_RATIO", Label: "Context compaction ratio", Category: "LLM", Description: "Fraction of the context window at which to auto-compact (0.5–0.9). Default 0.75 = compact at ~75% full. Compacting earlier discards useful working context and hurts output quality; going higher risks hitting the provider's hard limit first.", DefaultValue: "0.75", InputType: "number"},
+		{Key: "AIDASTING_CONTEXT_COMPACT_TOKENS", Label: "Context compaction budget (tokens, override)", Category: "LLM", Description: "Optional ABSOLUTE override for the compaction trigger. Leave at -1 (auto) to derive the trigger from the context window × ratio above. Set a positive token count to force a fixed budget instead. 0 disables auto-compaction. Default -1 (auto).", DefaultValue: "-1", InputType: "number"},
+		{Key: "AIDASTING_MEMORY_COMPRESSOR_TIMEOUT", Label: "Memory compressor timeout", Category: "LLM", Description: "Timeout in seconds for context compression.", DefaultValue: "30", InputType: "number"},
+		{Key: "AIDASTING_BOUNDED_CONTEXT", Label: "Bounded working context (token saver)", Category: "LLM", Description: "Archive the complete raw output of every tool result to disk and replace tool-result messages older than the active window below with compact retrieval stubs. The model fetches the byte-identical original via read_tool_output when needed — no information is lost, aged raw output just stops being resent on every iteration. Measured fleet impact: 40-60% input-token reduction. Applies to NEW scans.", DefaultValue: "true", InputType: "boolean"},
+		{Key: "AIDASTING_EPOCH_COVERAGE", Label: "Epoch-based coverage convergence", Category: "Runtime", Description: "Measure per-endpoint coverage completion against a frozen surface snapshot that advances in bounded epochs, instead of the live-growing discovered set. On large or still-growing attack surfaces this lets coverage tasks actually close so the scan reaches a clean terminal state instead of chasing a receding bar until a watchdog. No coverage is dropped: every discovered endpoint is folded into a later epoch and tested before finish. Applies to NEW scans.", DefaultValue: "true", InputType: "boolean"},
+		{Key: "AIDASTING_TOOL_ARCHIVE_ACTIVE_WINDOW", Label: "Bounded context: active window", Category: "LLM", Description: "How many recent tool-result messages stay verbatim in the conversation before older ones become retrieval stubs (used by bounded working context above).", DefaultValue: "8", InputType: "number"},
+		{Key: "AIDASTING_TOOL_ARCHIVE_MIN_BYTES", Label: "Bounded context: archive threshold (bytes)", Category: "LLM", Description: "Minimum raw-output size before a tool result is archived/stubbed. Smaller results stay in-context verbatim.", DefaultValue: "1500", InputType: "number"},
+		{Key: "AIDASTING_ROLE_SCOPED_TOOLS", Label: "Role-scoped specialist tools (token saver)", Category: "LLM", Description: "Withhold documentation of role-foreign tools (e.g. browser tools from the authz specialist) from delegated specialists' prompts. Hidden tools remain callable and are listed in a compact index, so the reachable tool set is unchanged. Applies to NEW scans.", DefaultValue: "false", InputType: "boolean"},
+		{Key: "AIDASTING_LLM_MAX_INFLIGHT", Label: "LLM max in-flight concurrency", Category: "LLM", Description: "Maximum concurrent requests sent to the LLM provider across all scans and subagents. Clamps token velocity to prevent exhausting provider rolling-window rate limits or quotas. Default is 4 × MaxInstances. Takes effect after restart.", Placeholder: "4", InputType: "number", RequiresRestart: true},
+		{Key: "AIDASTING_MAX_ITERATIONS", Label: "Max iterations", Category: "Runtime", Description: "Maximum agent iterations per scan. 0 means unlimited.", DefaultValue: "0", InputType: "number"},
+		{Key: "AIDASTING_MIN_ITERATIONS", Label: "Min iterations (testing floor)", Category: "Runtime", Description: "Minimum testing floor in iterations before the gatekeeper permits finish. Ensures deep probing (OAST, ReDoS, fuzzing) before concluding.", DefaultValue: "50", InputType: "number"},
+		{Key: "AIDASTING_NO_TOOL_ABORT_AT", Label: "No-tool loop limit", Category: "Runtime", Description: "Consecutive assistant responses without a parsed tool call before cleanly stopping. Default 30; 0 disables this safety limit.", DefaultValue: "30", InputType: "number"},
+		{Key: "AIDASTING_MAX_WILDCARD_SUBDOMAINS", Label: "Wildcard subdomain cap", Category: "Runtime", Description: "Optional maximum full LLM sessions expanded from one wildcard target. Default -1 means unlimited; set a positive value only for an explicit emergency resource cap.", DefaultValue: "-1", InputType: "number"},
+		{Key: "AIDASTING_MAX_FINISH_REJECTIONS", Label: "Max finish rejections", Category: "Runtime", Description: "Number of times the agent's finish call will be rejected by the gatekeeper before allowing a deadlock bypass, enforcing deeper testing coverage.", DefaultValue: "15", InputType: "number"},
+		{Key: "AIDASTING_CONVERGE_FINISH_IDLE", Label: "Principled finish: no-finding tail (iterations)", Category: "Runtime", Description: "When the principled finish (AIDASTING_CONVERGE_FINISH) is on, a saturated scan finalizes after this many consecutive iterations without a new validated finding. Each new finding, and each new hypothesis the agent records (up to 5 times per scan), restarts the count. Higher values test longer before closing. Applies to new scans.", DefaultValue: "500", InputType: "number"},
+		{Key: "AIDASTING_CONVERGE_FINISH_LEAD_WINDOW", Label: "Principled finish: lead verification window (iterations)", Category: "Runtime", Description: "When the no-finding tail elapses while the agent still holds recent high-confidence unverified leads, it gets one final window of this many iterations to verify or reject them before the scan finalizes. -1 disables the window. Applies to new scans.", DefaultValue: "100", InputType: "number"},
+		{Key: "AIDASTING_MAX_CONCURRENT_AGENTS", Label: "Max concurrent subagents", Category: "Runtime", Description: "Maximum delegated specialist subagents executing simultaneously per scan. Set to 1 to run specialists serially one at a time. Default 3.", DefaultValue: "3", InputType: "number", RequiresRestart: true},
+		{Key: "AIDASTING_ITERATION_DELAY", Label: "Iteration delay (seconds)", Category: "Runtime", Description: "Pause in seconds between agent reasoning iterations. Paces LLM request velocity to stay within rolling-window provider rate limits. 0 disables delay (default). Takes effect immediately.", DefaultValue: "0", InputType: "number"},
+		{Key: "AIDASTING_MAX_TOOL_CALLS", Label: "Max tool calls (budget)", Category: "Runtime", Description: "Per-scan tool-call cap; the scan stops cleanly when reached (findings preserved). 0 = unlimited.", DefaultValue: "0", InputType: "number", RequiresRestart: true},
+		{Key: "AIDASTING_MAX_DURATION", Label: "Max duration seconds (budget)", Category: "Runtime", Description: "Per-scan wall-clock cap in seconds; the scan stops cleanly when reached. 0 = unlimited.", DefaultValue: "0", InputType: "number", RequiresRestart: true},
+		{Key: "AIDASTING_MAX_TOKENS", Label: "Max LLM tokens (budget)", Category: "Runtime", Description: "Per-scan total-token cap; the scan stops cleanly when reached. 0 = unlimited.", DefaultValue: "0", InputType: "number", RequiresRestart: true},
+		{Key: "AIDASTING_TARGET_AUTH", Label: "Target auth (authenticated scanning)", Category: "Runtime", Description: "Authenticated-session credentials for the target so the agent tests post-auth surface (IDOR/BOLA, privilege escalation, business logic). One 'Header-Name: value' per line or separated by ';'. e.g. 'Cookie: session=abc; Authorization: Bearer xyz'. Auto-applied to http_request.", Placeholder: "Cookie: session=...; Authorization: Bearer ...", InputType: "text", Sensitive: true, RequiresRestart: true},
+		{Key: "AIDASTING_SCAN_HEADERS", Label: "Scan headers (attribution)", Category: "Runtime", Description: "Identifying header(s) added to ALL target-facing scan traffic (agent HTTP client + httpx/nuclei via -H) so an authorized AI-DAST-ING run is attributable in the target's logs and can be allow-listed by its WAF/SOC. Bug-bounty programs often require one, e.g. 'X-Bug-Bounty: <handle>'. One 'Header-Name: value' per entry, separated by ';'. Never attached to LLM APIs, notifications, or the dashboard.", Placeholder: "X-Bug-Bounty: ulises2k; X-Scan-ID: engagement-42", InputType: "text", RequiresRestart: true},
+		{Key: "AIDASTING_SCAN_HEADERS_FILE", Label: "Scan headers file", Category: "Runtime", Description: "Path to a file of scan/attribution headers, one 'Name: value' per line ('#' comments and blank lines ignored). Merged with AIDASTING_SCAN_HEADERS; the inline value wins on a name clash.", Placeholder: "/path/to/scan-headers.txt", InputType: "path", RequiresRestart: true},
+		{Key: "AIDASTING_OOB_PUBLIC_URL", Label: "OOB callback URL", Category: "OOB", Description: "Public address targets can reach for out-of-band verification of blind vulns (blind SSRF/RCE/XSS/XXE), e.g. https://oob.example.com. Enables the self-hosted oob_callback listener. Leave blank to use the zero-config interactsh backend.", Placeholder: "https://oob.example.com", InputType: "url", RequiresRestart: true},
+		{Key: "AIDASTING_OOB_PORT", Label: "OOB listener port", Category: "OOB", Description: "Local port the OOB callback listener binds (0.0.0.0). Expose/reverse-proxy it to the OOB callback URL above.", Placeholder: "8888", InputType: "number", RequiresRestart: true},
+		{Key: "AIDASTING_OOB_INTERACTIONS", Label: "OOB interaction types", Category: "OOB", Description: "Which out-of-band interaction types count as a callback (proof). All selected = default (any DNS/HTTP/SMTP hit is proof). Deselect DNS to suppress DNS-only false positives from cloud infra (e.g. AWS resolvers that merely resolve the callback host). HTTP also covers HTTPS. Other interactsh channels (LDAP for JNDI/Log4Shell, SMB, FTP) are always kept. Note the self-hosted listener (OOB callback URL) only ever reports HTTP(S), so a DNS-only selection suppresses all of its callbacks.", DefaultValue: "dns,http,smtp", InputType: "multiselect", Options: []string{"dns", "http", "smtp"}, RequiresRestart: true},
+		{Key: "AIDASTING_SOURCE_REPO", Label: "Whitebox source (repo/path)", Category: "Runtime", Description: "Enable whitebox / source-assisted assessment. A Git URL (shallow-cloned) or a local directory path to the target's source. Activates the code_search tool and source→sink→exploit methodology — where RCE, injection, and secret-exposure bugs are found.", Placeholder: "https://github.com/org/app.git", InputType: "text", RequiresRestart: true},
 		{Key: "GEMINI_API_KEY", Label: "Gemini web-search key", Category: "LLM", Description: "Optional Gemini key for web search enrichment.", Placeholder: "AIza...", InputType: "secret", Sensitive: true},
 
-		{Key: "XALGORIX_DISCORD_WEBHOOK", Label: "Discord webhook", Category: "Notifications", Description: "Global Discord webhook used when a scan does not provide its own.", Placeholder: "https://discord.com/api/webhooks/...", InputType: "secret", Sensitive: true},
-		{Key: "XALGORIX_DISCORD_MIN_SEVERITY", Label: "Discord minimum severity", Category: "Notifications", Description: "Minimum severity sent to Discord.", InputType: "select", Options: []string{"", "info", "low", "medium", "high", "critical"}},
+		{Key: "AIDASTING_DISCORD_WEBHOOK", Label: "Discord webhook", Category: "Notifications", Description: "Global Discord webhook used when a scan does not provide its own.", Placeholder: "https://discord.com/api/webhooks/...", InputType: "secret", Sensitive: true},
+		{Key: "AIDASTING_DISCORD_MIN_SEVERITY", Label: "Discord minimum severity", Category: "Notifications", Description: "Minimum severity sent to Discord.", InputType: "select", Options: []string{"", "info", "low", "medium", "high", "critical"}},
 
-		{Key: "XALGORIX_TELEGRAM_BOT_TOKEN", Label: "Telegram bot token", Category: "Notifications", Description: "Bot token from @BotFather. Required to enable Telegram notifications.", Placeholder: "123456789:ABC-DEF...", InputType: "secret", Sensitive: true},
-		{Key: "XALGORIX_TELEGRAM_CHAT_ID", Label: "Telegram chat ID", Category: "Notifications", Description: "Target chat/channel ID. Numeric ID (e.g. -1001234567890) or @channelusername.", Placeholder: "-1001234567890", InputType: "text"},
-		{Key: "XALGORIX_TELEGRAM_MIN_SEVERITY", Label: "Telegram minimum severity", Category: "Notifications", Description: "Minimum severity sent to Telegram.", InputType: "select", Options: []string{"", "info", "low", "medium", "high", "critical"}},
-		{Key: "XALGORIX_NOTIFY_SCAN_COMPLETE", Label: "Notify on scan completion", Category: "Notifications", Description: "Send the \"Scan Finished\" summary (report ready / clean scan) to the configured channels after every scan. Off by default so only per-vulnerability alerts are sent.", DefaultValue: "false", InputType: "boolean"},
+		{Key: "AIDASTING_TELEGRAM_BOT_TOKEN", Label: "Telegram bot token", Category: "Notifications", Description: "Bot token from @BotFather. Required to enable Telegram notifications.", Placeholder: "123456789:ABC-DEF...", InputType: "secret", Sensitive: true},
+		{Key: "AIDASTING_TELEGRAM_CHAT_ID", Label: "Telegram chat ID", Category: "Notifications", Description: "Target chat/channel ID. Numeric ID (e.g. -1001234567890) or @channelusername.", Placeholder: "-1001234567890", InputType: "text"},
+		{Key: "AIDASTING_TELEGRAM_MIN_SEVERITY", Label: "Telegram minimum severity", Category: "Notifications", Description: "Minimum severity sent to Telegram.", InputType: "select", Options: []string{"", "info", "low", "medium", "high", "critical"}},
+		{Key: "AIDASTING_NOTIFY_SCAN_COMPLETE", Label: "Notify on scan completion", Category: "Notifications", Description: "Send the \"Scan Finished\" summary (report ready / clean scan) to the configured channels after every scan. Off by default so only per-vulnerability alerts are sent.", DefaultValue: "false", InputType: "boolean"},
 
 		{Key: "AGENTMAIL_POD", Label: "AgentMail pod", Category: "AgentMail", Description: "AgentMail pod identifier.", Placeholder: "am_us_pod_47", InputType: "text"},
 		{Key: "AGENTMAIL_API_KEY", Label: "AgentMail API key", Category: "AgentMail", Description: "AgentMail API key for inbound email triage.", Placeholder: "ak_...", InputType: "secret", Sensitive: true},
 
-		{Key: "XALGORIX_RATE_LIMIT_REQUESTS", Label: "Rate-limit requests", Category: "Rate limits", Description: "Requests allowed per dashboard rate-limit window.", DefaultValue: "60", InputType: "number"},
-		{Key: "XALGORIX_RATE_LIMIT_WINDOW", Label: "Rate-limit window", Category: "Rate limits", Description: "Rate-limit window in seconds.", DefaultValue: "60", InputType: "number"},
-		{Key: "XALGORIX_RATE_RPS", Label: "Outbound RPS", Category: "Rate limits", Description: "Sustained per-domain outbound request rate.", DefaultValue: "10", InputType: "number"},
-		{Key: "XALGORIX_RATE_BURST", Label: "Outbound burst", Category: "Rate limits", Description: "Per-domain outbound burst size.", DefaultValue: "20", InputType: "number"},
+		{Key: "AIDASTING_RATE_LIMIT_REQUESTS", Label: "Rate-limit requests", Category: "Rate limits", Description: "Requests allowed per dashboard rate-limit window.", DefaultValue: "60", InputType: "number"},
+		{Key: "AIDASTING_RATE_LIMIT_WINDOW", Label: "Rate-limit window", Category: "Rate limits", Description: "Rate-limit window in seconds.", DefaultValue: "60", InputType: "number"},
+		{Key: "AIDASTING_RATE_RPS", Label: "Outbound RPS", Category: "Rate limits", Description: "Sustained per-domain outbound request rate.", DefaultValue: "10", InputType: "number"},
+		{Key: "AIDASTING_RATE_BURST", Label: "Outbound burst", Category: "Rate limits", Description: "Per-domain outbound burst size.", DefaultValue: "20", InputType: "number"},
 
-		{Key: "XALGORIX_USE_PROXY", Label: "Use proxy", Category: "Proxy", Description: "Enable proxy routing for outbound traffic. Takes effect after restart.", DefaultValue: "false", InputType: "boolean", RequiresRestart: true},
-		{Key: "XALGORIX_PROXY_REQUIRED", Label: "Require proxy for scan HTTP", Category: "Proxy", Description: "Reject missing proxy configuration; route built-in scan HTTP/browser via the proxy and fail requests if it is down. Shell tools still require network isolation. Takes effect after restart.", DefaultValue: "false", InputType: "boolean", RequiresRestart: true},
-		{Key: "XALGORIX_PROXY_URL", Label: "Proxy URL", Category: "Proxy", Description: "Single proxy URL. Overrides proxy file when set. Takes effect after restart.", Placeholder: "socks5://user:pass@127.0.0.1:1080", InputType: "secret", Sensitive: true, RequiresRestart: true},
-		{Key: "XALGORIX_PROXY_FILE", Label: "Proxy file", Category: "Proxy", Description: "Path to a file with one proxy per line. Takes effect after restart.", Placeholder: "/path/to/proxies.txt", InputType: "path", RequiresRestart: true},
-		{Key: "XALGORIX_PROXY_ROTATION", Label: "Proxy rotation", Category: "Proxy", Description: "Proxy rotation strategy. Takes effect after restart.", DefaultValue: "roundrobin", InputType: "select", Options: []string{"roundrobin", "random"}, RequiresRestart: true},
-		{Key: "XALGORIX_TLS_SKIP_VERIFY", Label: "Skip TLS verification", Category: "Proxy", Description: "Allow insecure TLS verification for proxied/testing traffic.", DefaultValue: "false", InputType: "boolean"},
+		{Key: "AIDASTING_USE_PROXY", Label: "Use proxy", Category: "Proxy", Description: "Enable proxy routing for outbound traffic. Takes effect after restart.", DefaultValue: "false", InputType: "boolean", RequiresRestart: true},
+		{Key: "AIDASTING_PROXY_REQUIRED", Label: "Require proxy for scan HTTP", Category: "Proxy", Description: "Reject missing proxy configuration; route built-in scan HTTP/browser via the proxy and fail requests if it is down. Shell tools still require network isolation. Takes effect after restart.", DefaultValue: "false", InputType: "boolean", RequiresRestart: true},
+		{Key: "AIDASTING_PROXY_URL", Label: "Proxy URL", Category: "Proxy", Description: "Single proxy URL. Overrides proxy file when set. Takes effect after restart.", Placeholder: "socks5://user:pass@127.0.0.1:1080", InputType: "secret", Sensitive: true, RequiresRestart: true},
+		{Key: "AIDASTING_PROXY_FILE", Label: "Proxy file", Category: "Proxy", Description: "Path to a file with one proxy per line. Takes effect after restart.", Placeholder: "/path/to/proxies.txt", InputType: "path", RequiresRestart: true},
+		{Key: "AIDASTING_PROXY_ROTATION", Label: "Proxy rotation", Category: "Proxy", Description: "Proxy rotation strategy. Takes effect after restart.", DefaultValue: "roundrobin", InputType: "select", Options: []string{"roundrobin", "random"}, RequiresRestart: true},
+		{Key: "AIDASTING_TLS_SKIP_VERIFY", Label: "Skip TLS verification", Category: "Proxy", Description: "Allow insecure TLS verification for proxied/testing traffic.", DefaultValue: "false", InputType: "boolean"},
 
-		{Key: "XALGORIX_WORKSPACE", Label: "Workspace", Category: "Runtime", Description: "Workspace root for scan execution.", InputType: "path", RequiresRestart: true},
-		{Key: "XALGORIX_DISABLE_BROWSER", Label: "Disable browser", Category: "Runtime", Description: "Disable browser automation tools.", DefaultValue: "false", InputType: "boolean"},
-		{Key: "XALGORIX_BROWSER_PATH", Label: "Browser path", Category: "Runtime", Description: "Custom Chrome/Chromium executable path.", InputType: "path"},
-		{Key: "XALGORIX_ALLOW_AUTO_INSTALL", Label: "Allow auto-install", Category: "Runtime", Description: "Permit the agent to auto-install missing packages.", DefaultValue: autoInstallDefault, InputType: "boolean"},
-		{Key: "XALGORIX_AUTO_INSTALL_SUDO", Label: "Allow sudo auto-install", Category: "Runtime", Description: "Permit sudo-prefixed auto-installs.", DefaultValue: "false", InputType: "boolean"},
-		{Key: "XALGORIX_ALLOW_ABSOLUTE_FILEEDIT", Label: "Allow absolute file edits", Category: "Runtime", Description: "Allow file-edit tooling to write absolute paths.", DefaultValue: "false", InputType: "boolean"},
+		{Key: "AIDASTING_WORKSPACE", Label: "Workspace", Category: "Runtime", Description: "Workspace root for scan execution.", InputType: "path", RequiresRestart: true},
+		{Key: "AIDASTING_DISABLE_BROWSER", Label: "Disable browser", Category: "Runtime", Description: "Disable browser automation tools.", DefaultValue: "false", InputType: "boolean"},
+		{Key: "AIDASTING_BROWSER_PATH", Label: "Browser path", Category: "Runtime", Description: "Custom Chrome/Chromium executable path.", InputType: "path"},
+		{Key: "AIDASTING_ALLOW_AUTO_INSTALL", Label: "Allow auto-install", Category: "Runtime", Description: "Permit the agent to auto-install missing packages.", DefaultValue: autoInstallDefault, InputType: "boolean"},
+		{Key: "AIDASTING_AUTO_INSTALL_SUDO", Label: "Allow sudo auto-install", Category: "Runtime", Description: "Permit sudo-prefixed auto-installs.", DefaultValue: "false", InputType: "boolean"},
+		{Key: "AIDASTING_ALLOW_ABSOLUTE_FILEEDIT", Label: "Allow absolute file edits", Category: "Runtime", Description: "Allow file-edit tooling to write absolute paths.", DefaultValue: "false", InputType: "boolean"},
 
-		{Key: "XALGORIX_USERNAME", Label: "Dashboard username", Category: "Security", Description: "Dashboard login username.", InputType: "text", RequiresRestart: true},
-		{Key: "XALGORIX_PASSWORD", Label: "Dashboard password", Category: "Security", Description: "Plaintext dashboard password. Prefer XALGORIX_PASSWORD_HASH.", InputType: "secret", Sensitive: true, RequiresRestart: true},
-		{Key: "XALGORIX_PASSWORD_HASH", Label: "Dashboard password hash", Category: "Security", Description: "Bcrypt dashboard password hash.", InputType: "secret", Sensitive: true, RequiresRestart: true},
-		{Key: "XALGORIX_BIND", Label: "Bind address", Category: "Security", Description: "Web server listen address.", DefaultValue: "127.0.0.1", Placeholder: "127.0.0.1", InputType: "text", RequiresRestart: true},
-		{Key: "XALGORIX_ALLOW_LOCAL_TARGETS", Label: "Allow local targets", Category: "Security", Description: "Permit scanning locally-hosted apps (localhost / 127.0.0.1 / private IPs) — for self-hosted demo/staging on the same box. The dashboard's own listener is always protected. Leave OFF on shared/hosted deployments.", DefaultValue: "false", InputType: "boolean"},
-		{Key: "XALGORIX_DISABLE_AUTO_DELEGATE", Label: "Disable specialist wave", Category: "LLM", Description: "Skip the automatic specialist delegation wave entirely. The root agent does all testing itself — deeper but slower (pre-v4.6.93 behavior). Enable if specialist-parallel scans are producing shallower results.", DefaultValue: "false", InputType: "boolean"},
-		{Key: "XALGORIX_DISABLED_SPECIALISTS", Label: "Disabled specialist lanes", Category: "LLM", Description: "Comma-separated specialist lane names to skip. Available lanes: recon-discovery, authz-logic, injection-serverside, client-source. Example: recon-discovery disables the early discovery specialist only. Use XALGORIX_DISABLE_AUTO_DELEGATE=true to disable ALL specialists.", Placeholder: "recon-discovery", InputType: "text", RequiresRestart: true},
-		{Key: "XALGORIX_CHECKLIST", Label: "Scan checklist", Category: "LLM", Description: "Methodology depth: full = comprehensive 22-phase playbook (default, deepest scans); professional = compact focused workflow.", DefaultValue: "full", InputType: "select", Options: []string{"full", "professional"}},
+		{Key: "AIDASTING_USERNAME", Label: "Dashboard username", Category: "Security", Description: "Dashboard login username.", InputType: "text", RequiresRestart: true},
+		{Key: "AIDASTING_PASSWORD", Label: "Dashboard password", Category: "Security", Description: "Plaintext dashboard password. Prefer AIDASTING_PASSWORD_HASH.", InputType: "secret", Sensitive: true, RequiresRestart: true},
+		{Key: "AIDASTING_PASSWORD_HASH", Label: "Dashboard password hash", Category: "Security", Description: "Bcrypt dashboard password hash.", InputType: "secret", Sensitive: true, RequiresRestart: true},
+		{Key: "AIDASTING_BIND", Label: "Bind address", Category: "Security", Description: "Web server listen address.", DefaultValue: "127.0.0.1", Placeholder: "127.0.0.1", InputType: "text", RequiresRestart: true},
+		{Key: "AIDASTING_ALLOW_LOCAL_TARGETS", Label: "Allow local targets", Category: "Security", Description: "Permit scanning locally-hosted apps (localhost / 127.0.0.1 / private IPs) — for self-hosted demo/staging on the same box. The dashboard's own listener is always protected. Leave OFF on shared/hosted deployments.", DefaultValue: "false", InputType: "boolean"},
+		{Key: "AIDASTING_DISABLE_AUTO_DELEGATE", Label: "Disable specialist wave", Category: "LLM", Description: "Skip the automatic specialist delegation wave entirely. The root agent does all testing itself — deeper but slower (pre-v4.6.93 behavior). Enable if specialist-parallel scans are producing shallower results.", DefaultValue: "false", InputType: "boolean"},
+		{Key: "AIDASTING_DISABLED_SPECIALISTS", Label: "Disabled specialist lanes", Category: "LLM", Description: "Comma-separated specialist lane names to skip. Available lanes: recon-discovery, authz-logic, injection-serverside, client-source. Example: recon-discovery disables the early discovery specialist only. Use AIDASTING_DISABLE_AUTO_DELEGATE=true to disable ALL specialists.", Placeholder: "recon-discovery", InputType: "text", RequiresRestart: true},
+		{Key: "AIDASTING_CHECKLIST", Label: "Scan checklist", Category: "LLM", Description: "Methodology depth: full = comprehensive 22-phase playbook (default, deepest scans); professional = compact focused workflow.", DefaultValue: "full", InputType: "select", Options: []string{"full", "professional"}},
 
 		{Key: "CAIDO_PORT", Label: "Caido port", Category: "Integrations", Description: "Caido proxy port. 0 means auto-detect.", DefaultValue: "0", InputType: "number"},
 		{Key: "CAIDO_API_TOKEN", Label: "Caido API token", Category: "Integrations", Description: "Caido API token for proxy integration.", InputType: "secret", Sensitive: true},
-		{Key: "XALGORIX_TELEMETRY", Label: "Telemetry", Category: "Integrations", Description: "Enable OpenTelemetry export.", DefaultValue: "true", InputType: "boolean"},
-		{Key: "XALGORIX_OTEL_ENDPOINT", Label: "OTel endpoint", Category: "Integrations", Description: "OpenTelemetry collector endpoint.", InputType: "url"},
+		{Key: "AIDASTING_TELEMETRY", Label: "Telemetry", Category: "Integrations", Description: "Enable OpenTelemetry export.", DefaultValue: "true", InputType: "boolean"},
+		{Key: "AIDASTING_OTEL_ENDPOINT", Label: "OTel endpoint", Category: "Integrations", Description: "OpenTelemetry collector endpoint.", InputType: "url"},
 
-		{Key: "XALGORIX_CPU_CAUTION_PCT", Label: "CPU caution percent", Category: "Resources", Description: "CPU load caution threshold.", DefaultValue: "70", InputType: "number", RequiresRestart: true},
-		{Key: "XALGORIX_CPU_CRITICAL_PCT", Label: "CPU critical percent", Category: "Resources", Description: "CPU load critical threshold.", DefaultValue: "90", InputType: "number", RequiresRestart: true},
-		{Key: "XALGORIX_RAM_CAUTION_MB", Label: "RAM caution MB", Category: "Resources", Description: "Available RAM caution threshold.", InputType: "number", RequiresRestart: true},
-		{Key: "XALGORIX_RAM_CRITICAL_MB", Label: "RAM critical MB", Category: "Resources", Description: "Available RAM critical threshold.", InputType: "number", RequiresRestart: true},
-		{Key: "XALGORIX_DISK_CAUTION_MB", Label: "Disk caution MB", Category: "Resources", Description: "Free disk caution threshold.", DefaultValue: "2048", InputType: "number", RequiresRestart: true},
-		{Key: "XALGORIX_DISK_CRITICAL_MB", Label: "Disk critical MB", Category: "Resources", Description: "Free disk critical threshold.", DefaultValue: "1024", InputType: "number", RequiresRestart: true},
-		{Key: "XALGORIX_MAX_INSTANCES", Label: "Max instances", Category: "Resources", Description: "Authoritative concurrent scan capacity when set; automatic RAM-based capacity is used when unset.", InputType: "number", RequiresRestart: true},
-		{Key: "XALGORIX_HEAVY_TOOL_CPU_LOAD", Label: "Heavy tool CPU load", Category: "Resources", Description: "Expected CPU load per heavy terminal tool. Empty means auto-scale from CPU cores.", Placeholder: "auto", InputType: "number", RequiresRestart: true},
-		{Key: "XALGORIX_SCAN_MEMORY_BUDGET_MB", Label: "Scan memory budget MB", Category: "Resources", Description: "Memory budget per active scan. Empty means auto-scale from RAM and CPU cores.", Placeholder: "auto", InputType: "number", RequiresRestart: true},
-		{Key: "XALGORIX_SCAN_OVERHEAD_MB", Label: "Scan overhead MB", Category: "Resources", Description: "Reserved memory overhead per scan. Empty means auto-scale from RAM.", Placeholder: "auto", InputType: "number", RequiresRestart: true},
-		{Key: "XALGORIX_HEAVY_TOOL_MEM_LIMIT_MB", Label: "Heavy tool memory limit MB", Category: "Resources", Description: "Optional hard address-space limit for heavy terminal tools. Empty or 0 leaves hard limiting disabled; dynamic admission still uses live RAM headroom.", Placeholder: "disabled", InputType: "number", RequiresRestart: true},
-		{Key: "XALGORIX_GO_MEM_LIMIT_MB", Label: "Go memory limit MB", Category: "Resources", Description: "Soft memory limit for the Xalgorix parent process. Empty means auto-scale from RAM.", Placeholder: "auto", InputType: "number", RequiresRestart: true},
+		{Key: "AIDASTING_CPU_CAUTION_PCT", Label: "CPU caution percent", Category: "Resources", Description: "CPU load caution threshold.", DefaultValue: "70", InputType: "number", RequiresRestart: true},
+		{Key: "AIDASTING_CPU_CRITICAL_PCT", Label: "CPU critical percent", Category: "Resources", Description: "CPU load critical threshold.", DefaultValue: "90", InputType: "number", RequiresRestart: true},
+		{Key: "AIDASTING_RAM_CAUTION_MB", Label: "RAM caution MB", Category: "Resources", Description: "Available RAM caution threshold.", InputType: "number", RequiresRestart: true},
+		{Key: "AIDASTING_RAM_CRITICAL_MB", Label: "RAM critical MB", Category: "Resources", Description: "Available RAM critical threshold.", InputType: "number", RequiresRestart: true},
+		{Key: "AIDASTING_DISK_CAUTION_MB", Label: "Disk caution MB", Category: "Resources", Description: "Free disk caution threshold.", DefaultValue: "2048", InputType: "number", RequiresRestart: true},
+		{Key: "AIDASTING_DISK_CRITICAL_MB", Label: "Disk critical MB", Category: "Resources", Description: "Free disk critical threshold.", DefaultValue: "1024", InputType: "number", RequiresRestart: true},
+		{Key: "AIDASTING_MAX_INSTANCES", Label: "Max instances", Category: "Resources", Description: "Authoritative concurrent scan capacity when set; automatic RAM-based capacity is used when unset.", InputType: "number", RequiresRestart: true},
+		{Key: "AIDASTING_HEAVY_TOOL_CPU_LOAD", Label: "Heavy tool CPU load", Category: "Resources", Description: "Expected CPU load per heavy terminal tool. Empty means auto-scale from CPU cores.", Placeholder: "auto", InputType: "number", RequiresRestart: true},
+		{Key: "AIDASTING_SCAN_MEMORY_BUDGET_MB", Label: "Scan memory budget MB", Category: "Resources", Description: "Memory budget per active scan. Empty means auto-scale from RAM and CPU cores.", Placeholder: "auto", InputType: "number", RequiresRestart: true},
+		{Key: "AIDASTING_SCAN_OVERHEAD_MB", Label: "Scan overhead MB", Category: "Resources", Description: "Reserved memory overhead per scan. Empty means auto-scale from RAM.", Placeholder: "auto", InputType: "number", RequiresRestart: true},
+		{Key: "AIDASTING_HEAVY_TOOL_MEM_LIMIT_MB", Label: "Heavy tool memory limit MB", Category: "Resources", Description: "Optional hard address-space limit for heavy terminal tools. Empty or 0 leaves hard limiting disabled; dynamic admission still uses live RAM headroom.", Placeholder: "disabled", InputType: "number", RequiresRestart: true},
+		{Key: "AIDASTING_GO_MEM_LIMIT_MB", Label: "Go memory limit MB", Category: "Resources", Description: "Soft memory limit for the AI-DAST-ING parent process. Empty means auto-scale from RAM.", Placeholder: "auto", InputType: "number", RequiresRestart: true},
 	}
 }
 
@@ -284,18 +284,18 @@ func (s *Server) handleLLMSettings(w http.ResponseWriter, r *http.Request) {
 		}
 
 		updates := map[string]string{
-			"XALGORIX_LLM":                       strings.TrimSpace(req.Model),
-			"XALGORIX_API_BASE":                  strings.TrimSpace(req.APIBase),
-			"XALGORIX_REASONING_EFFORT":          reasoning,
-			"XALGORIX_LLM_MAX_RETRIES":           strconv.Itoa(req.LLMMaxRetries),
-			"XALGORIX_MEMORY_COMPRESSOR_TIMEOUT": strconv.Itoa(req.MemoryCompressorTimeout),
-			"XALGORIX_MAX_ITERATIONS":            strconv.Itoa(req.MaxIterations),
+			"AIDASTING_LLM":                       strings.TrimSpace(req.Model),
+			"AIDASTING_API_BASE":                  strings.TrimSpace(req.APIBase),
+			"AIDASTING_REASONING_EFFORT":          reasoning,
+			"AIDASTING_LLM_MAX_RETRIES":           strconv.Itoa(req.LLMMaxRetries),
+			"AIDASTING_MEMORY_COMPRESSOR_TIMEOUT": strconv.Itoa(req.MemoryCompressorTimeout),
+			"AIDASTING_MAX_ITERATIONS":            strconv.Itoa(req.MaxIterations),
 		}
 		if req.OllamaCompatible != nil {
-			updates["XALGORIX_OLLAMA_COMPATIBLE"] = strconv.FormatBool(*req.OllamaCompatible)
+			updates["AIDASTING_OLLAMA_COMPATIBLE"] = strconv.FormatBool(*req.OllamaCompatible)
 		}
 		if !isMaskedSettingValue(req.APIKey) {
-			updates["XALGORIX_API_KEY"] = strings.TrimSpace(req.APIKey)
+			updates["AIDASTING_API_KEY"] = strings.TrimSpace(req.APIKey)
 		}
 		if !isMaskedSettingValue(req.GeminiAPIKey) {
 			updates["GEMINI_API_KEY"] = strings.TrimSpace(req.GeminiAPIKey)
@@ -315,13 +315,13 @@ func (s *Server) handleLLMSettings(w http.ResponseWriter, r *http.Request) {
 // catalog + Profile_Store. Three sub-branches:
 //
 //  1. activeProfileKey supplied without new credentials → just
-//     write XALGORIX_LLM_PROFILE so the resolver picks up the
+//     write AIDASTING_LLM_PROFILE so the resolver picks up the
 //     existing Profile next request.
 //  2. authMethod=api_key with apiKey supplied → upsert an
 //     auth.Profile{Type: APIKey} for "<provider>:<profileId or
-//     'default'>", also write XALGORIX_LLM/XALGORIX_API_KEY/
-//     XALGORIX_API_BASE for legacy callers, and finally point
-//     XALGORIX_LLM_PROFILE at the new key so the resolver
+//     'default'>", also write AIDASTING_LLM/AIDASTING_API_KEY/
+//     AIDASTING_API_BASE for legacy callers, and finally point
+//     AIDASTING_LLM_PROFILE at the new key so the resolver
 //     dispatches through the catalog branch.
 //  3. authMethod=oauth or none with no profile work → just sync
 //     the env-var side-channel (model + provider hint) so the
@@ -351,12 +351,12 @@ func (s *Server) applyCatalogLLMSettings(ctx context.Context, req llmSettingsReq
 
 	updates := map[string]string{}
 	if provider != "" {
-		updates["XALGORIX_LLM_PROVIDER"] = provider
+		updates["AIDASTING_LLM_PROVIDER"] = provider
 	}
 
 	// API_KEY path: persist the credential AS a profile, then point
-	// XALGORIX_LLM_PROFILE at it. We also continue to write the
-	// legacy XALGORIX_LLM / XALGORIX_API_KEY / XALGORIX_API_BASE
+	// AIDASTING_LLM_PROFILE at it. We also continue to write the
+	// legacy AIDASTING_LLM / AIDASTING_API_KEY / AIDASTING_API_BASE
 	// trio so anyone still consuming those env vars (legacy
 	// scripts, the legacyResolver fallback) keeps working.
 	//
@@ -436,19 +436,19 @@ func (s *Server) applyCatalogLLMSettings(ctx context.Context, req llmSettingsReq
 	// selected local provider in the composite resolver.
 	if authMethod == "none" {
 		activeProfileKey = ""
-		updates["XALGORIX_LLM_PROFILE"] = ""
-		updates["XALGORIX_API_KEY"] = ""
+		updates["AIDASTING_LLM_PROFILE"] = ""
+		updates["AIDASTING_API_KEY"] = ""
 	}
 
 	// activeProfileKey wins as the source of truth for
-	// XALGORIX_LLM_PROFILE. Either the api_key branch above set
+	// AIDASTING_LLM_PROFILE. Either the api_key branch above set
 	// it, or the operator picked an existing profile from the
 	// list, or both fields are empty (auth_method=none / oauth-
 	// only flow) and we leave the pointer alone.
 	if activeProfileKey != "" {
 		// Guard against pointing the resolver at a profile that was never
 		// persisted (e.g. the operator clicked Save before completing the
-		// OAuth sign-in). Without this, XALGORIX_LLM_PROFILE would name a
+		// OAuth sign-in). Without this, AIDASTING_LLM_PROFILE would name a
 		// missing profile and every scan would fail the credential lookup.
 		if s.profiles != nil {
 			if _, ok, err := s.profiles.Get(ctx, activeProfileKey); err != nil {
@@ -457,16 +457,16 @@ func (s *Server) applyCatalogLLMSettings(ctx context.Context, req llmSettingsReq
 				return fmt.Errorf("no saved credential for %q — complete the OAuth sign-in (or save an API key) before selecting it", activeProfileKey)
 			}
 		}
-		updates["XALGORIX_LLM_PROFILE"] = activeProfileKey
+		updates["AIDASTING_LLM_PROFILE"] = activeProfileKey
 	}
 
 	// Legacy env-var sync. Always written when the operator
 	// supplied a model so the legacy path stays runnable.
 	if model := modelForConfiguredProvider(strings.TrimSpace(req.Model), provider); model != "" {
-		updates["XALGORIX_LLM"] = model
+		updates["AIDASTING_LLM"] = model
 	}
 
-	// Legacy env-var sync: XALGORIX_API_BASE.
+	// Legacy env-var sync: AIDASTING_API_BASE.
 	// The WebUI sends apiBase only for the "custom" provider; for
 	// catalog providers it sends apiBaseOverride instead. Fall
 	// through: req.APIBase → req.APIBaseOverride → catalog entry
@@ -497,33 +497,33 @@ func (s *Server) applyCatalogLLMSettings(ctx context.Context, req llmSettingsReq
 			base = containerReachableLocalBase(base)
 		}
 		if base != "" {
-			updates["XALGORIX_API_BASE"] = base
+			updates["AIDASTING_API_BASE"] = base
 		}
 	}
 	if !isMaskedSettingValue(req.APIKey) && strings.TrimSpace(req.APIKey) != "" {
-		updates["XALGORIX_API_KEY"] = strings.TrimSpace(req.APIKey)
+		updates["AIDASTING_API_KEY"] = strings.TrimSpace(req.APIKey)
 	}
 	if !isMaskedSettingValue(req.GeminiAPIKey) {
 		updates["GEMINI_API_KEY"] = strings.TrimSpace(req.GeminiAPIKey)
 	}
 	// Numeric settings still come through both shapes.
 	if req.LLMMaxRetries > 0 {
-		updates["XALGORIX_LLM_MAX_RETRIES"] = strconv.Itoa(clampInt(req.LLMMaxRetries, 0, 20))
+		updates["AIDASTING_LLM_MAX_RETRIES"] = strconv.Itoa(clampInt(req.LLMMaxRetries, 0, 20))
 	}
 	if req.MemoryCompressorTimeout > 0 {
-		updates["XALGORIX_MEMORY_COMPRESSOR_TIMEOUT"] = strconv.Itoa(clampInt(req.MemoryCompressorTimeout, 5, 600))
+		updates["AIDASTING_MEMORY_COMPRESSOR_TIMEOUT"] = strconv.Itoa(clampInt(req.MemoryCompressorTimeout, 5, 600))
 	}
 	if req.MaxIterations > 0 {
-		updates["XALGORIX_MAX_ITERATIONS"] = strconv.Itoa(clampInt(req.MaxIterations, 0, 1000))
+		updates["AIDASTING_MAX_ITERATIONS"] = strconv.Itoa(clampInt(req.MaxIterations, 0, 1000))
 	}
 	if reasoning := strings.ToLower(strings.TrimSpace(req.ReasoningEffort)); reasoning != "" {
 		if !oneOf(reasoning, []string{"none", "low", "medium", "high", "xhigh"}) {
 			return fmt.Errorf("invalid reasoning effort %q", req.ReasoningEffort)
 		}
-		updates["XALGORIX_REASONING_EFFORT"] = reasoning
+		updates["AIDASTING_REASONING_EFFORT"] = reasoning
 	}
 	if req.OllamaCompatible != nil {
-		updates["XALGORIX_OLLAMA_COMPATIBLE"] = strconv.FormatBool(*req.OllamaCompatible)
+		updates["AIDASTING_OLLAMA_COMPATIBLE"] = strconv.FormatBool(*req.OllamaCompatible)
 	}
 
 	if len(updates) == 0 {
@@ -595,7 +595,7 @@ func (s *Server) llmSettings(ctx context.Context) llmSettingsResponse {
 		APIKeyPool:              maskedKeyPoolList(s.cfg.APIKeys),
 		HasAPIKeyPool:           len(s.cfg.APIKeys) > 0,
 		HasGeminiAPIKey:         s.cfg.GeminiAPIKey != "",
-		EnvFile:                 xalgorixEnvFilePath(),
+		EnvFile:                 aidastingEnvFilePath(),
 		ActiveProfileKey:        s.cfg.LLMProfile,
 		Profiles:                []llmProfileSummary{},
 	}
@@ -692,7 +692,7 @@ func (s *Server) environmentSettings(restartRequired bool) environmentSettingsRe
 		value := s.envSettingValue(def.Key)
 		hasValue := os.Getenv(def.Key) != ""
 		if def.Sensitive {
-			if def.Key == "XALGORIX_API_KEYS" {
+			if def.Key == "AIDASTING_API_KEYS" {
 				value = maskKeyPoolValue(value)
 			} else {
 				value = maskSecretValue(value)
@@ -711,7 +711,7 @@ func (s *Server) environmentSettings(restartRequired bool) environmentSettingsRe
 		return values[i].Key < values[j].Key
 	})
 	return environmentSettingsResponse{
-		EnvFile:         xalgorixEnvFilePath(),
+		EnvFile:         aidastingEnvFilePath(),
 		Variables:       values,
 		RestartRequired: restartRequired,
 	}
@@ -758,7 +758,7 @@ func (s *Server) applyEnvironmentUpdates(values map[string]string) (bool, error)
 	s.settingsMu.Lock()
 	defer s.settingsMu.Unlock()
 
-	if err := updateXalgorixEnvFile(xalgorixEnvFilePath(), effective); err != nil {
+	if err := updateAidastingEnvFile(aidastingEnvFilePath(), effective); err != nil {
 		return false, err
 	}
 	for key, value := range effective {
@@ -776,57 +776,57 @@ func (s *Server) applyEnvironmentToRuntimeConfig(values map[string]string) {
 	rateChanged := false
 	for key, value := range values {
 		switch key {
-		case "XALGORIX_LLM":
+		case "AIDASTING_LLM":
 			s.cfg.LLM = value
-		case "XALGORIX_LLM_PROVIDER":
+		case "AIDASTING_LLM_PROVIDER":
 			s.cfg.LLMProvider = value
-		case "XALGORIX_API_BASE":
+		case "AIDASTING_API_BASE":
 			s.cfg.APIBase = value
-		case "XALGORIX_API_KEY":
+		case "AIDASTING_API_KEY":
 			s.cfg.APIKey = value
-		case "XALGORIX_API_KEYS":
+		case "AIDASTING_API_KEYS":
 			s.cfg.APIKeys = config.ParseAPIKeyList(value)
-		case "XALGORIX_LLM_PROFILE":
+		case "AIDASTING_LLM_PROFILE":
 			s.cfg.LLMProfile = value
-		case "XALGORIX_REASONING_EFFORT":
+		case "AIDASTING_REASONING_EFFORT":
 			s.cfg.ReasoningEffort = valueOrDefault(value, "high")
-		case "XALGORIX_LANGUAGE":
+		case "AIDASTING_LANGUAGE":
 			s.cfg.Language = config.NormalizeLanguage(value)
-		case "XALGORIX_OLLAMA_COMPATIBLE":
+		case "AIDASTING_OLLAMA_COMPATIBLE":
 			s.cfg.OllamaCompatible = parseBoolSetting(value, false)
-		case "XALGORIX_LLM_MAX_RETRIES":
+		case "AIDASTING_LLM_MAX_RETRIES":
 			s.cfg.LLMMaxRetries = parseIntSetting(value, 5)
-		case "XALGORIX_MAX_RATE_LIMIT_WAIT":
+		case "AIDASTING_MAX_RATE_LIMIT_WAIT":
 			s.cfg.MaxRateLimitWaitSec = parseIntSetting(value, 30*60)
-		case "XALGORIX_MAX_OUTPUT_TOKENS":
+		case "AIDASTING_MAX_OUTPUT_TOKENS":
 			s.cfg.MaxOutputTokens = parseIntSetting(value, 8192)
-		case "XALGORIX_CONTEXT_COMPACT_TOKENS":
+		case "AIDASTING_CONTEXT_COMPACT_TOKENS":
 			s.cfg.ContextCompactTokens = parseIntSetting(value, -1)
-		case "XALGORIX_LLM_CONTEXT_WINDOW":
+		case "AIDASTING_LLM_CONTEXT_WINDOW":
 			s.cfg.LLMContextWindow = parseIntSetting(value, 128000)
-		case "XALGORIX_LLM_TIMEOUT_SECONDS":
+		case "AIDASTING_LLM_TIMEOUT_SECONDS":
 			s.cfg.LLMTimeoutSeconds = parseIntSetting(value, 600)
-		case "XALGORIX_NATIVE_TOOL_CALLS":
+		case "AIDASTING_NATIVE_TOOL_CALLS":
 			s.cfg.NativeToolCalls = parseBoolSetting(value, false)
-		case "XALGORIX_CONTEXT_COMPACT_RATIO":
+		case "AIDASTING_CONTEXT_COMPACT_RATIO":
 			s.cfg.ContextCompactRatio = parseFloatSetting(value, 0.75)
-		case "XALGORIX_BOUNDED_CONTEXT":
+		case "AIDASTING_BOUNDED_CONTEXT":
 			s.cfg.BoundedContext = parseBoolSetting(value, true)
-		case "XALGORIX_EPOCH_COVERAGE":
+		case "AIDASTING_EPOCH_COVERAGE":
 			s.cfg.EpochCoverage = parseBoolSetting(value, true)
-		case "XALGORIX_TOOL_ARCHIVE_MIN_BYTES":
+		case "AIDASTING_TOOL_ARCHIVE_MIN_BYTES":
 			s.cfg.ToolArchiveMinBytes = parseIntSetting(value, 1500)
-		case "XALGORIX_TOOL_ARCHIVE_ACTIVE_WINDOW":
+		case "AIDASTING_TOOL_ARCHIVE_ACTIVE_WINDOW":
 			s.cfg.ToolArchiveActiveWindow = parseIntSetting(value, 8)
-		case "XALGORIX_ROLE_SCOPED_TOOLS":
+		case "AIDASTING_ROLE_SCOPED_TOOLS":
 			s.cfg.RoleScopedTools = parseBoolSetting(value, false)
-		case "XALGORIX_MEMORY_COMPRESSOR_TIMEOUT":
+		case "AIDASTING_MEMORY_COMPRESSOR_TIMEOUT":
 			s.cfg.MemCompTimeout = parseIntSetting(value, 30)
-		case "XALGORIX_MAX_ITERATIONS":
+		case "AIDASTING_MAX_ITERATIONS":
 			s.cfg.MaxIterations = parseIntSetting(value, 0)
-		case "XALGORIX_MIN_ITERATIONS":
+		case "AIDASTING_MIN_ITERATIONS":
 			s.cfg.MinIterations = parseIntSetting(value, 50)
-		case "XALGORIX_ITERATION_DELAY":
+		case "AIDASTING_ITERATION_DELAY":
 			delay := parseFloatSetting(value, 0)
 			s.cfg.IterationDelaySec = delay
 			s.mu.Lock()
@@ -836,43 +836,43 @@ func (s *Server) applyEnvironmentToRuntimeConfig(values map[string]string) {
 				}
 			}
 			s.mu.Unlock()
-		case "XALGORIX_MAX_WILDCARD_SUBDOMAINS":
+		case "AIDASTING_MAX_WILDCARD_SUBDOMAINS":
 			s.cfg.MaxWildcardSubdomains = parseIntSetting(value, -1)
-		case "XALGORIX_NO_TOOL_ABORT_AT":
+		case "AIDASTING_NO_TOOL_ABORT_AT":
 			s.cfg.NoToolAbortAt = parseIntSetting(value, 30)
-		case "XALGORIX_MAX_FINISH_REJECTIONS":
+		case "AIDASTING_MAX_FINISH_REJECTIONS":
 			s.cfg.MaxFinishRejections = parseIntSetting(value, 15)
-		case "XALGORIX_CONVERGE_FINISH_IDLE":
+		case "AIDASTING_CONVERGE_FINISH_IDLE":
 			s.cfg.ConvergeFinishIdle = parseIntSetting(value, 500)
-		case "XALGORIX_CONVERGE_FINISH_LEAD_WINDOW":
+		case "AIDASTING_CONVERGE_FINISH_LEAD_WINDOW":
 			s.cfg.ConvergeFinishLeadWindow = parseIntSetting(value, 100)
-		case "XALGORIX_WORKSPACE":
+		case "AIDASTING_WORKSPACE":
 			if value != "" {
 				s.cfg.Workspace = value
 			}
-		case "XALGORIX_DISABLE_BROWSER":
+		case "AIDASTING_DISABLE_BROWSER":
 			s.cfg.DisableBrowser = parseBoolSetting(value, false)
-		case "XALGORIX_RATE_LIMIT_REQUESTS":
+		case "AIDASTING_RATE_LIMIT_REQUESTS":
 			s.cfg.RateLimitRequests = parseIntSetting(value, 60)
 			rateChanged = true
-		case "XALGORIX_RATE_LIMIT_WINDOW":
+		case "AIDASTING_RATE_LIMIT_WINDOW":
 			s.cfg.RateLimitWindow = parseIntSetting(value, 60)
 			rateChanged = true
-		case "XALGORIX_RATE_RPS":
+		case "AIDASTING_RATE_RPS":
 			s.cfg.RateLimitRPS = parseFloatSetting(value, 10)
-		case "XALGORIX_RATE_BURST":
+		case "AIDASTING_RATE_BURST":
 			s.cfg.RateLimitBurst = parseIntSetting(value, 20)
-		case "XALGORIX_TLS_SKIP_VERIFY":
+		case "AIDASTING_TLS_SKIP_VERIFY":
 			s.cfg.TLSSkipVerify = parseBoolSetting(value, false)
-		case "XALGORIX_ALLOW_LOCAL_TARGETS":
+		case "AIDASTING_ALLOW_LOCAL_TARGETS":
 			s.cfg.AllowLocalTargets = parseBoolSetting(value, false)
 		case "CAIDO_PORT":
 			s.cfg.CaidoPort = parseIntSetting(value, 0)
 		case "CAIDO_API_TOKEN":
 			s.cfg.CaidoAPIToken = value
-		case "XALGORIX_TELEMETRY":
+		case "AIDASTING_TELEMETRY":
 			s.cfg.Telemetry = parseBoolSetting(value, true)
-		case "XALGORIX_OTEL_ENDPOINT":
+		case "AIDASTING_OTEL_ENDPOINT":
 			s.cfg.OTelEndpoint = value
 		case "GEMINI_API_KEY":
 			s.cfg.GeminiAPIKey = value
@@ -880,48 +880,48 @@ func (s *Server) applyEnvironmentToRuntimeConfig(values map[string]string) {
 			s.cfg.AgentMailAPIKey = value
 		case "AGENTMAIL_POD":
 			s.cfg.AgentMailPod = value
-		case "XALGORIX_DISCORD_WEBHOOK":
+		case "AIDASTING_DISCORD_WEBHOOK":
 			s.cfg.DiscordWebhook = value
 			s.discordWebhook = value
-		case "XALGORIX_DISCORD_MIN_SEVERITY":
+		case "AIDASTING_DISCORD_MIN_SEVERITY":
 			s.cfg.DiscordMinSeverity = value
 			s.discordMinSeverity = strings.ToLower(strings.TrimSpace(value))
-		case "XALGORIX_TELEGRAM_BOT_TOKEN":
+		case "AIDASTING_TELEGRAM_BOT_TOKEN":
 			s.cfg.TelegramBotToken = value
 			s.telegramBotToken = value
-		case "XALGORIX_TELEGRAM_CHAT_ID":
+		case "AIDASTING_TELEGRAM_CHAT_ID":
 			s.cfg.TelegramChatID = value
 			s.telegramChatID = value
-		case "XALGORIX_TELEGRAM_MIN_SEVERITY":
+		case "AIDASTING_TELEGRAM_MIN_SEVERITY":
 			s.cfg.TelegramMinSeverity = value
 			s.telegramMinSeverity = strings.ToLower(strings.TrimSpace(value))
-		case "XALGORIX_NOTIFY_SCAN_COMPLETE":
+		case "AIDASTING_NOTIFY_SCAN_COMPLETE":
 			enabled := parseBoolSetting(value, false)
 			s.cfg.NotifyScanComplete = enabled
 			s.notifyScanComplete.Store(enabled)
-		case "XALGORIX_USERNAME":
+		case "AIDASTING_USERNAME":
 			s.cfg.Username = value
-		case "XALGORIX_PASSWORD":
+		case "AIDASTING_PASSWORD":
 			s.cfg.Password = value
-		case "XALGORIX_PASSWORD_HASH":
+		case "AIDASTING_PASSWORD_HASH":
 			s.cfg.PasswordHash = value
-		case "XALGORIX_BIND":
+		case "AIDASTING_BIND":
 			s.cfg.BindAddr = valueOrDefault(value, "127.0.0.1")
-		case "XALGORIX_ALLOW_AUTO_INSTALL":
+		case "AIDASTING_ALLOW_AUTO_INSTALL":
 			s.cfg.AllowAutoInstall = parseBoolSetting(value, os.Getuid() == 0)
-		case "XALGORIX_AUTO_INSTALL_SUDO":
+		case "AIDASTING_AUTO_INSTALL_SUDO":
 			s.cfg.AllowAutoInstallSudo = parseBoolSetting(value, false)
-		case "XALGORIX_USE_PROXY":
+		case "AIDASTING_USE_PROXY":
 			s.cfg.UseProxy = parseBoolSetting(value, false)
-		case "XALGORIX_PROXY_REQUIRED":
+		case "AIDASTING_PROXY_REQUIRED":
 			s.cfg.ProxyRequired = parseBoolSetting(value, false)
-		case "XALGORIX_PROXY_FILE":
+		case "AIDASTING_PROXY_FILE":
 			s.cfg.ProxyFile = value
-		case "XALGORIX_PROXY_ROTATION":
+		case "AIDASTING_PROXY_ROTATION":
 			s.cfg.ProxyRotation = valueOrDefault(value, "roundrobin")
-		case "XALGORIX_PROXY_URL":
+		case "AIDASTING_PROXY_URL":
 			s.cfg.ProxyURL = value
-		case "XALGORIX_BROWSER_PATH":
+		case "AIDASTING_BROWSER_PATH":
 			s.cfg.BrowserPath = value
 		}
 	}
@@ -940,87 +940,87 @@ func (s *Server) applyEnvironmentToRuntimeConfig(values map[string]string) {
 
 func (s *Server) envSettingValue(key string) string {
 	switch key {
-	case "XALGORIX_LLM":
+	case "AIDASTING_LLM":
 		return s.cfg.LLM
-	case "XALGORIX_API_BASE":
+	case "AIDASTING_API_BASE":
 		return s.cfg.APIBase
-	case "XALGORIX_API_KEY":
+	case "AIDASTING_API_KEY":
 		return s.cfg.APIKey
-	case "XALGORIX_API_KEYS":
+	case "AIDASTING_API_KEYS":
 		return strings.Join(s.cfg.APIKeys, ", ")
-	case "XALGORIX_LLM_PROFILE":
+	case "AIDASTING_LLM_PROFILE":
 		return s.cfg.LLMProfile
-	case "XALGORIX_REASONING_EFFORT":
+	case "AIDASTING_REASONING_EFFORT":
 		return valueOrDefault(s.cfg.ReasoningEffort, "high")
-	case "XALGORIX_LANGUAGE":
+	case "AIDASTING_LANGUAGE":
 		return config.NormalizeLanguage(s.cfg.Language)
-	case "XALGORIX_OLLAMA_COMPATIBLE":
+	case "AIDASTING_OLLAMA_COMPATIBLE":
 		return strconv.FormatBool(s.cfg.OllamaCompatible)
-	case "XALGORIX_LLM_MAX_RETRIES":
+	case "AIDASTING_LLM_MAX_RETRIES":
 		return strconv.Itoa(s.cfg.LLMMaxRetries)
-	case "XALGORIX_MAX_RATE_LIMIT_WAIT":
+	case "AIDASTING_MAX_RATE_LIMIT_WAIT":
 		return strconv.Itoa(s.cfg.MaxRateLimitWaitSec)
-	case "XALGORIX_MAX_OUTPUT_TOKENS":
+	case "AIDASTING_MAX_OUTPUT_TOKENS":
 		return strconv.Itoa(s.cfg.MaxOutputTokens)
-	case "XALGORIX_CONTEXT_COMPACT_TOKENS":
+	case "AIDASTING_CONTEXT_COMPACT_TOKENS":
 		return strconv.Itoa(s.cfg.ContextCompactTokens)
-	case "XALGORIX_LLM_CONTEXT_WINDOW":
+	case "AIDASTING_LLM_CONTEXT_WINDOW":
 		return strconv.Itoa(s.cfg.LLMContextWindow)
-	case "XALGORIX_CONTEXT_COMPACT_RATIO":
+	case "AIDASTING_CONTEXT_COMPACT_RATIO":
 		return strconv.FormatFloat(s.cfg.ContextCompactRatio, 'g', -1, 64)
-	case "XALGORIX_BOUNDED_CONTEXT":
+	case "AIDASTING_BOUNDED_CONTEXT":
 		return strconv.FormatBool(s.cfg.BoundedContext)
-	case "XALGORIX_EPOCH_COVERAGE":
+	case "AIDASTING_EPOCH_COVERAGE":
 		return strconv.FormatBool(s.cfg.EpochCoverage)
-	case "XALGORIX_NATIVE_TOOL_CALLS":
+	case "AIDASTING_NATIVE_TOOL_CALLS":
 		return strconv.FormatBool(s.cfg.NativeToolCalls)
-	case "XALGORIX_TOOL_ARCHIVE_MIN_BYTES":
+	case "AIDASTING_TOOL_ARCHIVE_MIN_BYTES":
 		return strconv.Itoa(s.cfg.ToolArchiveMinBytes)
-	case "XALGORIX_TOOL_ARCHIVE_ACTIVE_WINDOW":
+	case "AIDASTING_TOOL_ARCHIVE_ACTIVE_WINDOW":
 		return strconv.Itoa(s.cfg.ToolArchiveActiveWindow)
-	case "XALGORIX_ROLE_SCOPED_TOOLS":
+	case "AIDASTING_ROLE_SCOPED_TOOLS":
 		return strconv.FormatBool(s.cfg.RoleScopedTools)
-	case "XALGORIX_MEMORY_COMPRESSOR_TIMEOUT":
+	case "AIDASTING_MEMORY_COMPRESSOR_TIMEOUT":
 		return strconv.Itoa(s.cfg.MemCompTimeout)
-	case "XALGORIX_MAX_ITERATIONS":
+	case "AIDASTING_MAX_ITERATIONS":
 		return strconv.Itoa(s.cfg.MaxIterations)
-	case "XALGORIX_MIN_ITERATIONS":
+	case "AIDASTING_MIN_ITERATIONS":
 		return strconv.Itoa(s.cfg.MinIterations)
-	case "XALGORIX_ITERATION_DELAY":
+	case "AIDASTING_ITERATION_DELAY":
 		return strconv.FormatFloat(s.cfg.IterationDelaySec, 'g', -1, 64)
-	case "XALGORIX_MAX_WILDCARD_SUBDOMAINS":
+	case "AIDASTING_MAX_WILDCARD_SUBDOMAINS":
 		return strconv.Itoa(s.cfg.MaxWildcardSubdomains)
-	case "XALGORIX_NO_TOOL_ABORT_AT":
+	case "AIDASTING_NO_TOOL_ABORT_AT":
 		return strconv.Itoa(s.cfg.NoToolAbortAt)
-	case "XALGORIX_MAX_FINISH_REJECTIONS":
+	case "AIDASTING_MAX_FINISH_REJECTIONS":
 		return strconv.Itoa(s.cfg.MaxFinishRejections)
-	case "XALGORIX_CONVERGE_FINISH_IDLE":
+	case "AIDASTING_CONVERGE_FINISH_IDLE":
 		return strconv.Itoa(s.cfg.ConvergeFinishIdle)
-	case "XALGORIX_CONVERGE_FINISH_LEAD_WINDOW":
+	case "AIDASTING_CONVERGE_FINISH_LEAD_WINDOW":
 		return strconv.Itoa(s.cfg.ConvergeFinishLeadWindow)
-	case "XALGORIX_WORKSPACE":
+	case "AIDASTING_WORKSPACE":
 		return s.cfg.Workspace
-	case "XALGORIX_DISABLE_BROWSER":
+	case "AIDASTING_DISABLE_BROWSER":
 		return strconv.FormatBool(s.cfg.DisableBrowser)
-	case "XALGORIX_RATE_LIMIT_REQUESTS":
+	case "AIDASTING_RATE_LIMIT_REQUESTS":
 		return strconv.Itoa(s.cfg.RateLimitRequests)
-	case "XALGORIX_RATE_LIMIT_WINDOW":
+	case "AIDASTING_RATE_LIMIT_WINDOW":
 		return strconv.Itoa(s.cfg.RateLimitWindow)
-	case "XALGORIX_RATE_RPS":
+	case "AIDASTING_RATE_RPS":
 		return strconv.FormatFloat(s.cfg.RateLimitRPS, 'f', -1, 64)
-	case "XALGORIX_RATE_BURST":
+	case "AIDASTING_RATE_BURST":
 		return strconv.Itoa(s.cfg.RateLimitBurst)
-	case "XALGORIX_TLS_SKIP_VERIFY":
+	case "AIDASTING_TLS_SKIP_VERIFY":
 		return strconv.FormatBool(s.cfg.TLSSkipVerify)
-	case "XALGORIX_ALLOW_LOCAL_TARGETS":
+	case "AIDASTING_ALLOW_LOCAL_TARGETS":
 		return strconv.FormatBool(s.cfg.AllowLocalTargets)
 	case "CAIDO_PORT":
 		return strconv.Itoa(s.cfg.CaidoPort)
 	case "CAIDO_API_TOKEN":
 		return s.cfg.CaidoAPIToken
-	case "XALGORIX_TELEMETRY":
+	case "AIDASTING_TELEMETRY":
 		return strconv.FormatBool(s.cfg.Telemetry)
-	case "XALGORIX_OTEL_ENDPOINT":
+	case "AIDASTING_OTEL_ENDPOINT":
 		return s.cfg.OTelEndpoint
 	case "GEMINI_API_KEY":
 		return s.cfg.GeminiAPIKey
@@ -1028,52 +1028,52 @@ func (s *Server) envSettingValue(key string) string {
 		return s.cfg.AgentMailAPIKey
 	case "AGENTMAIL_POD":
 		return s.cfg.AgentMailPod
-	case "XALGORIX_DISCORD_WEBHOOK":
+	case "AIDASTING_DISCORD_WEBHOOK":
 		return s.cfg.DiscordWebhook
-	case "XALGORIX_DISCORD_MIN_SEVERITY":
+	case "AIDASTING_DISCORD_MIN_SEVERITY":
 		return s.cfg.DiscordMinSeverity
-	case "XALGORIX_TELEGRAM_BOT_TOKEN":
+	case "AIDASTING_TELEGRAM_BOT_TOKEN":
 		return s.cfg.TelegramBotToken
-	case "XALGORIX_TELEGRAM_CHAT_ID":
+	case "AIDASTING_TELEGRAM_CHAT_ID":
 		return s.cfg.TelegramChatID
-	case "XALGORIX_TELEGRAM_MIN_SEVERITY":
+	case "AIDASTING_TELEGRAM_MIN_SEVERITY":
 		return s.cfg.TelegramMinSeverity
-	case "XALGORIX_NOTIFY_SCAN_COMPLETE":
+	case "AIDASTING_NOTIFY_SCAN_COMPLETE":
 		return strconv.FormatBool(s.notifyScanComplete.Load())
-	case "XALGORIX_USERNAME":
+	case "AIDASTING_USERNAME":
 		return s.cfg.Username
-	case "XALGORIX_PASSWORD":
+	case "AIDASTING_PASSWORD":
 		return s.cfg.Password
-	case "XALGORIX_PASSWORD_HASH":
+	case "AIDASTING_PASSWORD_HASH":
 		return s.cfg.PasswordHash
-	case "XALGORIX_BIND":
+	case "AIDASTING_BIND":
 		return valueOrDefault(s.cfg.BindAddr, "127.0.0.1")
-	case "XALGORIX_ALLOW_AUTO_INSTALL":
+	case "AIDASTING_ALLOW_AUTO_INSTALL":
 		return strconv.FormatBool(s.cfg.AllowAutoInstall)
-	case "XALGORIX_AUTO_INSTALL_SUDO":
+	case "AIDASTING_AUTO_INSTALL_SUDO":
 		return strconv.FormatBool(s.cfg.AllowAutoInstallSudo)
-	case "XALGORIX_USE_PROXY":
+	case "AIDASTING_USE_PROXY":
 		return strconv.FormatBool(s.cfg.UseProxy)
-	case "XALGORIX_PROXY_REQUIRED":
+	case "AIDASTING_PROXY_REQUIRED":
 		return strconv.FormatBool(s.cfg.ProxyRequired)
-	case "XALGORIX_PROXY_FILE":
+	case "AIDASTING_PROXY_FILE":
 		return s.cfg.ProxyFile
-	case "XALGORIX_PROXY_ROTATION":
+	case "AIDASTING_PROXY_ROTATION":
 		return valueOrDefault(s.cfg.ProxyRotation, "roundrobin")
-	case "XALGORIX_PROXY_URL":
+	case "AIDASTING_PROXY_URL":
 		return s.cfg.ProxyURL
-	case "XALGORIX_BROWSER_PATH":
+	case "AIDASTING_BROWSER_PATH":
 		return s.cfg.BrowserPath
 	default:
 		return os.Getenv(key)
 	}
 }
 
-func updateXalgorixEnvFile(path string, updates map[string]string) error {
+func updateAidastingEnvFile(path string, updates map[string]string) error {
 	return config.UpdateEnvFile(path, updates)
 }
 
-func xalgorixEnvFilePath() string {
+func aidastingEnvFilePath() string {
 	return config.EnvFilePath()
 }
 
@@ -1168,19 +1168,19 @@ func normalizeEnvSettingValue(def envSettingDefinition, value string) (string, e
 		}
 	}
 	switch def.Key {
-	case "XALGORIX_RATE_LIMIT_REQUESTS":
+	case "AIDASTING_RATE_LIMIT_REQUESTS":
 		return strconv.Itoa(clampInt(parseIntSetting(value, 60), 1, 1000)), nil
-	case "XALGORIX_RATE_LIMIT_WINDOW":
+	case "AIDASTING_RATE_LIMIT_WINDOW":
 		return strconv.Itoa(clampInt(parseIntSetting(value, 60), 10, 3600)), nil
-	case "XALGORIX_LLM_MAX_RETRIES":
+	case "AIDASTING_LLM_MAX_RETRIES":
 		return strconv.Itoa(clampInt(parseIntSetting(value, 5), 0, 20)), nil
-	case "XALGORIX_LLM_MAX_INFLIGHT":
+	case "AIDASTING_LLM_MAX_INFLIGHT":
 		return strconv.Itoa(clampInt(parseIntSetting(value, 4), 1, 256)), nil
-	case "XALGORIX_MAX_RATE_LIMIT_WAIT":
+	case "AIDASTING_MAX_RATE_LIMIT_WAIT":
 		return strconv.Itoa(clampInt(parseIntSetting(value, 30*60), -1, 7*24*60*60)), nil
-	case "XALGORIX_MAX_OUTPUT_TOKENS":
+	case "AIDASTING_MAX_OUTPUT_TOKENS":
 		return strconv.Itoa(clampInt(parseIntSetting(value, 8192), 1024, 200000)), nil
-	case "XALGORIX_CONTEXT_COMPACT_TOKENS":
+	case "AIDASTING_CONTEXT_COMPACT_TOKENS":
 		// Negative = auto (window-relative, normalized to -1); 0 disables;
 		// positive = explicit absolute budget clamped to a sane range (avoid a
 		// tiny value that would compact every turn, or an absurd one).
@@ -1191,9 +1191,9 @@ func normalizeEnvSettingValue(def envSettingDefinition, value string) (string, e
 			ct = clampInt(ct, 20000, 2000000)
 		}
 		return strconv.Itoa(ct), nil
-	case "XALGORIX_LLM_CONTEXT_WINDOW":
+	case "AIDASTING_LLM_CONTEXT_WINDOW":
 		return strconv.Itoa(clampInt(parseIntSetting(value, 128000), 8000, 2000000)), nil
-	case "XALGORIX_CONTEXT_COMPACT_RATIO":
+	case "AIDASTING_CONTEXT_COMPACT_RATIO":
 		r := parseFloatSetting(value, 0.75)
 		if r < 0.5 {
 			r = 0.5
@@ -1201,29 +1201,29 @@ func normalizeEnvSettingValue(def envSettingDefinition, value string) (string, e
 			r = 0.9
 		}
 		return strconv.FormatFloat(r, 'g', -1, 64), nil
-	case "XALGORIX_MEMORY_COMPRESSOR_TIMEOUT":
+	case "AIDASTING_MEMORY_COMPRESSOR_TIMEOUT":
 		return strconv.Itoa(clampInt(parseIntSetting(value, 30), 5, 600)), nil
-	case "XALGORIX_MAX_ITERATIONS":
+	case "AIDASTING_MAX_ITERATIONS":
 		return strconv.Itoa(clampInt(parseIntSetting(value, 0), 0, 1000)), nil
-	case "XALGORIX_MIN_ITERATIONS":
+	case "AIDASTING_MIN_ITERATIONS":
 		return strconv.Itoa(clampInt(parseIntSetting(value, 50), 1, 500)), nil
-	case "XALGORIX_NO_TOOL_ABORT_AT":
+	case "AIDASTING_NO_TOOL_ABORT_AT":
 		return strconv.Itoa(clampInt(parseIntSetting(value, 30), 0, 500)), nil
-	case "XALGORIX_MAX_WILDCARD_SUBDOMAINS":
+	case "AIDASTING_MAX_WILDCARD_SUBDOMAINS":
 		return strconv.Itoa(clampInt(parseIntSetting(value, -1), -1, 1000)), nil
-	case "XALGORIX_MAX_FINISH_REJECTIONS":
+	case "AIDASTING_MAX_FINISH_REJECTIONS":
 		return strconv.Itoa(clampInt(parseIntSetting(value, 15), 1, 100)), nil
-	case "XALGORIX_CONVERGE_FINISH_IDLE":
+	case "AIDASTING_CONVERGE_FINISH_IDLE":
 		return strconv.Itoa(clampInt(parseIntSetting(value, 500), 50, 5000)), nil
-	case "XALGORIX_CONVERGE_FINISH_LEAD_WINDOW":
+	case "AIDASTING_CONVERGE_FINISH_LEAD_WINDOW":
 		v := parseIntSetting(value, 100)
 		if v < 0 {
 			return "-1", nil
 		}
 		return strconv.Itoa(clampInt(v, 0, 1000)), nil
-	case "XALGORIX_MAX_CONCURRENT_AGENTS":
+	case "AIDASTING_MAX_CONCURRENT_AGENTS":
 		return strconv.Itoa(clampInt(parseIntSetting(value, 3), 1, 10)), nil
-	case "XALGORIX_ITERATION_DELAY":
+	case "AIDASTING_ITERATION_DELAY":
 		d := parseFloatSetting(value, 0)
 		if d < 0 {
 			d = 0

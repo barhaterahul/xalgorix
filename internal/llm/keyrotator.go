@@ -1,8 +1,8 @@
 // API-key pool rotation for provider rate limits.
 //
 // KeyRotator spreads outbound API-key-authenticated requests across a
-// pool of operator-configured keys (XALGORIX_API_KEYS plus
-// XALGORIX_API_KEY). Picks advance round-robin, so a pool of N keys
+// pool of operator-configured keys (AIDASTING_API_KEYS plus
+// AIDASTING_API_KEY). Picks advance round-robin, so a pool of N keys
 // raises the effective provider rate ceiling roughly N times. When a
 // request fails with a provider rate limit (429 / usage-window), the
 // key it used enters a short cooldown and subsequent picks skip it
@@ -188,7 +188,7 @@ func (r *KeyRotator) Len() int {
 
 // Contains reports whether key is one of the pooled keys. Used so the client can
 // rotate an endpoint that already carries a pooled key (e.g. a provider profile
-// that resolved to the first key while XALGORIX_API_KEY is empty), without ever
+// that resolved to the first key while AIDASTING_API_KEY is empty), without ever
 // touching a credential that is not in the operator's own pool.
 func (r *KeyRotator) Contains(key string) bool {
 	if r == nil || key == "" {

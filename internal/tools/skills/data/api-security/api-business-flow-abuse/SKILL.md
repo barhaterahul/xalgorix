@@ -135,7 +135,7 @@ A business-flow abuse finding requires:
 - Endpoint exists but properly enforces per-account limits
 - OTP sending is properly throttled
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `terminal_execute` with bash loops for sequential and parallel testing
 - Python for complex multi-step workflows
 - `http_request` for precise API interactions

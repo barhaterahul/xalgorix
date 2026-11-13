@@ -10,9 +10,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/safe"
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/safe"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
 )
 
 // Policy is the immutable Allow_List boundary check used by every
@@ -39,7 +39,7 @@ type Policy struct {
 	// Each entry is the result of filepath.Abs + filepath.Clean, with
 	// empty/duplicate entries dropped, sorted longest-first so the
 	// prefix match is deterministic when one root is nested inside
-	// another (e.g. /tmp/xalgorix vs /tmp).
+	// another (e.g. /tmp/ai-dast-ing vs /tmp).
 	roots []string
 
 	// readDeny holds canonical absolute prefixes that REVOKE the
@@ -145,11 +145,11 @@ var (
 //   - the active Data_Dir (cfg.Workspace, which mirrors Data_Dir after
 //     Task 3.1 lands; before then it is the legacy $CWD-derived
 //     workspace),
-//   - cfg.HomeDir (~/.xalgorix),
+//   - cfg.HomeDir (~/.ai-dast-ing),
 //   - "/tmp".
 //
 // The read deny-list comes from cfg.ReadDenyList (sensible defaults
-// merged with XALGORIX_READ_DENY_LIST entries). Reads outside the
+// merged with AIDASTING_READ_DENY_LIST entries). Reads outside the
 // Allow_List are permitted by default; only deny-list members are
 // rejected.
 //

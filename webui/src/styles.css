@@ -5,11 +5,11 @@
    theme store), instead of the OS `prefers-color-scheme` media query. */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Geist + Vercel-inspired design tokens for Xalgorix. Values live on :root
+/* Geist + Vercel-inspired design tokens for AI-DAST-ING. Values live on :root
    (light) and .dark (dark); the @theme inline block below maps them to
    Tailwind color utilities so background, text and border classes resolve
    against the active theme. The crimson brand accent is intentionally
-   identical to the Xalgorix SaaS tokens so the dashboard and hosted product
+   identical to the AI-DAST-ING SaaS tokens so the dashboard and hosted product
    share one accent — the brand oklch values are the same in both themes;
    change them together. */
 :root {
@@ -195,7 +195,7 @@
     overflow: hidden;
   }
 
-  /* Crosshair "radar target" motif in the top-right, mirroring the Xalgorix SaaS
+  /* Crosshair "radar target" motif in the top-right, mirroring the AI-DAST-ING SaaS
      backdrop: centre dot, crosshair, conic tick marks and concentric rings, all
      faded out by a radial mask. Decorative only — pointer-events are disabled
      and #root sits above it. */

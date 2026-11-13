@@ -22,8 +22,8 @@ func TestImportLegacyDataDir_Idempotent(t *testing.T) {
 	s.dataDir = t.TempDir()
 
 	// Seed the legacy directory with one scan record at a realistic
-	// nested path: ~/xalgorix-data/<target>/<date>/<scan-id>/scan.json
-	legacy := filepath.Join(home, "xalgorix-data", "example.com", "2026-05-01", "legacy-scan-1")
+	// nested path: ~/ai-dast-ing-data/<target>/<date>/<scan-id>/scan.json
+	legacy := filepath.Join(home, "ai-dast-ing-data", "example.com", "2026-05-01", "legacy-scan-1")
 	if err := os.MkdirAll(legacy, 0o755); err != nil {
 		t.Fatalf("mkdir legacy: %v", err)
 	}
@@ -113,7 +113,7 @@ func TestImportLegacyDataDir_LegacyEqualsActive(t *testing.T) {
 	t.Setenv("HOME", home)
 
 	s := newTestServer(t, nil)
-	legacy := filepath.Join(home, "xalgorix-data")
+	legacy := filepath.Join(home, "ai-dast-ing-data")
 	if err := os.MkdirAll(legacy, 0o700); err != nil {
 		t.Fatalf("mkdir legacy: %v", err)
 	}

@@ -5,8 +5,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/auth"
-	"github.com/xalgord/xalgorix/v4/internal/providers"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/auth"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
 )
 
 // TestBuildCatalogEndpoint_CodexResponses is the regression guard for the
@@ -120,7 +120,7 @@ func TestBuildCatalogEndpoint_OpenAIAndUnknown(t *testing.T) {
 // guard for issue #122: a "custom" provider has an empty catalog
 // Entry.BaseURL, so when the credential profile is also missing its
 // APIBaseOverride the builder must fall back to the operator-configured
-// base URL (cfg.APIBase / XALGORIX_API_BASE) instead of emitting a
+// base URL (cfg.APIBase / AIDASTING_API_BASE) instead of emitting a
 // relative "/v1/chat/completions" path.
 func TestBuildCatalogEndpoint_CustomProviderFallbackBase(t *testing.T) {
 	custom := providers.Entry{

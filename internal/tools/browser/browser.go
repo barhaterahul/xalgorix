@@ -23,18 +23,18 @@ import (
 	"github.com/go-rod/rod/lib/launcher"
 	"github.com/go-rod/rod/lib/proto"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	egressproxy "github.com/xalgord/xalgorix/v4/internal/proxy"
-	"github.com/xalgord/xalgorix/v4/internal/resources"
-	"github.com/xalgord/xalgorix/v4/internal/sandbox"
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
-	"github.com/xalgord/xalgorix/v4/internal/tools"
-	"github.com/xalgord/xalgorix/v4/internal/tools/terminal"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	egressproxy "github.com/barhaterahul/ai-dast-ing/v4/internal/proxy"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/resources"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/sandbox"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/terminal"
 )
 
 // browserCacheDir is the on-disk root for every browser cache, extension
 // extraction, and downloaded Chromium binary. Per Task 8.5 this lives under
-// ~/.xalgorix/browser/ so the default policy roots admit it without any
+// ~/.ai-dast-ing/browser/ so the default policy roots admit it without any
 // per-scan workspace trickery.
 func browserCacheDir() string {
 	return filepath.Join(config.Get().HomeDir, "browser")
@@ -305,7 +305,7 @@ func detectCaidoPort() int {
 var extensionFS embed.FS
 
 // wellKnownBrowserPaths lists absolute paths to probe when neither
-// XALGORIX_BROWSER_PATH nor rod's launcher.LookPath locate a browser. It exists
+// AIDASTING_BROWSER_PATH nor rod's launcher.LookPath locate a browser. It exists
 // because rod's LookPath name list misses some real installs — most notably
 // Google Chrome at /opt/google/chrome/chrome (commonly symlinked as
 // /usr/bin/chrome). Without these entries a host whose only browser is Google
@@ -324,7 +324,7 @@ func wellKnownBrowserPaths() []string {
 }
 
 // getChromiumPath returns the path to a Chromium binary.
-// Priority: 1) XALGORIX_BROWSER_PATH env  2) System-installed browser  3) Rod auto-download (~170MB first run)
+// Priority: 1) AIDASTING_BROWSER_PATH env  2) System-installed browser  3) Rod auto-download (~170MB first run)
 func getChromiumPath(ctxID string) (string, error) {
 	// 1. User override via config
 	if p := config.Get().BrowserPath; p != "" {
@@ -332,7 +332,7 @@ func getChromiumPath(ctxID string) (string, error) {
 			log.Printf("[browser] Using custom browser path: %s", p)
 			return p, nil
 		}
-		return "", fmt.Errorf("XALGORIX_BROWSER_PATH set to %q but file not found", p)
+		return "", fmt.Errorf("AIDASTING_BROWSER_PATH set to %q but file not found", p)
 	}
 
 	// 2. System-installed browser (chromium, google-chrome, etc.)
@@ -366,7 +366,7 @@ func getChromiumPath(ctxID string) (string, error) {
 	b.RootDir = cacheDir
 	path, err := b.Get()
 	if err != nil {
-		return "", fmt.Errorf("failed to get/download Chromium: %w\n\nFix: install a browser on your system:\n  Debian/Ubuntu: sudo apt install chromium-browser\n  Alpine:        apk add chromium\n  Or set XALGORIX_BROWSER_PATH=/path/to/chrome", err)
+		return "", fmt.Errorf("failed to get/download Chromium: %w\n\nFix: install a browser on your system:\n  Debian/Ubuntu: sudo apt install chromium-browser\n  Alpine:        apk add chromium\n  Or set AIDASTING_BROWSER_PATH=/path/to/chrome", err)
 	}
 
 	log.Printf("[browser] Chromium ready at: %s", path)
@@ -378,7 +378,7 @@ func getChromiumPath(ctxID string) (string, error) {
 // Files are only re-written if the directory doesn't exist or manifest changed.
 //
 // Per Task 8.5 the extension lives under the browser cache root
-// (~/.xalgorix/browser/extension) and every write is canonicalized through
+// (~/.ai-dast-ing/browser/extension) and every write is canonicalized through
 // sandbox.Default().CheckResolve with the "browser" tool name so the
 // Path_Policy Allow_List always admits it.
 func extractExtension(ctxID string) (string, error) {
@@ -551,7 +551,7 @@ func ensureBrowser(ctxID, proxy string) error {
 	// one already cached on BrowserState from a previous launch in this
 	// scan — in both cases the same memory ceiling applies. isHeavy=true
 	// matches the python tool: Chromium is a memory-hungry subprocess and
-	// should be reaped before xalgorix under pressure.
+	// should be reaped before ai-dast-ing under pressure.
 	pid := ln.PID()
 	if pid > 0 {
 		activeLease := lease

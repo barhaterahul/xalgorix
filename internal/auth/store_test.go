@@ -20,7 +20,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/providers"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
 )
 
 // newStoreCatalog returns a stubCatalog (defined in sink_test.go)
@@ -55,7 +55,7 @@ func newTestStore(t *testing.T, knownProviders ...string) (*Store, string) {
 	t.Helper()
 	dir := t.TempDir()
 	// Use a nested directory so EnsureSecureDir has work to do — this
-	// matches the production layout (~/.xalgorix/data/...).
+	// matches the production layout (~/.ai-dast-ing/data/...).
 	dataDir := filepath.Join(dir, "data")
 	path := filepath.Join(dataDir, "auth-profiles.json")
 	cat := newStoreCatalog(knownProviders...)

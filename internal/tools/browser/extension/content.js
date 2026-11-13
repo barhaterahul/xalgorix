@@ -1,4 +1,4 @@
-// content.js — Xalgorix Page Agent content script.
+// content.js — AI-DAST-ING Page Agent content script.
 // Injected into every page. Bundles discovery + controller capabilities.
 // Responds to commands from background.js via chrome.runtime.onMessage.
 //
@@ -16,8 +16,8 @@
 
 (() => {
   // Guard against double-injection
-  if (window.__xalgorix_content_loaded) return;
-  window.__xalgorix_content_loaded = true;
+  if (window.__aidasting_content_loaded) return;
+  window.__aidasting_content_loaded = true;
 
   // ── ID Counter ────────────────────────────────────────────────────────
   let xpaCounter = 1;
@@ -572,5 +572,5 @@
     return false; // Synchronous response (except wait_element)
   });
 
-  console.log("[xalgorix-content] Page agent loaded on", window.location.href);
+  console.log("[ai-dast-ing-content] Page agent loaded on", window.location.href);
 })();

@@ -20,7 +20,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/tools"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
 )
 
 var (
@@ -89,7 +89,7 @@ func Register(r *tools.Registry) {
 func executeWithContext(contextID string, args map[string]string) (tools.Result, error) {
 	root := getSourceRoot(contextID)
 	if root == "" {
-		return tools.Result{Output: "❌ Whitebox source not available for this scan (set XALGORIX_SOURCE_REPO to a git URL or local path). Fall back to black-box testing (fetch and read client-side JS bundles with http_request/browser to discover endpoints)."}, nil
+		return tools.Result{Output: "❌ Whitebox source not available for this scan (set AIDASTING_SOURCE_REPO to a git URL or local path). Fall back to black-box testing (fetch and read client-side JS bundles with http_request/browser to discover endpoints)."}, nil
 	}
 
 	query := strings.TrimSpace(args["query"])

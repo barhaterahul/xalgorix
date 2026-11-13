@@ -98,7 +98,7 @@ CONFIRMED ONLY WITH IMPACT: NamespaceRule cross-tenant reads, UseAfterFree
       (deleted resource still returns 200/data), auth bypasses in sequences
 NOISE: GC/timing races, expected 401s from token refresh gaps, soft validation 422s
 Reproduce every real finding manually (outside RESTler) before reporting —
-Xalgorix is verified-only.
+AI-DAST-ING is verified-only.
 ```
 
 ### Step 6: Verify Coverage
@@ -130,7 +130,7 @@ A RESTler-derived finding requires:
 - 500s that don't reproduce (GC/timing race)
 - Timeouts on slow endpoints without other signals
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `terminal_execute` for RESTler runs (compile/test/fuzz) and result triage
 - Python for dictionary generation from recon-harvested values
 - Manual reproduction via `http_request`/curl before any report

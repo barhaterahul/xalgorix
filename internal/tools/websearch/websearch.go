@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/tools"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
 )
 
 // Register adds web search tools to the registry.
@@ -513,7 +513,7 @@ func searchGemini(query string, max int) ([]searchResult, error) {
 // call MiniMax's server-side web_search tool. ok is false when the provider is
 // not MiniMax, or when no API key is directly available on the config (e.g.
 // credential-profile setups where the key lives in the profile store rather
-// than XALGORIX_API_KEY) — web_search then falls back to the scraping backends.
+// than AIDASTING_API_KEY) — web_search then falls back to the scraping backends.
 func minimaxWebSearchConfig() (apiKey, baseURL, model string, ok bool) {
 	cfg := config.Get()
 	if cfg == nil || !isMiniMaxProvider(cfg) {

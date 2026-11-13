@@ -9,7 +9,7 @@ body:
         Thanks for taking the time to file a bug! Please search existing issues first to avoid duplicates.
 
         ⚠️ **Do not report security vulnerabilities here.** Follow the process in
-        [SECURITY.md](https://github.com/xalgorix/xalgorix/security/policy).
+        [SECURITY.md](https://github.com/ai-dast-ing/ai-dast-ing/security/policy).
   - type: textarea
     id: what-happened
     attributes:
@@ -24,8 +24,8 @@ body:
       label: Steps to reproduce
       description: Exact steps so we can reproduce it.
       placeholder: |
-        1. Configure XALGORIX_LLM=...
-        2. Start with `xalgorix --web`
+        1. Configure AIDASTING_LLM=...
+        2. Start with `ai-dast-ing --web`
         3. Launch a scan against ...
         4. See error
     validations:
@@ -39,8 +39,8 @@ body:
   - type: input
     id: version
     attributes:
-      label: Xalgorix version
-      description: Output of `xalgorix --version` (or the Docker tag).
+      label: AI-DAST-ING version
+      description: Output of `ai-dast-ing --version` (or the Docker tag).
       placeholder: v4.5.153
     validations:
       required: true
@@ -52,7 +52,7 @@ body:
         - Prebuilt binary (installer)
         - Docker
         - Built from source
-        - Hosted (www.xalgorix.com)
+        - Hosted (www.ai-dast-ing.com)
     validations:
       required: true
   - type: input

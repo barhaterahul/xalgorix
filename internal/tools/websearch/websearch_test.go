@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
 )
 
 func TestClampMaxResultsAndCVEIDNormalization(t *testing.T) {
@@ -39,11 +39,11 @@ func TestClampMaxResultsAndCVEIDNormalization(t *testing.T) {
 }
 
 func TestFormatResultsAndTruncateBody(t *testing.T) {
-	formatted := formatResults("xalgorix", []searchResult{
+	formatted := formatResults("ai-dast-ing", []searchResult{
 		{Title: "One", URL: "https://one.test", Snippet: "first"},
 		{Title: "Two", URL: "https://two.test"},
 	})
-	for _, want := range []string{"Search results for: xalgorix", "1. One", "URL: https://one.test", "first", "2. Two"} {
+	for _, want := range []string{"Search results for: ai-dast-ing", "1. One", "URL: https://one.test", "first", "2. Two"} {
 		if !strings.Contains(formatted.Output, want) {
 			t.Fatalf("formatted output missing %q:\n%s", want, formatted.Output)
 		}
@@ -104,7 +104,7 @@ func TestSearchMiniMaxParsesResults(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(`{"content":[
 			{"type":"text","text":"Here is what I found"},
-			{"type":"server_tool_use","input":{"query":"xalgorix"}},
+			{"type":"server_tool_use","input":{"query":"ai-dast-ing"}},
 			{"type":"web_search_tool_result","content":[
 				{"type":"web_search_result","title":"One","url":"https://one.test","page_age":"1d","content":"first"},
 				{"type":"web_search_result","title":"Two","url":"https://two.test","content":"second"},
@@ -114,7 +114,7 @@ func TestSearchMiniMaxParsesResults(t *testing.T) {
 	}))
 	defer server.Close()
 
-	results, err := searchMiniMax("mm-key", server.URL, "MiniMax-M3", "xalgorix", 10)
+	results, err := searchMiniMax("mm-key", server.URL, "MiniMax-M3", "ai-dast-ing", 10)
 	if err != nil {
 		t.Fatalf("searchMiniMax error = %v", err)
 	}
@@ -129,7 +129,7 @@ func TestSearchMiniMaxParsesResults(t *testing.T) {
 	}
 
 	// max clamps the number of returned results.
-	capped, err := searchMiniMax("mm-key", server.URL, "MiniMax-M3", "xalgorix", 1)
+	capped, err := searchMiniMax("mm-key", server.URL, "MiniMax-M3", "ai-dast-ing", 1)
 	if err != nil {
 		t.Fatalf("searchMiniMax (max=1) error = %v", err)
 	}

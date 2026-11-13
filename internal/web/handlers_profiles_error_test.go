@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/auth"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/auth"
 )
 
 func TestWriteProfileErrorUsesProviderSpecificCredentialMessage(t *testing.T) {

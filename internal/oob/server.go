@@ -3,14 +3,14 @@
 // that some system reached the unique URL; target attribution remains
 // fail-closed until protocol and scanner-origin provenance are assessed.
 //
-// This is essential under Xalgorix's "no theoretical findings" policy: a blind
+// This is essential under AI-DAST-ING's "no theoretical findings" policy: a blind
 // class that cannot be reproduced by the verifier is dropped, so the agent
 // needs a real callback oracle to prove impact.
 //
 // Design: a single in-process HTTP listener records every inbound request,
 // correlated by a unique token embedded in the URL path (/{token}/...). The
-// listener binds 0.0.0.0:<XALGORIX_OOB_PORT>; the operator exposes it publicly
-// (directly or via reverse proxy) and sets XALGORIX_OOB_PUBLIC_URL to the
+// listener binds 0.0.0.0:<AIDASTING_OOB_PORT>; the operator exposes it publicly
+// (directly or via reverse proxy) and sets AIDASTING_OOB_PUBLIC_URL to the
 // address targets can reach. Without a public URL the feature is disabled and
 // the tool tells the agent to fall back to in-band verification.
 package oob
@@ -26,7 +26,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
 )
 
 // Interaction is a single recorded out-of-band callback.
@@ -81,7 +81,7 @@ const (
 )
 
 // selfHosted reports whether the operator configured a self-hosted callback
-// listener (XALGORIX_OOB_PUBLIC_URL). When set it takes precedence over the
+// listener (AIDASTING_OOB_PUBLIC_URL). When set it takes precedence over the
 // zero-config interactsh backend.
 func selfHosted() bool {
 	return strings.TrimSpace(config.Get().OOBPublicURL) != ""
@@ -99,7 +99,7 @@ func rawGenerate() (callbackURL, token string, err error) {
 		return selfHostedGenerate()
 	}
 	if !interactshEnabled() {
-		return "", "", fmt.Errorf("OOB is disabled (XALGORIX_OOB_DISABLE=true)")
+		return "", "", fmt.Errorf("OOB is disabled (AIDASTING_OOB_DISABLE=true)")
 	}
 	return interactshGenerate()
 }
@@ -188,7 +188,7 @@ func assessScannerOrigin(remoteAddr string) (scannerOrigin, assessed bool) {
 
 func calibrationHeaderMatches(headers map[string]string, nonce string) bool {
 	for key, value := range headers {
-		if strings.EqualFold(key, "X-Xalgorix-Origin-Calibration") && strings.TrimSpace(value) == nonce {
+		if strings.EqualFold(key, "X-AI-DAST-ING-Origin-Calibration") && strings.TrimSpace(value) == nonce {
 			return true
 		}
 	}
@@ -246,8 +246,8 @@ func calibrateScannerOrigin() {
 		finishScannerOriginCalibration("")
 		return
 	}
-	req.Header.Set("X-Xalgorix-Origin-Calibration", nonce)
-	req.Header.Set("User-Agent", "xalgorix-origin-calibration/1")
+	req.Header.Set("X-AI-DAST-ING-Origin-Calibration", nonce)
+	req.Header.Set("User-Agent", "ai-dast-ing-origin-calibration/1")
 	client := &http.Client{
 		Timeout: scannerOriginRequestTimeout,
 		CheckRedirect: func(_ *http.Request, _ []*http.Request) error {
@@ -289,7 +289,7 @@ func Generate() (callbackURL, token string, err error) {
 
 // Poll returns interactions for a token from whichever backend is active,
 // filtered to the interaction protocols the operator allows via
-// XALGORIX_OOB_INTERACTIONS (blank = all: dns, http, smtp). Each returned copy
+// AIDASTING_OOB_INTERACTIONS (blank = all: dns, http, smtp). Each returned copy
 // carries a fail-closed origin assessment.
 func Poll(token string) []Interaction {
 	// Polling an existing token is also an opportunity to recover from a
@@ -304,12 +304,12 @@ func Poll(token string) []Interaction {
 	return hits
 }
 
-// parseAllowedProtocols turns an XALGORIX_OOB_INTERACTIONS value into the set of
+// parseAllowedProtocols turns an AIDASTING_OOB_INTERACTIONS value into the set of
 // allowed protocol names. A nil result means "allow everything" (the default),
 // so an unset/blank value preserves the historical behavior of retaining any
 // DNS, HTTP or SMTP callback. "https" is folded into "http". A value
 // that names no valid protocol also yields nil — an operator typo must never
-// silently drop every callback (use XALGORIX_OOB_DISABLE to turn OOB off).
+// silently drop every callback (use AIDASTING_OOB_DISABLE to turn OOB off).
 func parseAllowedProtocols(raw string) map[string]bool {
 	raw = strings.TrimSpace(raw)
 	if raw == "" {
@@ -332,7 +332,7 @@ func parseAllowedProtocols(raw string) map[string]bool {
 	return set
 }
 
-// filterableProtocols are the only protocols XALGORIX_OOB_INTERACTIONS selects
+// filterableProtocols are the only protocols AIDASTING_OOB_INTERACTIONS selects
 // between. Anything else interactsh can report (ldap, smb, ftp, responder, or a
 // protocol we don't recognize yet) is always kept: those are independent proof
 // channels — LDAP is the primary one for JNDI/Log4Shell — that a DNS/HTTP/SMTP
@@ -371,7 +371,7 @@ func ensureStarted() error {
 	startOnce.Do(func() {
 		port := config.Get().OOBPort
 		if port <= 0 {
-			startErr = fmt.Errorf("XALGORIX_OOB_PORT not set")
+			startErr = fmt.Errorf("AIDASTING_OOB_PORT not set")
 			return
 		}
 		mux := http.NewServeMux()
@@ -396,7 +396,7 @@ func ensureStarted() error {
 // polling. Returns an error when the self-hosted listener is not reachable.
 func selfHostedGenerate() (callbackURL, token string, err error) {
 	if !selfHosted() {
-		return "", "", fmt.Errorf("OOB is not configured (set XALGORIX_OOB_PUBLIC_URL and XALGORIX_OOB_PORT)")
+		return "", "", fmt.Errorf("OOB is not configured (set AIDASTING_OOB_PUBLIC_URL and AIDASTING_OOB_PORT)")
 	}
 	if err := ensureStarted(); err != nil {
 		return "", "", err
@@ -469,7 +469,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	// the callback in-band (e.g. an SSRF that reflects the response body).
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write([]byte("xalgorix-oob-ok:" + token + "\n"))
+	_, _ = w.Write([]byte("ai-dast-ing-oob-ok:" + token + "\n"))
 }
 
 func firstPathSegment(p string) string {

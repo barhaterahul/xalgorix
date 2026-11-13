@@ -19,9 +19,9 @@ type Palette struct {
 	Code     [3]int
 }
 
-// ThemePalette returns the dark-theme palette baked into every Xalgorix
+// ThemePalette returns the dark-theme palette baked into every AI-DAST-ING
 // report. Every value mirrors the design tokens in webui/src/styles.css
-// (the actual Xalgorix product theme) so the PDF matches the brand the
+// (the actual AI-DAST-ING product theme) so the PDF matches the brand the
 // dashboard and marketing surfaces use.
 //
 // Accent is the one value that previously drifted from the brand: it was
