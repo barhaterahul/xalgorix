@@ -59,8 +59,6 @@ const en: Dict = {
   "nav.settings": "Settings",
   "sidebar.localScanner": "Local scanner",
   "sidebar.commandHint": "Ctrl+K for actions",
-  "sidebar.github": "GitHub",
-  "sidebar.githubTitle": "View Xalgorix on GitHub",
   "sidebar.securityScanner": "security scanner",
   "sidebar.navigation": "Main navigation",
 
@@ -288,8 +286,6 @@ const zhCN: Dict = {
   "nav.settings": "设置",
   "sidebar.localScanner": "本地扫描器",
   "sidebar.commandHint": "按 Ctrl+K 打开操作面板",
-  "sidebar.github": "GitHub",
-  "sidebar.githubTitle": "在 GitHub 上查看 Xalgorix",
   "sidebar.securityScanner": "安全扫描器",
   "sidebar.navigation": "主导航",
 
