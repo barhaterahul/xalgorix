@@ -166,6 +166,20 @@ func TestCopilotVendorOverrideDynamicHost(t *testing.T) {
 	}
 }
 
+func TestCopilotAPIBaseOverride(t *testing.T) {
+	t.Setenv("AIDASTING_COPILOT_API_URL", "https://api.tenant.ghe.com/")
+	if got := copilotAPIBaseOverride(); got != "https://api.tenant.ghe.com" {
+		t.Errorf("override = %q, want trimmed tenant host", got)
+	}
+	// With the override set, repointCopilotHost must NOT rewrite the request,
+	// even when the exchange advertised a different (public) host.
+	req, _ := http.NewRequest(http.MethodPost, "https://api.tenant.ghe.com/chat/completions", nil)
+	repointCopilotHost(req, "https://api.githubcopilot.com")
+	if req.URL.Host != "api.tenant.ghe.com" {
+		t.Errorf("host = %q, want override preserved (not repointed to the public gateway)", req.URL.Host)
+	}
+}
+
 func TestCopilotTokenCacheExpired(t *testing.T) {
 	cache := newCopilotTokenCache()
 	cache.put("gho_tok", cachedCopilotToken{

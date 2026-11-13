@@ -446,11 +446,16 @@ func BuildCatalogEndpoint(entry providers.Entry, prof auth.Profile, preferModel,
 		url += "/v1beta/models/" + model + ":generateContent"
 	case "openai":
 		if entry.ID == "copilot" {
-			// GitHub Copilot's OpenAI-compatible endpoint lives at the
-			// host root (api.githubcopilot.com/chat/completions) with no
-			// /v1 version segment — unlike the generic OpenAI path, which
-			// inserts /v1. Build it directly to avoid a 404.
-			url = strings.TrimRight(apiBase, "/") + "/chat/completions"
+			// GitHub Copilot's OpenAI-compatible endpoint lives at the host
+			// root (/chat/completions) with no /v1 version segment — unlike
+			// the generic OpenAI path, which inserts /v1. An operator override
+			// (AIDASTING_COPILOT_API_URL) wins for Enterprise / data-residency
+			// tenants; otherwise use the catalog base (api.githubcopilot.com).
+			base := apiBase
+			if ov := copilotAPIBaseOverride(); ov != "" {
+				base = ov
+			}
+			url = strings.TrimRight(base, "/") + "/chat/completions"
 		} else {
 			url = providers.OpenAICompatibleURL(apiBase, "chat/completions")
 		}
