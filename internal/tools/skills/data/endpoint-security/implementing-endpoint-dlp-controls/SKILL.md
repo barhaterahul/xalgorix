@@ -15,7 +15,7 @@ tags:
 - data-protection
 - content-inspection
 version: 1.0.0
-author: Krishna Kumar (xalgord)
+author: ING
 license: Apache-2.0
 atlas_techniques:
 - AML.T0024

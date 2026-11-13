@@ -888,4 +888,4 @@ AI-DAST-ING is released under the Apache License 2.0. See [LICENSE](LICENSE).
 | 💬 Questions     | [GitHub Discussions](https://github.com/ai-dast-ing/ai-dast-ing/discussions)             |
 | 🐛 Issues        | [github.com/ai-dast-ing/ai-dast-ing/issues](https://github.com/ai-dast-ing/ai-dast-ing/issues) |
 | 🔒 Security      | [SECURITY.md](SECURITY.md) · [Disclosure program](https://www.ai-dast-ing.com/vdp)    |
-| ☕ Support       | [buymeacoffee.com/xalgord](https://buymeacoffee.com/xalgord)                     |
+| ☕ Support       | [buymeacoffee.com/ING](https://buymeacoffee.com/ING)                     |

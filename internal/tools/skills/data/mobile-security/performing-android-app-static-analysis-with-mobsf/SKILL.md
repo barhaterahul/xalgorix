@@ -9,7 +9,7 @@ description: 'Performs automated static analysis of Android applications using M
   '
 domain: cybersecurity
 subdomain: mobile-security
-author: Krishna Kumar (xalgord)
+author: ING
 tags:
 - mobile-security
 - android

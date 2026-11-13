@@ -10,7 +10,7 @@ tags:
 - macos
 - red-teaming
 version: '1.0'
-author: Krishna Kumar (xalgord)
+author: ING
 license: Apache-2.0
 ---
 

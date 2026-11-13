@@ -14,7 +14,7 @@ tags:
 - ntds
 - sam-database
 version: '1.0'
-author: Krishna Kumar (xalgord)
+author: ING
 license: Apache-2.0
 d3fend_techniques:
 - Token Binding

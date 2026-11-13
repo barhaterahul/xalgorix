@@ -17,7 +17,7 @@ tags:
 - modbus
 - protocol-anomaly
 version: 1.0.0
-author: Krishna Kumar (xalgord)
+author: ING
 license: Apache-2.0
 nist_ai_rmf:
 - MEASURE-2.7

@@ -8,7 +8,7 @@ description: 'Intercepts and analyzes HTTP/HTTPS traffic from mobile application
   '
 domain: cybersecurity
 subdomain: mobile-security
-author: Krishna Kumar (xalgord)
+author: ING
 tags:
 - mobile-security
 - android

@@ -13,7 +13,7 @@ tags:
 - t1558
 - proactive-detection
 version: '1.0'
-author: Krishna Kumar (xalgord)
+author: ING
 license: Apache-2.0
 d3fend_techniques:
 - Application Protocol Command Analysis

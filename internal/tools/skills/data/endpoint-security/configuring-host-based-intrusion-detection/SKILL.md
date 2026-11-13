@@ -16,7 +16,7 @@ tags:
 - file-integrity-monitoring
 - intrusion-detection
 version: 1.0.0
-author: Krishna Kumar (xalgord)
+author: ING
 license: Apache-2.0
 nist_csf:
 - PR.PS-01

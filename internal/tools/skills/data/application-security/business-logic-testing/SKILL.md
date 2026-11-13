@@ -15,7 +15,7 @@ tags:
 - negative-testing
 - owasp
 version: '2.0'
-author: Krishna Kumar (xalgord)
+author: ING
 license: Apache-2.0
 intent: offensive
 phase: application-testing

@@ -12,7 +12,7 @@ tags:
 - covert-channels
 - image-analysis
 version: '1.0'
-author: Krishna Kumar (xalgord)
+author: ING
 license: Apache-2.0
 nist_csf:
 - RS.AN-01

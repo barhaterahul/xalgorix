@@ -14,7 +14,7 @@ tags:
 - reverse-proxy
 - credential-theft
 version: '1.0'
-author: Krishna Kumar (xalgord)
+author: ING
 license: Apache-2.0
 nist_csf:
 - PR.AT-01

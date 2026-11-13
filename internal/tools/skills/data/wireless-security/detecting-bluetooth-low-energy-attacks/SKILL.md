@@ -9,7 +9,7 @@ description: 'Detects and analyzes Bluetooth Low Energy (BLE) security attacks i
   '
 domain: cybersecurity
 subdomain: wireless-security
-author: Krishna Kumar (xalgord)
+author: ING
 tags:
 - ble
 - bluetooth

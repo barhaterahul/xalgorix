@@ -241,7 +241,7 @@ func (s *Server) sendDiscordWithFileTo(webhook string, color int, title, descrip
 	// Add payload JSON
 	embedPayload := map[string]any{
 		"username":   "AI-DAST-ING",
-		"avatar_url": "https://raw.githubusercontent.com/xalgord/xalgord/main/assets/logo.png",
+		"avatar_url": "https://raw.githubusercontent.com/ING/ING/main/assets/logo.png",
 		"embeds": []map[string]any{
 			{
 				"title":       title,
@@ -304,7 +304,7 @@ func (s *Server) sendSimpleEmbedTo(webhook string, color int, title, description
 	}
 	payload := map[string]any{
 		"username":   "AI-DAST-ING",
-		"avatar_url": "https://raw.githubusercontent.com/xalgord/xalgord/main/assets/logo.png",
+		"avatar_url": "https://raw.githubusercontent.com/ING/ING/main/assets/logo.png",
 		"embeds": []map[string]any{
 			{
 				"title":       title,

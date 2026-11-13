@@ -9,7 +9,7 @@ description: 'Performs runtime mobile security exploration of iOS applications u
   '
 domain: cybersecurity
 subdomain: mobile-security
-author: Krishna Kumar (xalgord)
+author: ING
 tags:
 - mobile-security
 - ios
