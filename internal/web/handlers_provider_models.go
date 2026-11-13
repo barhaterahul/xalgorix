@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"sort"
 	"strings"
 	"time"
@@ -148,6 +149,19 @@ func requestProviderModels(r *http.Request, entry providers.Entry, credential, a
 		if credential != "" {
 			req.Header.Set("Authorization", "Bearer "+credential)
 		}
+		if entry.ID == "copilot" {
+			// Copilot's /models endpoint needs the same editor-identity headers
+			// as its chat endpoint (see internal/llm/copilot_token.go), or it
+			// rejects the request. Integration-id depends on the token type:
+			// fine-grained PATs use copilot-developer-cli, OAuth uses vscode-chat.
+			integ := "vscode-chat"
+			if strings.HasPrefix(strings.TrimSpace(credential), "github_pat_") {
+				integ = "copilot-developer-cli"
+			}
+			req.Header.Set("Copilot-Integration-Id", integ)
+			req.Header.Set("Editor-Version", "vscode/1.95.0")
+			req.Header.Set("Editor-Plugin-Version", "copilot-chat/0.26.7")
+		}
 		if accountID != "" {
 			req.Header.Set("chatgpt-account-id", accountID)
 		}
@@ -182,7 +196,16 @@ func providerModelsURLs(entry providers.Entry) ([]string, error) {
 	for _, suffix := range []string{"/chat/completions", "/responses", "/messages", "/models"} {
 		base = strings.TrimSuffix(base, suffix)
 	}
-	if entry.HeaderStyle == "openai" {
+	if entry.ID == "copilot" {
+		// GitHub Copilot serves the model list at the host root (/models),
+		// not /v1/models like the generic OpenAI path. Honor the Enterprise /
+		// data-residency override (AIDASTING_COPILOT_API_URL) for the host.
+		cb := base
+		if ov := strings.TrimRight(strings.TrimSpace(os.Getenv("AIDASTING_COPILOT_API_URL")), "/"); ov != "" {
+			cb = ov
+		}
+		base = strings.TrimRight(cb, "/") + "/models"
+	} else if entry.HeaderStyle == "openai" {
 		base = providers.OpenAICompatibleURL(base, "models")
 	}
 	u, err := url.Parse(base)
