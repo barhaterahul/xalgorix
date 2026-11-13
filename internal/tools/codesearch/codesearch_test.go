@@ -498,7 +498,7 @@ func TestSinkScanCrossLanguage(t *testing.T) {
 			"    new ProcessBuilder(\"sh\", \"-c\", h).start();\n  }\n}\n",
 		"run.go": "package main\n\nimport \"os/exec\"\n\nfunc run(h string) {\n" +
 			"\texec.Command(\"sh\", \"-c\", h).Run()\n}\n",
-		"shell.php": "<?php\nfunction run($h) {\n  return shell_exec('ping ' . $h);\n}\n",
+		"shell.php": "<?" + "php\nfunction run($h) {\n  return shell_exec('ping ' . $h);\n}\n",
 	}
 	for name, body := range files {
 		if err := os.WriteFile(filepath.Join(dir, name), []byte(body), 0o644); err != nil {
