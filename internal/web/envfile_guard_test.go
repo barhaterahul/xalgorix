@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
 )
 
 // Guard for the 2026-11-12 outage: a test that saves settings must write the
@@ -13,10 +13,10 @@ import (
 // API keys.
 func TestSettingsWritesStayOutOfRealEnvFile(t *testing.T) {
 	// applyEnvironmentUpdates also sets these in the process; restore them.
-	t.Setenv("XALGORIX_API_KEY", "")
-	t.Setenv("XALGORIX_API_KEYS", "")
+	t.Setenv("AIDASTING_API_KEY", "")
+	t.Setenv("AIDASTING_API_KEYS", "")
 
-	path := xalgorixEnvFilePath()
+	path := aidastingEnvFilePath()
 	if path == realEnvFile {
 		t.Fatalf("settings are persisted to the real env file %s; TestMain must point HOME at a temp dir", path)
 	}
@@ -26,7 +26,7 @@ func TestSettingsWritesStayOutOfRealEnvFile(t *testing.T) {
 	if rr.Code != http.StatusOK {
 		t.Fatalf("POST /api/pool code = %d body=%s", rr.Code, rr.Body.String())
 	}
-	if got, err := config.ReadEnvFile(path); err != nil || got["XALGORIX_API_KEY"] != "dup-key-1111" {
+	if got, err := config.ReadEnvFile(path); err != nil || got["AIDASTING_API_KEY"] != "dup-key-1111" {
 		t.Fatalf("POST /api/pool did not write the temp env file %s: %v %v", path, got, err)
 	}
 	if envFileState(realEnvFile) != realEnvFileBefore {

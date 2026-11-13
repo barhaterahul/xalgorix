@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	pdfreport "github.com/xalgord/xalgorix/v4/internal/reporting"
-	"github.com/xalgord/xalgorix/v4/internal/tools/reporting"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	pdfreport "github.com/barhaterahul/ai-dast-ing/v4/internal/reporting"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/reporting"
 )
 
 // vulnToSummary converts a reporting.Vulnerability to a VulnSummary with all fields.

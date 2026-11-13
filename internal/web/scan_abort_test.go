@@ -3,8 +3,8 @@ package web
 import (
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/agent"
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/agent"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
 )
 
 // A "finished" event flagged as an abnormal LLM-side abort must be captured on

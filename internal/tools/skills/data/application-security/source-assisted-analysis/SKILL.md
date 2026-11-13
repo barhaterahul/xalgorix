@@ -12,7 +12,7 @@ tags:
 - sast-leads
 - hypothesis-generation
 version: '2.0'
-author: Krishna Kumar (xalgord)
+author: ING
 license: Apache-2.0
 intent: offensive
 phase: source-analysis
@@ -24,7 +24,7 @@ whitebox: true
 
 ## Purpose
 
-When source is attached, use it to generate leads, prioritize, and explain - NOT as a replacement for runtime proof. Xalgorix stays a black-box-first product: the application model and hypotheses come from runtime behavior; source accelerates and strengthens them.
+When source is attached, use it to generate leads, prioritize, and explain - NOT as a replacement for runtime proof. AI-DAST-ING stays a black-box-first product: the application model and hypotheses come from runtime behavior; source accelerates and strengthens them.
 
 ```text
 BLACK BOX (primary)                    SOURCE WHEN AVAILABLE (secondary)
@@ -90,7 +90,7 @@ When a sink appears guarded, read what the guard actually enforces:
 - Do not trust reachability by file proximity alone
 - Do not skip runtime validation because "the code obviously does it"
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 
 - scan_source_sinks / scan_source_routes - seed and reseed the correlated ledger
 - code_search - trace call paths hop by hop (query, glob, path, sinks, max parameters); use it for the guard-reading workflow too

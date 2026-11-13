@@ -1,4 +1,4 @@
-// Package llm provides the LLM API client for Xalgorix.
+// Package llm provides the LLM API client for AI-DAST-ING.
 package llm
 
 import (
@@ -21,10 +21,10 @@ import (
 
 	"golang.org/x/time/rate"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/providers"
-	"github.com/xalgord/xalgorix/v4/internal/resources"
-	"github.com/xalgord/xalgorix/v4/internal/safe"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/resources"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/safe"
 )
 
 // Message represents a chat message.
@@ -87,7 +87,7 @@ type Client struct {
 	tempOverride atomic.Value // *float64
 	// keyRotator, when non-nil, replaces the resolved endpoint's API
 	// key with the next eligible key from the operator's pool
-	// (XALGORIX_API_KEYS + XALGORIX_API_KEY): requests spread
+	// (AIDASTING_API_KEYS + AIDASTING_API_KEY): requests spread
 	// round-robin across the pool and a key that just hit a provider
 	// rate limit is skipped for a short cooldown. nil when fewer than
 	// two distinct keys are configured, so single-key setups produce
@@ -285,7 +285,7 @@ func isKnownProvider(candidate string) bool {
 // routingProvider splits the configured model into the provider used for
 // endpoint routing and the model ID sent upstream. A leading "<provider>/"
 // that names a known provider selects that provider and is removed from the
-// model; otherwise the explicit XALGORIX_LLM_PROVIDER applies.
+// model; otherwise the explicit AIDASTING_LLM_PROVIDER applies.
 //
 // An explicit provider that hosts other vendors' models is the exception:
 // gateways, inference hosts, local runtimes and a Custom Provider in front of
@@ -322,12 +322,12 @@ var loggedPrefixKept sync.Map
 
 // logPrefixKept reports once per configuration that the explicit provider
 // routes a model whose prefix names another provider, so a stale
-// XALGORIX_LLM_PROVIDER left over from an earlier setup shows in the log.
+// AIDASTING_LLM_PROVIDER left over from an earlier setup shows in the log.
 func logPrefixKept(explicit, prefixProvider, model string) {
 	if _, seen := loggedPrefixKept.LoadOrStore(explicit+"\x00"+model, struct{}{}); seen {
 		return
 	}
-	log.Printf("[llm] Routing model %q to XALGORIX_LLM_PROVIDER=%s with the ID unchanged; set XALGORIX_LLM_PROVIDER=%s to route by its prefix instead", model, explicit, prefixProvider)
+	log.Printf("[llm] Routing model %q to AIDASTING_LLM_PROVIDER=%s with the ID unchanged; set AIDASTING_LLM_PROVIDER=%s to route by its prefix instead", model, explicit, prefixProvider)
 }
 
 // singleVendorProviders are chat-completions providers whose own API serves
@@ -376,9 +376,9 @@ func speaksChatCompletions(provider string) bool {
 }
 
 // providerDefaultBase returns the base URL provider's requests use when
-// XALGORIX_API_BASE is unset: the legacy default, else the built-in catalog
+// AIDASTING_API_BASE is unset: the legacy default, else the built-in catalog
 // base of a chat-completions provider the operator selected, either as
-// XALGORIX_LLM_PROVIDER or as the model's prefix with no provider set. A
+// AIDASTING_LLM_PROVIDER or as the model's prefix with no provider set. A
 // prefix that outranked a different explicit provider gets no catalog
 // default, so the key never reaches a catalog host the operator did not
 // select. "" means no default, which the composite resolver refuses.
@@ -457,7 +457,7 @@ func NewClient(cfg *config.Config, opts ...Option) *Client {
 	// Bound each outbound request. The 10-minute default suits hosted API
 	// backends; a local runtime (llama.cpp on CPU) can legitimately need far
 	// longer to prefill a large prompt, so allow overriding it via
-	// XALGORIX_LLM_TIMEOUT_SECONDS. Non-positive values keep the default.
+	// AIDASTING_LLM_TIMEOUT_SECONDS. Non-positive values keep the default.
 	timeout := 10 * time.Minute
 	if cfg != nil && cfg.LLMTimeoutSeconds > 0 {
 		timeout = time.Duration(cfg.LLMTimeoutSeconds) * time.Second
@@ -481,8 +481,8 @@ func NewClient(cfg *config.Config, opts ...Option) *Client {
 		}
 		c.rateLimiter = rate.NewLimiter(rate.Limit(cfg.RateLimitRPS), burst)
 	}
-	// Build the API-key pool rotator from XALGORIX_API_KEY +
-	// XALGORIX_API_KEYS. Only engages with two or more distinct keys;
+	// Build the API-key pool rotator from AIDASTING_API_KEY +
+	// AIDASTING_API_KEYS. Only engages with two or more distinct keys;
 	// otherwise requests stay byte-identical to the single-key path.
 	if cfg != nil {
 		pool := make([]string, 0, len(cfg.APIKeys)+1)
@@ -543,7 +543,7 @@ type chatRequest struct {
 	MaxCompletionTokens int    `json:"max_completion_tokens,omitempty"`
 	ReasoningEffort     string `json:"reasoning_effort,omitempty"`
 	// Tools carries the native tool definitions. Only populated when native
-	// tool calling is enabled (XALGORIX_NATIVE_TOOL_CALLS) and the endpoint
+	// tool calling is enabled (AIDASTING_NATIVE_TOOL_CALLS) and the endpoint
 	// speaks the OpenAI chat-completions protocol.
 	Tools []chatTool `json:"tools,omitempty"`
 }
@@ -669,12 +669,12 @@ type geminiGenerationConfig struct {
 }
 
 // geminiSafetySetting is one entry of Gemini's "safetySettings" array: an
-// adjustable harm category paired with the HarmBlockThreshold to apply. Xalgorix
+// adjustable harm category paired with the HarmBlockThreshold to apply. AI-DAST-ING
 // is an authorized security-testing tool, so by default it sends BLOCK_NONE for
 // every category to stop Gemini's content filter from refusing legitimate
 // exploit payloads / offensive-security methodology (classified under
 // HARM_CATEGORY_DANGEROUS_CONTENT). Operator-configurable via
-// XALGORIX_GEMINI_SAFETY — see config.Config.GeminiSafetyThreshold.
+// AIDASTING_GEMINI_SAFETY — see config.Config.GeminiSafetyThreshold.
 type geminiSafetySetting struct {
 	Category  string `json:"category"`
 	Threshold string `json:"threshold"`
@@ -840,10 +840,10 @@ func (c *Client) applyKeyRotation(ep Endpoint) Endpoint {
 	}
 	// Rotate when the endpoint carries the legacy configured key (ep.APIKey ==
 	// cfg.APIKey) OR already carries one of the pooled keys. The pool holds only
-	// the operator's own keys (XALGORIX_API_KEY + XALGORIX_API_KEYS), so a request
+	// the operator's own keys (AIDASTING_API_KEY + AIDASTING_API_KEYS), so a request
 	// already using a pooled key is ours to spread across the pool — this is the
-	// common case when the keys are supplied via XALGORIX_API_KEYS with an empty
-	// XALGORIX_API_KEY and a provider profile resolves every request to the first
+	// common case when the keys are supplied via AIDASTING_API_KEYS with an empty
+	// AIDASTING_API_KEY and a provider profile resolves every request to the first
 	// key (which otherwise never matched the empty cfg.APIKey, pinning all traffic
 	// to one key). A credential outside the pool (a different provider's
 	// profile/keystore key) is never in the pool and is left untouched.
@@ -982,7 +982,7 @@ func applyAuthHeaders(req *http.Request, ep Endpoint) {
 // Handles provider prefixes like "minimax/", "openai/", "anthropic/", etc.
 // Appends the OpenAI-compatible chat path while preserving an explicit API
 // version already present in the base (for example Z.AI's /v4).
-// Also supports custom providers - just set XALGORIX_API_BASE to your endpoint.
+// Also supports custom providers - just set AIDASTING_API_BASE to your endpoint.
 //
 // This is the legacy single-call resolver kept on the Client so
 // the no-resolver fallback path in resolveRequestEndpoint can
@@ -1342,7 +1342,7 @@ func (c *Client) maxOutputTokens() int {
 	return n
 }
 
-// geminiHarmCategories are the adjustable Gemini safety categories Xalgorix sets
+// geminiHarmCategories are the adjustable Gemini safety categories AI-DAST-ING sets
 // a threshold on. All four get the same operator-configured threshold so an
 // authorized assessment is not blocked mid-scan when the model reasons about
 // exploit payloads or offensive-security methodology (Gemini files these under
@@ -1356,10 +1356,10 @@ var geminiHarmCategories = []string{
 }
 
 // unknownGeminiSafetyOnce guards a single warning line for an unrecognized
-// XALGORIX_GEMINI_SAFETY value so a typo produces one breadcrumb, not log spam.
+// AIDASTING_GEMINI_SAFETY value so a typo produces one breadcrumb, not log spam.
 var unknownGeminiSafetyOnce sync.Once
 
-// normalizeGeminiSafetyThreshold maps the operator-facing XALGORIX_GEMINI_SAFETY
+// normalizeGeminiSafetyThreshold maps the operator-facing AIDASTING_GEMINI_SAFETY
 // value to a canonical Gemini HarmBlockThreshold. It returns ("", false) when no
 // safetySettings should be sent — empty / "default" / "unspecified" — so Gemini
 // applies its own server-side defaults (preserving the pre-change behavior for
@@ -1382,7 +1382,7 @@ func normalizeGeminiSafetyThreshold(raw string) (string, bool) {
 		return "BLOCK_LOW_AND_ABOVE", true
 	default:
 		unknownGeminiSafetyOnce.Do(func() {
-			log.Printf("[llm] unknown XALGORIX_GEMINI_SAFETY=%q; using BLOCK_NONE (authorized-security-testing default)", raw)
+			log.Printf("[llm] unknown AIDASTING_GEMINI_SAFETY=%q; using BLOCK_NONE (authorized-security-testing default)", raw)
 		})
 		return "BLOCK_NONE", true
 	}
@@ -1425,7 +1425,7 @@ func geminiBlockDetail(resp geminiResponse) string {
 	if strings.EqualFold(finishReason, "SAFETY") ||
 		strings.EqualFold(blockReason, "SAFETY") ||
 		strings.EqualFold(blockReason, "PROHIBITED_CONTENT") {
-		detail += "; Gemini's safety filter blocked this response — set XALGORIX_GEMINI_SAFETY=BLOCK_NONE (or OFF) to allow authorized security-testing content"
+		detail += "; Gemini's safety filter blocked this response — set AIDASTING_GEMINI_SAFETY=BLOCK_NONE (or OFF) to allow authorized security-testing content"
 	}
 	return detail + ")"
 }

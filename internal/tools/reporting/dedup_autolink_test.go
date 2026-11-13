@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
 )
 
 // newTestLedgerCtx creates an active in-memory scan context with a ledger.

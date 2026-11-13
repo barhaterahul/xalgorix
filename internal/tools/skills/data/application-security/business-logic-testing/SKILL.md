@@ -15,7 +15,7 @@ tags:
 - negative-testing
 - owasp
 version: '2.0'
-author: Krishna Kumar (xalgord)
+author: ING
 license: Apache-2.0
 intent: offensive
 phase: application-testing
@@ -114,7 +114,7 @@ Always verify by re-reading state server-side (order history, balance, quota cou
 - Coupon stacking that the business explicitly allows (check UI copy first)
 - Repeated 200s where the backend is idempotent (single persisted effect) - that is correct design; move to race-condition-testing if the effect SHOULD multiply
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 
 - browser_action to walk the legitimate flow and capture the multi-step requests
 - http_request to replay steps with one variable tampered

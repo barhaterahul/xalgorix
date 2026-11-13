@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/providers"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
 )
 
 func TestKeyStore_SetAndGet(t *testing.T) {

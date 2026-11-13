@@ -1,6 +1,6 @@
 package agent
 
-import "github.com/xalgord/xalgorix/v4/internal/scanctx"
+import "github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
 
 // settleVerifierHypothesis sets the ledger status of a hypothesis a verifier
 // just recorded exploit evidence on. Upsert alone cannot do this: when the

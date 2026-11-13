@@ -11,7 +11,7 @@ process's startup failure.
 For a systemd installation:
 
 ```sh
-journalctl -u xalgorix --since "20 minutes ago" --no-pager
+journalctl -u ai-dast-ing --since "20 minutes ago" --no-pager
 ```
 
 For a container installation, use its existing container logs. For a foreground

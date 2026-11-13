@@ -12,7 +12,7 @@ tags:
 - hypothesis-generation
 - blackbox
 version: '2.0'
-author: Krishna Kumar (xalgord)
+author: ING
 license: Apache-2.0
 intent: offensive
 phase: application-testing
@@ -94,7 +94,7 @@ For every transition and boundary, generate candidate violations and record them
 
 Chaining: preserve weak intermediate observations in the ledger instead of discarding them as low-impact. Username enumeration + reset weakness becomes account takeover; invite leakage + object-level access becomes tenant breach. A primitive that looks minor may be the first link of a chain - record it, do not delete it.
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 
 - browser_action / authenticated browser session: walk flows as a real user and observe state changes, menus, and client state machines
 - discover_client_routes on the root/login page: extract dynamic routes before modeling

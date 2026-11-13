@@ -99,7 +99,7 @@ A BOPLA finding requires ALL of:
 - Debug fields in staging environments that don't exist in production
 - The API returning the user's OWN settings (which they can legitimately see)
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `authz_matrix` for automated cross-role property differential
 - `terminal_execute` with curl for precise property manipulation
 - Python for batch property enumeration across all discovered fields

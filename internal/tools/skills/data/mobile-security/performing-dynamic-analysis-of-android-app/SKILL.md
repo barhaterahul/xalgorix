@@ -9,7 +9,7 @@ description: 'Performs runtime dynamic analysis of Android applications using Fr
   '
 domain: cybersecurity
 subdomain: mobile-security
-author: Krishna Kumar (xalgord)
+author: ING
 tags:
 - mobile-security
 - android

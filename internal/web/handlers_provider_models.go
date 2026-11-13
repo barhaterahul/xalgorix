@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/auth"
-	"github.com/xalgord/xalgorix/v4/internal/providers"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/auth"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
 )
 
 const providerModelsResponseLimit = 4 << 20
@@ -57,9 +57,9 @@ func (s *Server) handleDiscoverProviderModels(w http.ResponseWriter, r *http.Req
 }
 
 // activeConfigTargetsProvider reports whether the operator's persisted active
-// LLM config (XALGORIX_LLM*) targets providerID. It matches either the legacy
-// "<provider>/<model>" prefix carried on XALGORIX_LLM or the explicit
-// XALGORIX_LLM_PROVIDER routing field, which deliberately keeps the provider
+// LLM config (AIDASTING_LLM*) targets providerID. It matches either the legacy
+// "<provider>/<model>" prefix carried on AIDASTING_LLM or the explicit
+// AIDASTING_LLM_PROVIDER routing field, which deliberately keeps the provider
 // separate from a bare, provider-native model name (for example
 // LLMProvider="deepseek" with LLM="deepseek-v4-pro"). Without the LLMProvider
 // branch, discovery for such providers falls through to "save or select

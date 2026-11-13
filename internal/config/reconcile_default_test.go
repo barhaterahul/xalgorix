@@ -5,12 +5,12 @@ import "testing"
 // Converge-reconcile is on unless explicitly disabled.
 func TestConvergeReconcileDefaultsOn(t *testing.T) {
 	isolateEnvFiles(t)
-	t.Setenv("XALGORIX_CONVERGE_RECONCILE", "")
+	t.Setenv("AIDASTING_CONVERGE_RECONCILE", "")
 	if !load().ConvergeReconcile {
 		t.Fatal("ConvergeReconcile default = false, want true")
 	}
-	t.Setenv("XALGORIX_CONVERGE_RECONCILE", "false")
+	t.Setenv("AIDASTING_CONVERGE_RECONCILE", "false")
 	if load().ConvergeReconcile {
-		t.Fatal("XALGORIX_CONVERGE_RECONCILE=false did not disable converge-reconcile")
+		t.Fatal("AIDASTING_CONVERGE_RECONCILE=false did not disable converge-reconcile")
 	}
 }

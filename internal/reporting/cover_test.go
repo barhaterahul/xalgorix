@@ -259,15 +259,15 @@ func TestCoverPage_SeverityRollupRendered(t *testing.T) {
 func TestCoverPage_FreePlanWatermarkPresent(t *testing.T) {
 	freezeFPDF(t)
 
-	const watermarked = "TRIAL — XALGORIX FREE — Acme Corp"
+	const watermarked = "TRIAL — AI-DAST-ING FREE — Acme Corp"
 	body, _ := renderFixture(t, fixedScan(watermarked))
 
-	// "TRIAL" and "XALGORIX FREE" are ASCII substrings of the
+	// "TRIAL" and "AI-DAST-ING FREE" are ASCII substrings of the
 	// watermark prefix the cloud Generator stamps onto Free-plan
 	// reports. Searching for the ASCII chunks (rather than the full
 	// em-dash-bearing string) keeps the test robust against fpdf's
 	// non-UTF8 text encoding.
-	for _, marker := range []string{"TRIAL", "XALGORIX FREE"} {
+	for _, marker := range []string{"TRIAL", "AI-DAST-ING FREE"} {
 		if !bytes.Contains(body, []byte(marker)) {
 			t.Errorf("Free-plan PDF missing watermark marker %q", marker)
 		}
@@ -286,7 +286,7 @@ func TestCoverPage_PaidPlanNoWatermark(t *testing.T) {
 
 	body, _ := renderFixture(t, fixedScan("Acme Corp"))
 
-	for _, marker := range []string{"TRIAL", "XALGORIX FREE"} {
+	for _, marker := range []string{"TRIAL", "AI-DAST-ING FREE"} {
 		if bytes.Contains(body, []byte(marker)) {
 			t.Errorf("paid-plan PDF unexpectedly contains watermark marker %q", marker)
 		}

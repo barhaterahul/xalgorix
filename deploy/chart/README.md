@@ -1,8 +1,8 @@
-# xalgorix
+# ai-dast-ing
 
 ![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.6.91](https://img.shields.io/badge/AppVersion-4.6.91-informational?style=flat-square)
 
-Xalgorix autonomous AI penetration testing platform (dashboard on port 9137, persistent /data volume, optional Ingress or Gateway API exposure)
+AI-DAST-ING autonomous AI penetration testing platform (dashboard on port 9137, persistent /data volume, optional Ingress or Gateway API exposure)
 
 ## Maintainers
 
@@ -19,16 +19,16 @@ Kubernetes: `>=1.19.0-0`
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Affinity rules for pod assignment. |
-| auth | object | `{"existingSecret":"","password":"","username":""}` | Dashboard credentials, rendered as XALGORIX_USERNAME and XALGORIX_PASSWORD environment variables in the chart Secret. When empty, the container entrypoint generates a random admin password and prints it once to the container logs. |
-| auth.existingSecret | string | `""` | Name of an existing Secret holding the dashboard credentials. It must contain `XALGORIX_USERNAME` and `XALGORIX_PASSWORD` keys. When set, `username` and `password` are ignored and no credentials are written to the chart-managed Secret. |
+| auth | object | `{"existingSecret":"","password":"","username":""}` | Dashboard credentials, rendered as AIDASTING_USERNAME and AIDASTING_PASSWORD environment variables in the chart Secret. When empty, the container entrypoint generates a random admin password and prints it once to the container logs. |
+| auth.existingSecret | string | `""` | Name of an existing Secret holding the dashboard credentials. It must contain `AIDASTING_USERNAME` and `AIDASTING_PASSWORD` keys. When set, `username` and `password` are ignored and no credentials are written to the chart-managed Secret. |
 | auth.password | string | `""` | Dashboard login password. |
 | auth.username | string | `""` | Dashboard login username. |
 | autoscaling | object | `{"enabled":false,"maxReplicas":10,"minReplicas":1,"targetCPUUtilizationPercentage":80}` | Horizontal pod autoscaler for the deployment. |
-| autoscaling.enabled | bool | `false` | Whether to create a HorizontalPodAutoscaler instead of a fixed replica count. WARNING: Xalgorix is stateful (scans, reports and the persisted settings file live under /data). Scaling beyond one replica is NOT supported with local persistence: the default ReadWriteOnce PVC cannot multi-attach, and even with ReadWriteMany storage each replica keeps independent scan state. Leave disabled unless you run each replica as a single shared-nothing unit. |
+| autoscaling.enabled | bool | `false` | Whether to create a HorizontalPodAutoscaler instead of a fixed replica count. WARNING: AI-DAST-ING is stateful (scans, reports and the persisted settings file live under /data). Scaling beyond one replica is NOT supported with local persistence: the default ReadWriteOnce PVC cannot multi-attach, and even with ReadWriteMany storage each replica keeps independent scan state. Leave disabled unless you run each replica as a single shared-nothing unit. |
 | autoscaling.maxReplicas | int | `10` | Maximum number of replicas. |
 | autoscaling.minReplicas | int | `1` | Minimum number of replicas. |
 | autoscaling.targetCPUUtilizationPercentage | int | `80` | Target average CPU utilization percentage. |
-| env | object | `{"config":{},"raw":{},"secret":{}}` | Extra environment variables injected into the container. - `raw`: plain key/value pairs set directly on the container; use for any   `XALGORIX_*` variable without a dedicated value above. - `config`: rendered into a ConfigMap and injected via `envFrom`. - `secret`: rendered into a Secret and injected via `envFrom`. Settings changed in the dashboard's Settings UI persist to /data/.xalgorix.env and take precedence over these at startup. |
+| env | object | `{"config":{},"raw":{},"secret":{}}` | Extra environment variables injected into the container. - `raw`: plain key/value pairs set directly on the container; use for any   `AIDASTING_*` variable without a dedicated value above. - `config`: rendered into a ConfigMap and injected via `envFrom`. - `secret`: rendered into a Secret and injected via `envFrom`. Settings changed in the dashboard's Settings UI persist to /data/.ai-dast-ing.env and take precedence over these at startup. |
 | env.config | object | `{}` | Key/value pairs rendered into a ConfigMap and injected via `envFrom`. |
 | env.raw | object | `{}` | Plain key/value pairs set directly on the container. |
 | env.secret | object | `{}` | Key/value pairs rendered into a Secret and injected via `envFrom`. |
@@ -40,16 +40,16 @@ Kubernetes: `>=1.19.0-0`
 | httproute.hostname | string | Matches all traffic on the Gateway. | Hostname to match. A hostname prefixed with a dot (e.g. `.example.com`) matches all subdomains. |
 | httproute.hostnames | list | `[]` | Additional hostnames to match. |
 | httproute.matches | list | Matches the `/` path prefix. | Match rules for the route. An empty list matches all traffic. |
-| image | object | `{"pullPolicy":"IfNotPresent","repository":"ghcr.io/xalgord/xalgorix","tag":""}` | Container image settings. |
+| image | object | `{"pullPolicy":"IfNotPresent","repository":"ghcr.io/barhaterahul/ai-dast-ing","tag":""}` | Container image settings. |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy. |
-| image.repository | string | `"ghcr.io/xalgord/xalgorix"` | Image repository. |
+| image.repository | string | `"ghcr.io/barhaterahul/ai-dast-ing"` | Image repository. |
 | image.tag | string | The chart `appVersion`. | Image tag. |
 | imagePullSecrets | list | `[]` | Names of existing secrets with registry credentials for private images. |
-| ingress | object | `{"annotations":{},"className":"traefik","enabled":false,"hosts":[{"host":"xalgorix.local","paths":[{"path":"/","pathType":"Prefix"}]}],"tls":[]}` | Ingress resource for exposing the dashboard. Requires an ingress controller installed in the cluster. Add dashboard auth before exposing the dashboard beyond loopback. |
+| ingress | object | `{"annotations":{},"className":"traefik","enabled":false,"hosts":[{"host":"ai-dast-ing.local","paths":[{"path":"/","pathType":"Prefix"}]}],"tls":[]}` | Ingress resource for exposing the dashboard. Requires an ingress controller installed in the cluster. Add dashboard auth before exposing the dashboard beyond loopback. |
 | ingress.annotations | object | `{}` | Annotations added to the Ingress. |
 | ingress.className | string | `"traefik"` | Ingress class name. |
 | ingress.enabled | bool | `false` | Whether to create the Ingress. |
-| ingress.hosts | list | `[{"host":"xalgorix.local","paths":[{"path":"/","pathType":"Prefix"}]}]` | Hosts and paths served by the application. |
+| ingress.hosts | list | `[{"host":"ai-dast-ing.local","paths":[{"path":"/","pathType":"Prefix"}]}]` | Hosts and paths served by the application. |
 | ingress.tls | list | `[]` | TLS configuration for the Ingress. |
 | livenessProbe | object | `{}` | Liveness probe for the container. |
 | nameOverride | string | `""` | Overrides the chart name in resource names. |
@@ -72,7 +72,7 @@ Kubernetes: `>=1.19.0-0`
 | service.type | string | `"ClusterIP"` | Service type. |
 | serviceAccount | object | `{"annotations":{},"automount":false,"create":true,"name":""}` | Service account used by the pods. |
 | serviceAccount.annotations | object | `{}` | Annotations added to the service account. |
-| serviceAccount.automount | bool | `false` | Whether to automatically mount the service account API credentials. Xalgorix never talks to the Kubernetes API; leave disabled unless a sidecar in the pod needs it. |
+| serviceAccount.automount | bool | `false` | Whether to automatically mount the service account API credentials. AI-DAST-ING never talks to the Kubernetes API; leave disabled unless a sidecar in the pod needs it. |
 | serviceAccount.create | bool | `true` | Whether a service account should be created. |
 | serviceAccount.name | string | A name generated from the full name. | Name of the service account to use. |
 | tolerations | list | `[]` | Tolerations for pod assignment. |

@@ -1,28 +1,28 @@
 #!/usr/bin/env bash
-# Container entrypoint for the Xalgorix image.
+# Container entrypoint for the AI-DAST-ING image.
 #
 # The image binds 0.0.0.0 (so the published port works), but the engine refuses
 # to bind a non-loopback address without dashboard auth. Rather than fail a
 # plain `docker run`, we generate a random admin password when none is supplied,
 # print it once, and start. Operators can override by passing their own
-# XALGORIX_USERNAME + XALGORIX_PASSWORD (or XALGORIX_PASSWORD_HASH).
+# AIDASTING_USERNAME + AIDASTING_PASSWORD (or AIDASTING_PASSWORD_HASH).
 set -euo pipefail
 
 # Persist dashboard-configured settings on the /data volume. The engine writes
-# runtime settings (LLM model/key, integrations, etc.) to ~/.xalgorix.env
-# (=/root/.xalgorix.env). Symlinking it onto /data means anything you set under
+# runtime settings (LLM model/key, integrations, etc.) to ~/.ai-dast-ing.env
+# (=/root/.ai-dast-ing.env). Symlinking it onto /data means anything you set under
 # Settings survives `docker run --rm` / container recreation, not just restarts.
 mkdir -p /data
-if [ ! -e /data/.xalgorix.env ]; then
-  if [ -f /root/.xalgorix.env ] && [ ! -L /root/.xalgorix.env ]; then
-    mv /root/.xalgorix.env /data/.xalgorix.env
+if [ ! -e /data/.ai-dast-ing.env ]; then
+  if [ -f /root/.ai-dast-ing.env ] && [ ! -L /root/.ai-dast-ing.env ]; then
+    mv /root/.ai-dast-ing.env /data/.ai-dast-ing.env
   else
-    : >/data/.xalgorix.env
+    : >/data/.ai-dast-ing.env
   fi
 fi
-ln -sf /data/.xalgorix.env /root/.xalgorix.env
+ln -sf /data/.ai-dast-ing.env /root/.ai-dast-ing.env
 
-bind="${XALGORIX_BIND:-0.0.0.0}"
+bind="${AIDASTING_BIND:-0.0.0.0}"
 
 # Is the bind address loopback (no auth required by the engine)?
 is_loopback=false
@@ -32,24 +32,24 @@ esac
 
 # Is dashboard auth already configured?
 has_auth=false
-if [ -n "${XALGORIX_USERNAME:-}" ] && { [ -n "${XALGORIX_PASSWORD:-}" ] || [ -n "${XALGORIX_PASSWORD_HASH:-}" ]; }; then
+if [ -n "${AIDASTING_USERNAME:-}" ] && { [ -n "${AIDASTING_PASSWORD:-}" ] || [ -n "${AIDASTING_PASSWORD_HASH:-}" ]; }; then
   has_auth=true
 fi
 
 if [ "$is_loopback" = false ] && [ "$has_auth" = false ]; then
-  export XALGORIX_USERNAME="${XALGORIX_USERNAME:-admin}"
-  export XALGORIX_PASSWORD="$(openssl rand -base64 24 | tr -dc 'A-Za-z0-9' | head -c 20)"
+  export AIDASTING_USERNAME="${AIDASTING_USERNAME:-admin}"
+  export AIDASTING_PASSWORD="$(openssl rand -base64 24 | tr -dc 'A-Za-z0-9' | head -c 20)"
   echo "============================================================"
-  echo "  Xalgorix — no dashboard auth was provided."
+  echo "  AI-DAST-ING — no dashboard auth was provided."
   echo "  Generated one-time credentials so the container can start:"
   echo ""
-  echo "      username: ${XALGORIX_USERNAME}"
-  echo "      password: ${XALGORIX_PASSWORD}"
+  echo "      username: ${AIDASTING_USERNAME}"
+  echo "      password: ${AIDASTING_PASSWORD}"
   echo ""
-  echo "  Override by setting XALGORIX_USERNAME + XALGORIX_PASSWORD"
-  echo "  (or XALGORIX_PASSWORD_HASH). Rotate these before exposing"
+  echo "  Override by setting AIDASTING_USERNAME + AIDASTING_PASSWORD"
+  echo "  (or AIDASTING_PASSWORD_HASH). Rotate these before exposing"
   echo "  the dashboard on an untrusted network."
   echo "============================================================"
 fi
 
-exec xalgorix "$@"
+exec ai-dast-ing "$@"

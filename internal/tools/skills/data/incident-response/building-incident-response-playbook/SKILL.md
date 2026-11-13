@@ -19,7 +19,7 @@ mitre_attack:
 - T1566
 - T1078
 version: 1.0.0
-author: Krishna Kumar (xalgord)
+author: ING
 license: Apache-2.0
 nist_csf:
 - RS.MA-01

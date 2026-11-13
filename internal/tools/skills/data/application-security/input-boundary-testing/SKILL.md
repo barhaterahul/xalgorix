@@ -13,7 +13,7 @@ tags:
 - parser-confusion
 - parameter-tampering
 version: '2.0'
-author: Krishna Kumar (xalgord)
+author: ING
 license: Apache-2.0
 intent: offensive
 phase: application-testing
@@ -119,7 +119,7 @@ Pure type-rejection with clean errors is a NEGATIVE - close it and move on.
 - Accepted-but-ignored values (server re-derived the field): missing input trust is only a finding when the CLIENT value took effect
 - Timeouts from huge payloads = resource-consumption observation at best; classify honestly (api-resource-consumption for API targets)
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 
 - http_request for raw single-variable-violation replays (exact Content-Type and body control)
 - browser_action to confirm client-side behavior differences and drive flows needing real browsers

@@ -16,7 +16,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/xalgord/xalgorix/v4/internal/providers"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
 )
 
 // modelIndexOnce guards lazy initialization of the model index.

@@ -1,5 +1,5 @@
 // Package providers declares the compiled-in catalog of LLM
-// providers known to Xalgorix. v4.4.22 replaced the runtime-editable
+// providers known to AI-DAST-ING. v4.4.22 replaced the runtime-editable
 // JSON-backed catalog with this read-only built-in list — there is
 // no operator-editable catalog file, no openclaw importer, no
 // migration sentinel. Operators pick a provider slug in the LLM

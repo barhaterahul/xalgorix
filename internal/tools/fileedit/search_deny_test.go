@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/sandbox"
-	"github.com/xalgord/xalgorix/v4/internal/tools"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/sandbox"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
 )
 
 const searchSecret = "sk-test-SECRET-4242"

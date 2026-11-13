@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/providers"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
 )
 
 // endpointResolvers runs every no-profile resolution path a scan or a
@@ -33,8 +33,8 @@ func endpointResolvers(t *testing.T, cfg *config.Config) map[string]func() (Endp
 }
 
 // TestCustomProvider_KeepsGatewayModelIDs is the regression test for an
-// explicit Custom Provider (XALGORIX_LLM_PROVIDER=custom, as written by
-// `xalgorix --setup`) whose model ID starts with a known provider slug.
+// explicit Custom Provider (AIDASTING_LLM_PROVIDER=custom, as written by
+// `ai-dast-ing --setup`) whose model ID starts with a known provider slug.
 // Gateways commonly name models "vendor/model"; the slug used to be taken as
 // the routing provider, so requests left the operator's chat-completions
 // endpoint for another protocol (/messages or :generateContent) with the
@@ -225,10 +225,10 @@ func TestCustomProvider_ExplicitProviderWithoutPrefixUnchanged(t *testing.T) {
 }
 
 // TestResolver_ExplicitProviderWithBareModel covers the configuration
-// `xalgorix --setup` writes: XALGORIX_LLM_PROVIDER plus a bare model ID and
+// `ai-dast-ing --setup` writes: AIDASTING_LLM_PROVIDER plus a bare model ID and
 // no saved profile. Scans already routed it through the client fallback, but
 // the composite resolver used by post-scan chat only accepted a
-// "<provider>/model" XALGORIX_LLM and answered "no provider configured".
+// "<provider>/model" AIDASTING_LLM and answered "no provider configured".
 func TestResolver_ExplicitProviderWithBareModel(t *testing.T) {
 	routable := []struct {
 		name      string

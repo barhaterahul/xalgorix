@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/storage"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/storage"
 )
 
 // HypothesisStatus is the lifecycle state of an attack hypothesis in the

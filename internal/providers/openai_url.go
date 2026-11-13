@@ -10,7 +10,7 @@ var apiVersionSegmentPattern = regexp.MustCompile(`(?i)^v[0-9]+(?:[a-z][a-z0-9._
 
 // OpenAICompatibleURL appends an OpenAI-compatible resource path to apiBase.
 //
-// Most providers publish a host/root and expect Xalgorix to insert /v1, while
+// Most providers publish a host/root and expect AI-DAST-ING to insert /v1, while
 // others already include their API version in the base path. Z.AI is one such
 // provider: its Coding Plan base ends in /v4 and chat requests must go to
 // /v4/chat/completions, not /v4/v1/chat/completions. Treat any explicit

@@ -1,6 +1,6 @@
 .PHONY: build run clean test test-ci test-cover test-race install fmt vet lint tidy all webui webui-install webui-dev
 
-BINARY=xalgorix
+BINARY=ai-dast-ing
 BUILD_DIR=./build
 VERSION=4.6.133
 LDFLAGS=-ldflags "-s -w -X main.version=$(VERSION)"
@@ -22,11 +22,11 @@ webui-dev: webui/node_modules
 build: webui
 	@echo "Building $(BINARY)..."
 	@mkdir -p $(BUILD_DIR)
-	go build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY) ./cmd/xalgorix/
+	go build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY) ./cmd/ai-dast-ing/
 	@echo "Built: $(BUILD_DIR)/$(BINARY)"
 
 run:
-	go run ./cmd/xalgorix/ $(ARGS)
+	go run ./cmd/ai-dast-ing/ $(ARGS)
 
 clean:
 	rm -rf $(BUILD_DIR)
@@ -47,7 +47,7 @@ test-ci:
 	go test ./... -race
 	go vet ./...
 	@if command -v staticcheck >/dev/null 2>&1; then staticcheck ./...; else echo "staticcheck not installed; skipping"; fi
-	go build ./cmd/xalgorix
+	go build ./cmd/ai-dast-ing
 
 install: build
 	@echo "Installing $(BINARY) to /usr/local/bin..."

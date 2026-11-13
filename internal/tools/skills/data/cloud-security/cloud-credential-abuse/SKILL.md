@@ -1,6 +1,6 @@
 ---
 name: cloud-credential-abuse
-description: Provider-aware credential abuse — validating found AWS keys/tokens, Azure ARM/Graph/refresh tokens, and GCP service-account credentials, identifying principals, audiences, effective permissions, and escalation paths, transitioning Xalgorix into credentialed cloud attack mode
+description: Provider-aware credential abuse — validating found AWS keys/tokens, Azure ARM/Graph/refresh tokens, and GCP service-account credentials, identifying principals, audiences, effective permissions, and escalation paths, transitioning AI-DAST-ING into credentialed cloud attack mode
 intent: offensive
 assessment_mode:
   - blackbox
@@ -14,7 +14,7 @@ provider:
 # Cloud Credential Abuse
 
 ## Purpose
-Answer: "Xalgorix found a cloud credential/token — what happens next?" Validate it cheaply, identify exactly what it is, expand it into durable identity context, and route to the right escalation path. Invalid credentials are discarded quickly; valid ones become attack-surface state.
+Answer: "AI-DAST-ING found a cloud credential/token — what happens next?" Validate it cheaply, identify exactly what it is, expand it into durable identity context, and route to the right escalation path. Invalid credentials are discarded quickly; valid ones become attack-surface state.
 
 ## Entry Conditions
 - A discovered credential: from file disclosure, metadata chains, JS/config exposure, secret vaults, git history, phishing-captured context, or operator-supplied scope
@@ -103,7 +103,7 @@ credential discovered
 - Tokens expired between capture and use
 - Service accounts whose projects no longer exist
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `terminal_execute` with aws/az/gcloud as the baseline (no proprietary tooling required)
 - Pacu/CloudFox optional accelerators — their output is hypothesis, not proof
 - Credential entries in the ledger with provenance, principal, audience, and expiry

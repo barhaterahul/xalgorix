@@ -112,7 +112,7 @@ primitive observed (SSRF/RCE/LFI)
 - Tokens for identity federations with no privileges on any reachable resource
 - Client-side (browser) requests to link-local ranges (no server-side fetch)
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `http_request`/curl with full method/header control for IMDSv2
 - `terminal_execute` with aws/az/gcloud CLIs once credentials land in the test environment
 - Ledger: credential entry with principal, audience/scopes, and provenance

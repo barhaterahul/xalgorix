@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/llm"
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/llm"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
 )
 
 func msgsOfSize(totalBytes int) []llm.Message {
@@ -18,7 +18,7 @@ func msgsOfSize(totalBytes int) []llm.Message {
 }
 
 // The auto-compaction trigger must be driven by the configurable token budget
-// (XALGORIX_CONTEXT_COMPACT_TOKENS), not a hardcoded constant.
+// (AIDASTING_CONTEXT_COMPACT_TOKENS), not a hardcoded constant.
 func TestShouldPruneBeforeLLM_TokenBudget(t *testing.T) {
 	// 30000 tokens ≈ 120000 bytes threshold.
 	a := &Agent{cfg: &config.Config{ContextCompactTokens: 30000}}

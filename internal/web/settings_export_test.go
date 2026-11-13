@@ -15,8 +15,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/auth"
-	"github.com/xalgord/xalgorix/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/auth"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
 )
 
 func doImport(t *testing.T, s *Server, body string) settingsImportResult {
@@ -109,9 +109,9 @@ func TestSettingsImport_SkipsAndValidation(t *testing.T) {
 
 	res := doImport(t, s, `{
 		"env": {
-			"XALGORIX_LLM": "good-model",
+			"AIDASTING_LLM": "good-model",
 			"FUTURE_UNKNOWN_KEY": "x",
-			"XALGORIX_API_KEY": "****masked"
+			"AIDASTING_API_KEY": "****masked"
 		},
 		"profiles": [
 			{"provider": "openai", "profileId": "default", "type": "api_key", "apiKey": "sk-good"},
@@ -135,7 +135,7 @@ func TestSettingsImport_SkipsAndValidation(t *testing.T) {
 	// A validation failure must apply nothing and answer 400.
 	rr := httptest.NewRecorder()
 	s.handleSettingsImport(rr, httptest.NewRequest(http.MethodPost, "/api/settings/import",
-		strings.NewReader(`{"env":{"XALGORIX_MAX_ITERATIONS":"not-a-number"}}`)))
+		strings.NewReader(`{"env":{"AIDASTING_MAX_ITERATIONS":"not-a-number"}}`)))
 	if rr.Code != http.StatusBadRequest {
 		t.Fatalf("invalid env value must 400, got %d: %s", rr.Code, rr.Body.String())
 	}

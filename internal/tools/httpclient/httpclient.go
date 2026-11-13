@@ -16,10 +16,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/proxy"
-	"github.com/xalgord/xalgorix/v4/internal/scanheaders"
-	"github.com/xalgord/xalgorix/v4/internal/tools"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/proxy"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanheaders"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
 )
 
 const maxBodyBytes = 50 * 1024      // default cap — keeps the context window manageable
@@ -176,7 +176,7 @@ func executeWithContext(contextID string, guard tools.RequestGuard, args map[str
 		}
 	}
 
-	// Apply operator-configured scan/attribution headers (XALGORIX_SCAN_HEADERS
+	// Apply operator-configured scan/attribution headers (AIDASTING_SCAN_HEADERS
 	// / -H). Like session auth, they identify authorized scan traffic and are
 	// never allowed to override a header the caller set explicitly.
 	scanheaders.Apply(req.Header, config.Get().ScanHeaders)

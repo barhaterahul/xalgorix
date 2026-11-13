@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
 )
 
 func TestProviderCacheParsing(t *testing.T) {
@@ -248,7 +248,7 @@ func TestPromptCachingInvariants(t *testing.T) {
 	c.SetPromptCaching(true)
 
 	msgs := []Message{
-		{Role: "system", Content: "You are Xalgorix pentesting agent."},
+		{Role: "system", Content: "You are AI-DAST-ING pentesting agent."},
 		{Role: "user", Content: "Investigate target host."},
 	}
 
@@ -277,7 +277,7 @@ func TestPromptCachingInvariants(t *testing.T) {
 		t.Fatalf("system payload expected 1 ephemeral block, got: %v", capturedPayload["system"])
 	}
 	sysBlock := sysList[0].(map[string]any)
-	if sysBlock["text"] != "You are Xalgorix pentesting agent." {
+	if sysBlock["text"] != "You are AI-DAST-ING pentesting agent." {
 		t.Errorf("system text altered: %v", sysBlock["text"])
 	}
 	cacheControl, ok := sysBlock["cache_control"].(map[string]any)

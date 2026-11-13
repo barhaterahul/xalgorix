@@ -128,7 +128,7 @@ grpcurl -plaintext \
 - A method returning UNAUTHENTICATED (auth is working)
 - An empty response from a correctly permissioned endpoint
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `terminal_execute` with grpcurl for direct gRPC interaction
 - Python with grpcio for complex message construction
 - curl for REST gateway comparison testing

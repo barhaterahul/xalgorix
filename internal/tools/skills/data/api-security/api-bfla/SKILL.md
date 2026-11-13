@@ -90,7 +90,7 @@ A BFLA finding requires one of:
 - Cached/static responses; OPTIONS preflight output
 - Admin UI accidentally public but API enforces authorization (test the API, report what the API does)
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `authz_matrix` for multi-role differentials
 - `http_request`/curl for verb sweeps and override headers; ffuf for path-variant sweeps
 - `terminal_execute` + Python for the full method x version x path-normalization matrix

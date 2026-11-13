@@ -7,7 +7,7 @@ import { useAuth } from "@/store/auth";
 /**
  * Rendered by `AuthBootstrap` when `/api/auth/status` returns either a
  * network-level failure (HttpError.status === 0) or 404 — i.e. there is
- * no Xalgorix backend on the other side of `/api/*`. The login screen
+ * no AI-DAST-ING backend on the other side of `/api/*`. The login screen
  * would be misleading here (signing in would just produce another 404),
  * so we replace the entire app with a remediation page that:
  *
@@ -16,7 +16,7 @@ import { useAuth } from "@/store/auth";
  *   - Offers a "Retry" button that re-probes `/api/auth/status` without
  *     a full page reload, so an operator who just started the Go server
  *     in another shell can recover instantly.
- *   - Lists the two most common fixes (run `xalgorix serve` /
+ *   - Lists the two most common fixes (run `ai-dast-ing serve` /
  *     run the mock backend).
  */
 export function BackendUnreachable() {
@@ -45,7 +45,7 @@ export function BackendUnreachable() {
               <div>
                 <CardTitle className="text-balance">Backend unreachable</CardTitle>
                 <CardDescription>
-                  The Xalgorix API isn&apos;t responding on this host.
+                  The AI-DAST-ING API isn&apos;t responding on this host.
                 </CardDescription>
               </div>
             </div>
@@ -84,7 +84,7 @@ export function BackendUnreachable() {
                   <span>
                     Start the Go server:{" "}
                     <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">
-                      go run ./cmd/xalgorix serve
+                      go run ./cmd/ai-dast-ing serve
                     </code>
                   </span>
                 </li>

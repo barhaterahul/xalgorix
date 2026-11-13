@@ -140,7 +140,7 @@ A JWT vulnerability requires ALL of:
 - alg:none token accepted for PUBLIC endpoints (they accept everything)
 - A 200 that returns the same data as the original token (no privilege change)
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `terminal_execute` with Python for token forging
 - `http_request` for precise header manipulation
 - `authz_matrix` for cross-role differential

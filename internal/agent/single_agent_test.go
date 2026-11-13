@@ -14,10 +14,10 @@ import (
 	"testing"
 	"unicode/utf8"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
-	"github.com/xalgord/xalgorix/v4/internal/tools"
-	"github.com/xalgord/xalgorix/v4/internal/tools/agentsgraph"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/agentsgraph"
 )
 
 // satisfyComprehensiveRecon seeds a fully-settled comprehensive recon state
@@ -66,7 +66,7 @@ func newDelegationTestAgent(t *testing.T, cfg *config.Config, state *ScanState) 
 
 // ── Delegation-disabled behavior (scenarios 1-5) ───────────────────────────
 
-// Scenario 1: XALGORIX_DISABLE_AUTO_DELEGATE=true (DelegationEnabled=false)
+// Scenario 1: AIDASTING_DISABLE_AUTO_DELEGATE=true (DelegationEnabled=false)
 // produces no spawn-agent nudge or reminder.
 func TestSingleAgent_NoSpawnNudgeWhenDelegationDisabled(t *testing.T) {
 	state := NewScanState()
@@ -112,7 +112,7 @@ func TestSingleAgent_AllLanesDisabledDerivesSingleAgentMode(t *testing.T) {
 	}
 	a3 := newDelegationTestAgent(t, &config.Config{DisableAutoDelegate: true}, state)
 	if a3.delegationEnabled() {
-		t.Fatal("XALGORIX_DISABLE_AUTO_DELEGATE=true must derive DelegationEnabled=false")
+		t.Fatal("AIDASTING_DISABLE_AUTO_DELEGATE=true must derive DelegationEnabled=false")
 	}
 }
 

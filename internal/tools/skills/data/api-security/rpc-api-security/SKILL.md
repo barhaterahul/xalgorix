@@ -105,7 +105,7 @@ An RPC finding requires:
 - Batch rejected wholesale (per-method authz working)
 - Enumerated methods that exist but correctly enforce authorization
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `http_request`/curl for precise RPC envelopes; Python for batch construction and per-item parsing
 - `oob_callback` where RPC methods accept URLs (pingback SSRF chains)
 - `authz_matrix` for multi-role method differentials

@@ -16,7 +16,7 @@ import { useSyncExternalStore } from "react";
 export type ThemeMode = "light" | "dark" | "system";
 export type ResolvedTheme = "light" | "dark";
 
-const STORAGE_KEY = "xalgorix.theme";
+const STORAGE_KEY = "ai-dast-ing.theme";
 
 // Kept in sync with --background in styles.css so the mobile browser chrome
 // matches the app surface.

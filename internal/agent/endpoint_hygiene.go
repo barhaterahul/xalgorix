@@ -22,7 +22,7 @@ import (
 // is the single predicate that composes the existing filters and closes the
 // tool-config gap; sanitizeEndpointState scrubs already-recorded state so a scan
 // that froze a polluted baseline can still converge. All gated on
-// state.EndpointHygiene (XALGORIX_ENDPOINT_HYGIENE, default off).
+// state.EndpointHygiene (AIDASTING_ENDPOINT_HYGIENE, default off).
 
 // scannerToolConfigRe matches the engine's own CLI tool config namespaces, which
 // are never a target route (and which isProbeArtifactEndpoint does not catch).

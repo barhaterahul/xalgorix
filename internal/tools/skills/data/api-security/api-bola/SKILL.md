@@ -91,7 +91,7 @@ A BOLA finding requires ALL of:
 - Soft-deleted objects returning 404 for everyone
 - Admin/support tooling where cross-object access is intended
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `authz_matrix` for automated A/B session differentials
 - `http_request`/curl for precise ID swaps; Python for batch sweeps across harvested IDs
 - ffuf with harvested ID wordlists for sequential enumeration

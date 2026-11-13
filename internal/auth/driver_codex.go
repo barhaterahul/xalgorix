@@ -6,7 +6,7 @@
 // operator already obtained by running the official OpenAI Codex CLI
 // (`codex login`) on the same host. This is the reliable path for both
 // local and headless/remote (DigitalOcean) deployments — the operator
-// signs in once with the well-tested CLI, and xalgorix reuses the result.
+// signs in once with the well-tested CLI, and ai-dast-ing reuses the result.
 //
 // The Codex CLI writes ~/.codex/auth.json with shape:
 //
@@ -43,7 +43,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/providers"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
 )
 
 // codexCredentialPathFn resolves the on-disk path to the Codex CLI
@@ -53,11 +53,11 @@ import (
 var codexCredentialPathFn = codexCredentialPath
 
 // codexCredentialPath returns the documented Codex CLI credential path.
-// XALGORIX_CODEX_AUTH_FILE overrides it (useful when the dashboard runs
+// AIDASTING_CODEX_AUTH_FILE overrides it (useful when the dashboard runs
 // as a different user than the one that ran `codex login`). Falls back to
 // $HOME/.codex/auth.json. CODEX_HOME is also honored to match the CLI.
 func codexCredentialPath() string {
-	if v := strings.TrimSpace(os.Getenv("XALGORIX_CODEX_AUTH_FILE")); v != "" {
+	if v := strings.TrimSpace(os.Getenv("AIDASTING_CODEX_AUTH_FILE")); v != "" {
 		return v
 	}
 	if codexHome := strings.TrimSpace(os.Getenv("CODEX_HOME")); codexHome != "" {

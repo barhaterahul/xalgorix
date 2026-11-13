@@ -150,7 +150,7 @@ An unsafe-consumption finding requires:
 - The target makes its own request to the third-party (that's SSRF, not consumption)
 - A webhook endpoint that requires a secret token you don't have
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `terminal_execute` with curl for webhook payload crafting
 - `http_request` for precise header/content-type manipulation
 - `oob_callback` for verifying webhook-driven SSRF (when consumption leads to URL fetching)

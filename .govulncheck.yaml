@@ -1,4 +1,4 @@
-# govulncheck configuration for xalgorix.
+# govulncheck configuration for ai-dast-ing.
 #
 # govulncheck (golang.org/x/vuln/cmd/govulncheck) does not yet support a
 # native config file; this YAML is read by the `make sec` target and the

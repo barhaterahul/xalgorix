@@ -14,11 +14,11 @@ import (
 
 	"github.com/gorilla/websocket"
 
-	"github.com/xalgord/xalgorix/v4/internal/auth"
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/llm"
-	"github.com/xalgord/xalgorix/v4/internal/providers"
-	"github.com/xalgord/xalgorix/v4/internal/scopeguard"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/auth"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/llm"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scopeguard"
 )
 
 // stubWebhookDNS pins scopeguard's resolver so these tests never depend on

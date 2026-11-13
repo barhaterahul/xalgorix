@@ -17,7 +17,7 @@ tags:
 - Cobalt-Strike
 - detection-assessment
 version: 1.0.0
-author: Krishna Kumar (xalgord)
+author: ING
 license: Apache-2.0
 d3fend_techniques:
 - File Metadata Consistency Validation

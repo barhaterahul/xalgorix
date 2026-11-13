@@ -28,9 +28,9 @@ import (
 	"fmt"
 	"strings"
 
-	oobsrv "github.com/xalgord/xalgorix/v4/internal/oob"
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
-	"github.com/xalgord/xalgorix/v4/internal/tools"
+	oobsrv "github.com/barhaterahul/ai-dast-ing/v4/internal/oob"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
 )
 
 type oobPollFunc func(string) []oobsrv.Interaction

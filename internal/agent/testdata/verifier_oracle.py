@@ -15,7 +15,7 @@ try:
 except ImportError:
     jinja2 = None
 
-scratch = tempfile.TemporaryDirectory(prefix="xalgorix-verifier-oracle-")
+scratch = tempfile.TemporaryDirectory(prefix="ai-dast-ing-verifier-oracle-")
 passwd = pathlib.Path(scratch.name, "passwd")
 passwd.write_text("root:x:0:0:isolated fixture:/nonexistent:/bin/false\n")
 custom = pathlib.Path(scratch.name, "canary")
@@ -99,7 +99,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 return
             value = match.group(1)
             if "&xxe;" in value:
-                if self.path == "/xxe/unstable" and "xalgorix-xxe-missing-" not in raw:
+                if self.path == "/xxe/unstable" and "ai-dast-ing-xxe-missing-" not in raw:
                     unstable_counter += 1
                     replacement = "volatile-substitution-" + str(unstable_counter)
                 else:

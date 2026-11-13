@@ -1,4 +1,4 @@
-# Xalgorix — one-command run. Publishes the dashboard on http://localhost:9137
+# AI-DAST-ING — one-command run. Publishes the dashboard on http://localhost:9137
 # and persists all data (scans, reports, and settings) to a named volume.
 #
 #   docker compose up -d
@@ -8,8 +8,8 @@
 # you can configure the model + API key under Settings → LLM (it persists to the
 # volume). Set the env vars below only if you'd rather bake them in.
 services:
-  xalgorix:
-    image: xalgord/xalgorix:latest
+  ai-dast-ing:
+    image: barhaterahul/ai-dast-ing:latest
     # Or build locally instead of pulling:  build: .
     #
     # Full host-like permissions so the engine's toolset behaves as it does when
@@ -41,13 +41,13 @@ services:
     # login, a random admin password is generated and printed to the logs on
     # first start. The LLM can be set here or under Settings → LLM.
     # environment:
-    #   XALGORIX_USERNAME: admin
-    #   XALGORIX_PASSWORD: change-me-please
-    #   XALGORIX_LLM: openai/gpt-5.6
-    #   XALGORIX_API_KEY: your_provider_api_key
+    #   AIDASTING_USERNAME: admin
+    #   AIDASTING_PASSWORD: change-me-please
+    #   AIDASTING_LLM: openai/gpt-5.6
+    #   AIDASTING_API_KEY: your_provider_api_key
     volumes:
-      - xalgorix-data:/data
+      - ai-dast-ing-data:/data
     restart: unless-stopped
 
 volumes:
-  xalgorix-data:
+  ai-dast-ing-data:

@@ -12,7 +12,7 @@ import (
 )
 
 // importLegacyDataDir copies scan records from the pre-migration data
-// directory ~/xalgorix-data/ into the active s.dataDir, idempotently
+// directory ~/ai-dast-ing-data/ into the active s.dataDir, idempotently
 // and non-destructively. Each scan ID already present under dataDir is
 // skipped. On completion (or no-op early return), a sentinel file
 // .legacy-imported is written so subsequent starts skip the walk.
@@ -26,7 +26,7 @@ func (s *Server) importLegacyDataDir() (int, error) {
 	if err != nil {
 		return 0, fmt.Errorf("home dir: %w", err)
 	}
-	legacyPath := filepath.Join(home, "xalgorix-data")
+	legacyPath := filepath.Join(home, "ai-dast-ing-data")
 	sentinelPath := filepath.Join(s.dataDir, ".legacy-imported")
 
 	// Early return: legacy IS the active dir — nothing to migrate.

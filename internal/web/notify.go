@@ -17,8 +17,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/safe"
-	"github.com/xalgord/xalgorix/v4/internal/scopeguard"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/safe"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scopeguard"
 )
 
 // notifyHTTPTimeout bounds every outbound notification request so a slow or
@@ -71,7 +71,7 @@ func webhookIPBlocked(ip net.IP) bool {
 }
 
 // isOperatorWebhook reports whether webhook is the operator-configured global
-// endpoint (XALGORIX_DISCORD_WEBHOOK / settings). Only the operator can set
+// endpoint (AIDASTING_DISCORD_WEBHOOK / settings). Only the operator can set
 // that value, so it is trusted as-is; every other webhook arrives with a scan
 // or schedule request and is guarded.
 func (s *Server) isOperatorWebhook(webhook string) bool {
@@ -240,8 +240,8 @@ func (s *Server) sendDiscordWithFileTo(webhook string, color int, title, descrip
 
 	// Add payload JSON
 	embedPayload := map[string]any{
-		"username":   "Xalgorix",
-		"avatar_url": "https://raw.githubusercontent.com/xalgord/xalgord/main/assets/logo.png",
+		"username":   "AI-DAST-ING",
+		"avatar_url": "https://raw.githubusercontent.com/ING/ING/main/assets/logo.png",
 		"embeds": []map[string]any{
 			{
 				"title":       title,
@@ -249,7 +249,7 @@ func (s *Server) sendDiscordWithFileTo(webhook string, color int, title, descrip
 				"color":       color,
 				"timestamp":   time.Now().Format(time.RFC3339),
 				"footer": map[string]string{
-					"text": "Xalgorix — Autonomous AI Pentesting Engine",
+					"text": "AI-DAST-ING — Autonomous AI Pentesting Engine",
 				},
 			},
 		},
@@ -303,8 +303,8 @@ func (s *Server) sendSimpleEmbedTo(webhook string, color int, title, description
 		return
 	}
 	payload := map[string]any{
-		"username":   "Xalgorix",
-		"avatar_url": "https://raw.githubusercontent.com/xalgord/xalgord/main/assets/logo.png",
+		"username":   "AI-DAST-ING",
+		"avatar_url": "https://raw.githubusercontent.com/ING/ING/main/assets/logo.png",
 		"embeds": []map[string]any{
 			{
 				"title":       title,
@@ -312,7 +312,7 @@ func (s *Server) sendSimpleEmbedTo(webhook string, color int, title, description
 				"color":       color,
 				"timestamp":   time.Now().Format(time.RFC3339),
 				"footer": map[string]string{
-					"text": "Xalgorix — Autonomous AI Pentesting Engine",
+					"text": "AI-DAST-ING — Autonomous AI Pentesting Engine",
 				},
 			},
 		},

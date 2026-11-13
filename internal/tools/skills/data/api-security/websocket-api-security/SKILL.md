@@ -96,7 +96,7 @@ Measure: baseline behavior vs sustained load — a finding requires the server p
 - Parse errors for malformed JSON (validation working)
 - Backpressure applied (server closes slow consumers — control working)
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `terminal_execute` with Python websockets for scripted frame exchange
 - `browser_action` for cross-origin PoCs against cookie-authenticated sessions
 - `http_request` for the upgrade handshake itself

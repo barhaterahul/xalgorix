@@ -14,10 +14,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/proxy"
-	"github.com/xalgord/xalgorix/v4/internal/ratelimit"
-	"github.com/xalgord/xalgorix/v4/internal/tools"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/proxy"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/ratelimit"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
 )
 
 // globalLimiter is initialized once from config when the package is loaded.
@@ -123,7 +123,7 @@ func sendRequestGuarded(guard tools.RequestGuard, args map[string]string) (tools
 	method := strings.ToUpper(args["method"])
 
 	// Rate-limit before sending — blocks until a token is available for
-	// this domain. No-op when XALGORIX_RATE_RPS=0.
+	// this domain. No-op when AIDASTING_RATE_RPS=0.
 	globalLimiter.Wait(targetURL)
 
 	var bodyReader io.Reader
@@ -230,7 +230,7 @@ func sendRequestGuarded(guard tools.RequestGuard, args map[string]string) (tools
 func listRequests(args map[string]string) (tools.Result, error) {
 	cfg := config.Get()
 	if cfg.CaidoAPIToken == "" {
-		return tools.Result{Output: "Caido API token not configured. Set CAIDO_API_TOKEN in ~/.xalgorix.env"}, nil
+		return tools.Result{Output: "Caido API token not configured. Set CAIDO_API_TOKEN in ~/.ai-dast-ing.env"}, nil
 	}
 
 	count := clampRequestCount(args["count"])

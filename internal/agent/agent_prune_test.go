@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/llm"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/llm"
 )
 
 // TestPruneSliceCutoff_PruneMessages_DoesNotPanic exercises the bug

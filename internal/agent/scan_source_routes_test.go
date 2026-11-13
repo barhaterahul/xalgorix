@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
-	"github.com/xalgord/xalgorix/v4/internal/tools/codesearch"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/codesearch"
 )
 
 // TestSeedRoutesCorrelatedAndUncorrelated verifies a route whose handler

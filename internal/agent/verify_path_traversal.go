@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
-	"github.com/xalgord/xalgorix/v4/internal/scopeguard"
-	"github.com/xalgord/xalgorix/v4/internal/tools"
-	"github.com/xalgord/xalgorix/v4/internal/tools/httpclient"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scopeguard"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/httpclient"
 )
 
 // verify_path_traversal confirms a path-segment file read without relying on
@@ -74,7 +74,7 @@ func (a *Agent) verifyPathTraversalTool(args map[string]string) (tools.Result, e
 	if stop := a.injectionRateGate(); stop != "" {
 		return tools.Result{Error: stop}, nil
 	}
-	baselineURL := baseURL + "xalgorix-missing-" + strconv.FormatInt(time.Now().UnixNano(), 36)
+	baselineURL := baseURL + "ai-dast-ing-missing-" + strconv.FormatInt(time.Now().UnixNano(), 36)
 	baseline, err := httpclient.SendRaw(httpclient.RawRequest{
 		Method: "GET", URL: baselineURL, Headers: headers,
 		FollowRedirects: false, TimeoutSec: 30,

@@ -46,7 +46,7 @@ aws iam set-default-policy-version --policy-arn <arn> --version-id v3
 # iam:AttachUserPolicy / AttachRolePolicy / AttachGroupPolicy
 aws iam attach-user-policy --user-name <u> --policy-arn arn:aws:iam::aws:policy/AdministratorAccess
 # iam:PutUserPolicy / PutRolePolicy / PutGroupPolicy (inline)
-aws iam put-user-policy --user-name <u> --policy-name xalgorix-test --policy-document '{...}'
+aws iam put-user-policy --user-name <u> --policy-name ai-dast-ing-test --policy-document '{...}'
 # PROOF: previously denied action now succeeds; record and RESTORE original state
 aws iam list-users   # example: was AccessDenied before escalation
 ```
@@ -64,7 +64,7 @@ Scoped PassRole is the usual gate: enumerate exactly which role ARNs are passabl
 
 ### Family 3 — Role Assumption
 ```bash
-aws sts assume-role --role-arn <arn> --role-session-name xalgorix-test
+aws sts assume-role --role-arn <arn> --role-session-name ai-dast-ing-test
 # Requires: identity-side sts:AssumeRole AND the target trust policy allowing your principal
 # AND every condition (ExternalId, MFA, SourceOrgID) satisfied
 ```
@@ -119,7 +119,7 @@ Do NOT blind-retry every AccessDenied. Retry-on-denial is justified only in the 
 - Trust policies that do not include your principal or conditions
 - Group-policy manipulation where no group membership exists
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `terminal_execute` with AWS CLI for every primitive; Pacu/PMapper/CloudFox for hypothesis generation only
 - `aws iam simulate-principal-policy` for boundary-aware checks
 - Ledger: candidate paths with constraint-resolution state, verified escalations with before/after proof

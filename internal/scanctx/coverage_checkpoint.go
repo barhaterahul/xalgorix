@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"sort"
 
-	"github.com/xalgord/xalgorix/v4/internal/storage"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/storage"
 )
 
 type coveragePair struct {

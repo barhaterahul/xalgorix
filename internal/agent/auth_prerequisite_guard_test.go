@@ -27,7 +27,7 @@ func TestMissingAuthPrerequisiteGuardAllowsAnonymousProbesAndHashEvidence(t *tes
 	for _, command := range []string{
 		`curl -sk https://example.test/api/health`,
 		`sqlite3 tmp/leaked.db "select login, password, salt from user"`,
-		`curl -X POST https://example.test/login -d '{"user":"xalgorix-invalid","password":"canary-8d22"}'`,
+		`curl -X POST https://example.test/login -d '{"user":"ai-dast-ing-invalid","password":"canary-8d22"}'`,
 		`curl -u admin:admin https://example.test/api/user`,
 		`curl -X POST https://example.test/login -d '{"user":"admin","password":"admin"}'`,
 	} {

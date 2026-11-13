@@ -51,11 +51,11 @@ func Init(useProxy bool, proxyURL, proxyFile, rotation string, timeout time.Dura
 
 // InitWithPolicy enables the optional proxy-required mode. That mode accepts
 // exactly one upstream proxy so a scan cannot switch egress IP mid-session.
-// Proxy-required mode covers Xalgorix's built-in HTTP and browser paths;
+// Proxy-required mode covers AI-DAST-ING's built-in HTTP and browser paths;
 // arbitrary subprocesses additionally need OS-level egress isolation.
 func InitWithPolicy(useProxy, required bool, proxyURL, proxyFile, rotation string, timeout time.Duration) error {
 	if required && (!useProxy || proxyURL == "") {
-		return fmt.Errorf("proxy-required mode needs XALGORIX_USE_PROXY=true and XALGORIX_PROXY_URL")
+		return fmt.Errorf("proxy-required mode needs AIDASTING_USE_PROXY=true and AIDASTING_PROXY_URL")
 	}
 	m := &Manager{
 		enabled:  useProxy,

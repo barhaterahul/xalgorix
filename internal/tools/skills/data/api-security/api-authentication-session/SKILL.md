@@ -99,7 +99,7 @@ An authentication finding requires ALL of:
 - Logout invalidating only the browser session while token TTL is short — check actual remaining impact
 - 200 responses that return the anonymous view of a resource
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `http_request`/curl for precise lifecycle probes; Python for repeated timing samples
 - `authz_matrix` for session-context differentials
 - agentmail where password-reset/MFA email flows need inbound access

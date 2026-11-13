@@ -42,38 +42,38 @@ func TestLiveHostMetricsAreUsable(t *testing.T) {
 }
 
 func TestEnvHelpers(t *testing.T) {
-	t.Setenv("XALGORIX_TEST_FLOAT", "")
-	if got := envFloat("XALGORIX_TEST_FLOAT", 1.5); got != 1.5 {
+	t.Setenv("AIDASTING_TEST_FLOAT", "")
+	if got := envFloat("AIDASTING_TEST_FLOAT", 1.5); got != 1.5 {
 		t.Fatalf("envFloat default = %v", got)
 	}
-	t.Setenv("XALGORIX_TEST_FLOAT", "2.25")
-	if got := envFloat("XALGORIX_TEST_FLOAT", 1.5); got != 2.25 {
+	t.Setenv("AIDASTING_TEST_FLOAT", "2.25")
+	if got := envFloat("AIDASTING_TEST_FLOAT", 1.5); got != 2.25 {
 		t.Fatalf("envFloat parsed = %v", got)
 	}
-	t.Setenv("XALGORIX_TEST_FLOAT", "bad")
-	if got := envFloat("XALGORIX_TEST_FLOAT", 1.5); got != 1.5 {
+	t.Setenv("AIDASTING_TEST_FLOAT", "bad")
+	if got := envFloat("AIDASTING_TEST_FLOAT", 1.5); got != 1.5 {
 		t.Fatalf("envFloat invalid default = %v", got)
 	}
 
-	t.Setenv("XALGORIX_TEST_INT", "7")
-	if got := envInt64("XALGORIX_TEST_INT", 3); got != 7 {
+	t.Setenv("AIDASTING_TEST_INT", "7")
+	if got := envInt64("AIDASTING_TEST_INT", 3); got != 7 {
 		t.Fatalf("envInt64 parsed = %v", got)
 	}
-	t.Setenv("XALGORIX_TEST_INT", "bad")
-	if got := envInt64("XALGORIX_TEST_INT", 3); got != 3 {
+	t.Setenv("AIDASTING_TEST_INT", "bad")
+	if got := envInt64("AIDASTING_TEST_INT", 3); got != 3 {
 		t.Fatalf("envInt64 invalid default = %v", got)
 	}
 
-	t.Setenv("XALGORIX_OPTIONAL_INT", "")
-	if got := envOptionalInt("XALGORIX_OPTIONAL_INT"); got != 0 {
+	t.Setenv("AIDASTING_OPTIONAL_INT", "")
+	if got := envOptionalInt("AIDASTING_OPTIONAL_INT"); got != 0 {
 		t.Fatalf("envOptionalInt empty = %v", got)
 	}
-	t.Setenv("XALGORIX_OPTIONAL_INT", "4")
-	if got := envOptionalInt("XALGORIX_OPTIONAL_INT"); got != 4 {
+	t.Setenv("AIDASTING_OPTIONAL_INT", "4")
+	if got := envOptionalInt("AIDASTING_OPTIONAL_INT"); got != 4 {
 		t.Fatalf("envOptionalInt parsed = %v", got)
 	}
-	t.Setenv("XALGORIX_OPTIONAL_INT", "0")
-	if got := envOptionalInt("XALGORIX_OPTIONAL_INT"); got != 0 {
+	t.Setenv("AIDASTING_OPTIONAL_INT", "0")
+	if got := envOptionalInt("AIDASTING_OPTIONAL_INT"); got != 0 {
 		t.Fatalf("envOptionalInt invalid cap = %v", got)
 	}
 }
@@ -195,20 +195,20 @@ func TestConfigureGoRuntimeLimitsHonorsOverrides(t *testing.T) {
 
 	const unset = "<unset>"
 	for _, tc := range []struct {
-		name, xalgorix, gomemlimit string
+		name, aidasting, gomemlimit string
 		wantMB                     int64 // 0: the runtime limit is left unchanged
 	}{
 		{"auto", unset, unset, autoMB},
 		{"empty GOMEMLIMIT", unset, "", autoMB},
 		{"GOMEMLIMIT", unset, "2GiB", 0},
-		{"XALGORIX_GO_MEM_LIMIT_MB", "8192", unset, 8192},
-		{"XALGORIX_GO_MEM_LIMIT_MB over GOMEMLIMIT", "8192", "2GiB", 8192},
-		{"XALGORIX_GO_MEM_LIMIT_MB=0", "0", unset, 0},
-		{"invalid XALGORIX_GO_MEM_LIMIT_MB", "lots", unset, autoMB},
-		{"invalid XALGORIX_GO_MEM_LIMIT_MB with GOMEMLIMIT", "lots", "2GiB", 0},
+		{"AIDASTING_GO_MEM_LIMIT_MB", "8192", unset, 8192},
+		{"AIDASTING_GO_MEM_LIMIT_MB over GOMEMLIMIT", "8192", "2GiB", 8192},
+		{"AIDASTING_GO_MEM_LIMIT_MB=0", "0", unset, 0},
+		{"invalid AIDASTING_GO_MEM_LIMIT_MB", "lots", unset, autoMB},
+		{"invalid AIDASTING_GO_MEM_LIMIT_MB with GOMEMLIMIT", "lots", "2GiB", 0},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			setOrUnsetEnv(t, "XALGORIX_GO_MEM_LIMIT_MB", tc.xalgorix, tc.xalgorix == unset)
+			setOrUnsetEnv(t, "AIDASTING_GO_MEM_LIMIT_MB", tc.aidasting, tc.aidasting == unset)
 			setOrUnsetEnv(t, "GOMEMLIMIT", tc.gomemlimit, tc.gomemlimit == unset)
 			debug.SetMemoryLimit(presetMB << 20)
 			goMemoryLimitMB = 0

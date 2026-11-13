@@ -17,7 +17,7 @@ tags:
 - compliance
 - article-15
 version: '1.0'
-author: Krishna Kumar (xalgord)
+author: ING
 license: Apache-2.0
 nist_csf:
 - GV.PO-01

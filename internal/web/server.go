@@ -1,4 +1,4 @@
-// Package web provides the Xalgorix web UI server.
+// Package web provides the AI-DAST-ING web UI server.
 package web
 
 import (
@@ -31,21 +31,21 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/agent"
-	"github.com/xalgord/xalgorix/v4/internal/auth"
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/llm"
-	"github.com/xalgord/xalgorix/v4/internal/providers"
-	"github.com/xalgord/xalgorix/v4/internal/proxy"
-	"github.com/xalgord/xalgorix/v4/internal/resources"
-	"github.com/xalgord/xalgorix/v4/internal/safe"
-	"github.com/xalgord/xalgorix/v4/internal/sandbox"
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
-	"github.com/xalgord/xalgorix/v4/internal/storage"
-	"github.com/xalgord/xalgorix/v4/internal/tools/browser"
-	"github.com/xalgord/xalgorix/v4/internal/tools/notes"
-	"github.com/xalgord/xalgorix/v4/internal/tools/reporting"
-	"github.com/xalgord/xalgorix/v4/internal/tools/terminal"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/agent"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/auth"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/llm"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/proxy"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/resources"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/safe"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/sandbox"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/storage"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/browser"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/notes"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/reporting"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/terminal"
 )
 
 // Version is set by main.go at startup — single source of truth.
@@ -389,7 +389,7 @@ type ScanRequest struct {
 	LogoPath       string   `json:"logo_path"`       // report branding: logo file path
 	// TargetAuth carries per-scan authenticated-scanning material so the
 	// agent can exercise post-login attack surface. Format mirrors
-	// XALGORIX_TARGET_AUTH (see httpclient/sessionauth.go): a header/cookie
+	// AIDASTING_TARGET_AUTH (see httpclient/sessionauth.go): a header/cookie
 	// spec applied automatically to http_request. Empty = unauthenticated.
 	TargetAuth string `json:"target_auth"`
 	// TargetAuthSecondary is a SECOND account's auth (same format as TargetAuth),
@@ -848,10 +848,10 @@ type Server struct {
 	currentScanID          string
 	discordWebhook         string
 	discordMinSeverity     string      // minimum severity to send to Discord ("info", "low", "medium", "high", "critical")
-	telegramBotToken       string      // XALGORIX_TELEGRAM_BOT_TOKEN (secret, never exposed via API)
-	telegramChatID         string      // XALGORIX_TELEGRAM_CHAT_ID (numeric ID or @channelusername)
+	telegramBotToken       string      // AIDASTING_TELEGRAM_BOT_TOKEN (secret, never exposed via API)
+	telegramChatID         string      // AIDASTING_TELEGRAM_CHAT_ID (numeric ID or @channelusername)
 	telegramMinSeverity    string      // minimum severity to send to Telegram ("info", "low", "medium", "high", "critical")
-	notifyScanComplete     atomic.Bool // XALGORIX_NOTIFY_SCAN_COMPLETE - send the "Scan Finished" summary after every scan (default false)
+	notifyScanComplete     atomic.Bool // AIDASTING_NOTIFY_SCAN_COMPLETE - send the "Scan Finished" summary after every scan (default false)
 	rateLimiter            *RateLimiter
 	settingsMu             sync.Mutex
 	instances              map[string]*ScanInstance // concurrent scan instances
@@ -895,7 +895,7 @@ type Server struct {
 	admissionWake chan struct{}
 
 	// legacyImportCount is the number of scan records imported from the
-	// pre-migration directory (~/xalgorix-data/) into the active dataDir
+	// pre-migration directory (~/ai-dast-ing-data/) into the active dataDir
 	// on the current server start. It is set once by importLegacyDataDir
 	// and surfaced via /api/legacy-import/status so the WebUI can render
 	// a one-time banner. Not persisted; resets to 0 each restart.
@@ -955,8 +955,8 @@ func NewServer(cfg *config.Config, port int) *Server {
 	// already canonicalized + created with mode 0o700 before we get here.
 	// The Web_Server is a downstream consumer; it must NOT re-derive a data
 	// root from $HOME or $CWD (Task 3.6 / R6.4 / R6.6) — doing so would
-	// silently bypass XALGORIX_DATA_DIR and resurrect the legacy
-	// ~/xalgorix-data location.
+	// silently bypass AIDASTING_DATA_DIR and resurrect the legacy
+	// ~/ai-dast-ing-data location.
 	dataDir := cfg.DataDir
 	// Rate limit from config (defaults: 60 requests per minute)
 	rl := NewRateLimiter(cfg.RateLimitRequests, time.Duration(cfg.RateLimitWindow)*time.Second)
@@ -1003,7 +1003,7 @@ func NewServer(cfg *config.Config, port int) *Server {
 	//
 	// Decision order matches llm.compositeResolver.Resolve
 	// exactly (catalog non-empty → catalogResolver; otherwise
-	// legacy when XALGORIX_LLM matches Legacy_Provider_Shape;
+	// legacy when AIDASTING_LLM matches Legacy_Provider_Shape;
 	// otherwise *ConfigError surfaced to the caller). That is
 	// the contract Requirement 11.2 / Requirement 2.x require
 	// for /api/scan, and putting the same resolver behind every
@@ -1021,7 +1021,7 @@ func NewServer(cfg *config.Config, port int) *Server {
 		return client.Chat(messages)
 	}
 
-	// Import legacy data dir (pre-migration ~/xalgorix-data/) into the
+	// Import legacy data dir (pre-migration ~/ai-dast-ing-data/) into the
 	// active dataDir on first start. Idempotent (sentinel-gated) and
 	// non-fatal — failures are logged and the server still starts. Must
 	// run BEFORE rebuildInstancesFromDisk so imported scans appear in
@@ -1038,7 +1038,7 @@ func NewServer(cfg *config.Config, port int) *Server {
 	// As of v4.4.22 the catalog is compiled-in (providers.Builtin)
 	// rather than file-backed. providers.NewService is constructed
 	// unconditionally and never fails. The auth profile store is
-	// still file-backed under ~/.xalgorix/data/auth-profiles.json;
+	// still file-backed under ~/.ai-dast-ing/data/auth-profiles.json;
 	// a failure there is non-fatal — the dashboard still serves
 	// traffic, and the profile handlers surface the missing
 	// dependency as HTTP 503 so the operator can repair the file
@@ -1143,7 +1143,7 @@ func (s *Server) Start() error {
 	go s.startScheduler()
 
 	// Start the scan-retention sweeper. It self-disables (returns
-	// immediately) when XALGORIX_SCAN_RETENTION_DAYS is 0, so this is a
+	// immediately) when AIDASTING_SCAN_RETENTION_DAYS is 0, so this is a
 	// no-op for installs that want to keep scans forever.
 	go s.startRetentionSweeper()
 
@@ -1370,7 +1370,7 @@ func (s *Server) Start() error {
 
 	// Bind to a specific interface. Default is 127.0.0.1 (loopback) so a
 	// fresh install isn't exposed to the network. Operators who want
-	// external access set XALGORIX_BIND=0.0.0.0 explicitly — and in that
+	// external access set AIDASTING_BIND=0.0.0.0 explicitly — and in that
 	// case auth MUST be configured or we refuse to start. This is a
 	// deliberate safety choice: the dashboard can launch arbitrary scans
 	// and a chat tool with the LLM, so an open port is a control plane.
@@ -1381,15 +1381,15 @@ func (s *Server) Start() error {
 	isLoopback := bindAddr == "127.0.0.1" || bindAddr == "::1" || bindAddr == "localhost"
 	if !isLoopback && !authConfigured(s.cfg) {
 		return fmt.Errorf(
-			"refusing to bind to non-loopback address %q without auth: set XALGORIX_USERNAME and either XALGORIX_PASSWORD_HASH (bcrypt) or XALGORIX_PASSWORD in ~/.xalgorix.env (dashboard), or XALGORIX_API_TOKEN (machine-to-machine API access), or set XALGORIX_BIND=127.0.0.1",
+			"refusing to bind to non-loopback address %q without auth: set AIDASTING_USERNAME and either AIDASTING_PASSWORD_HASH (bcrypt) or AIDASTING_PASSWORD in ~/.ai-dast-ing.env (dashboard), or AIDASTING_API_TOKEN (machine-to-machine API access), or set AIDASTING_BIND=127.0.0.1",
 			bindAddr,
 		)
 	}
 	addr := fmt.Sprintf("%s:%d", bindAddr, s.port)
 	if isLoopback {
-		log.Printf("Xalgorix Web UI → http://%s:%d (loopback only)", bindAddr, s.port)
+		log.Printf("AI-DAST-ING Web UI → http://%s:%d (loopback only)", bindAddr, s.port)
 	} else {
-		log.Printf("Xalgorix Web UI → http://%s:%d (NETWORK-EXPOSED)", bindAddr, s.port)
+		log.Printf("AI-DAST-ING Web UI → http://%s:%d (NETWORK-EXPOSED)", bindAddr, s.port)
 	}
 	log.Printf("Scan data → %s", s.dataDir)
 	log.Printf("Rate limiting: %d requests/%ds per IP", s.cfg.RateLimitRequests, s.cfg.RateLimitWindow)
@@ -1400,10 +1400,10 @@ func (s *Server) Start() error {
 		}
 		log.Printf("Authentication enabled (user: %s, password: %s)", s.cfg.Username, authMode)
 		if n := len(apiTokenHashes(s.cfg.APITokens)); n > 0 {
-			log.Printf("Machine API tokens: %d configured (XALGORIX_API_TOKEN(S))", n)
+			log.Printf("Machine API tokens: %d configured (AIDASTING_API_TOKEN(S))", n)
 		}
 	} else {
-		log.Printf("Authentication disabled — listening on loopback only. Set XALGORIX_USERNAME and XALGORIX_PASSWORD_HASH in ~/.xalgorix.env to enable.")
+		log.Printf("Authentication disabled — listening on loopback only. Set AIDASTING_USERNAME and AIDASTING_PASSWORD_HASH in ~/.ai-dast-ing.env to enable.")
 	}
 
 	// ── Auto-resume interrupted scan queue after short startup delay ──
@@ -1509,10 +1509,10 @@ func (s *Server) Start() error {
 		// "terminated"/"interrupt" rather than a numeric fallback for any
 		// os.Signal implementation that doesn't satisfy fmt.Stringer.
 		if s.discordWebhook != "" {
-			s.sendDiscord(0xff6b6b, "🔄 Xalgorix Restarting", fmt.Sprintf("Service received %s signal. Saving state and restarting.\nInterrupted scans will auto-resume.", sig.String()))
+			s.sendDiscord(0xff6b6b, "🔄 AI-DAST-ING Restarting", fmt.Sprintf("Service received %s signal. Saving state and restarting.\nInterrupted scans will auto-resume.", sig.String()))
 		}
 		if s.telegramConfigured() {
-			s.sendTelegram(0xff6b6b, "🔄 Xalgorix Restarting", fmt.Sprintf("Service received %s signal. Saving state and restarting.\nInterrupted scans will auto-resume.", sig.String()))
+			s.sendTelegram(0xff6b6b, "🔄 AI-DAST-ING Restarting", fmt.Sprintf("Service received %s signal. Saving state and restarting.\nInterrupted scans will auto-resume.", sig.String()))
 		}
 
 		// Give scans a moment to save their queue state
@@ -1531,7 +1531,7 @@ func (s *Server) Start() error {
 	}()
 
 	// ── Graceful restart-when-idle on SIGUSR1 ──
-	// `xalgorix --restart-when-idle` sends SIGUSR1 to this process. We do not
+	// `ai-dast-ing --restart-when-idle` sends SIGUSR1 to this process. We do not
 	// restart immediately: a watcher waits until no scan instance is active
 	// and no tool process is leased, then restarts cleanly (so in-flight
 	// engagements are never interrupted).
@@ -1563,12 +1563,12 @@ func (s *Server) scheduleGracefulRestart() bool {
 	}
 	log.Printf("[RESTART] Graceful restart requested — will restart once all scans finish")
 	if s.discordWebhook != "" {
-		s.sendDiscord(0x4dabf7, "🕓 Xalgorix Restart Scheduled",
-			"A restart was requested. Xalgorix will restart automatically once all running scans finish and no tools are active.")
+		s.sendDiscord(0x4dabf7, "🕓 AI-DAST-ING Restart Scheduled",
+			"A restart was requested. AI-DAST-ING will restart automatically once all running scans finish and no tools are active.")
 	}
 	if s.telegramConfigured() {
-		s.sendTelegram(0x4dabf7, "🕓 Xalgorix Restart Scheduled",
-			"A restart was requested. Xalgorix will restart automatically once all running scans finish and no tools are active.")
+		s.sendTelegram(0x4dabf7, "🕓 AI-DAST-ING Restart Scheduled",
+			"A restart was requested. AI-DAST-ING will restart automatically once all running scans finish and no tools are active.")
 	}
 	go s.restartWhenIdleWatcher(s.httpServer)
 	return true
@@ -1634,10 +1634,10 @@ func (s *Server) restartWhenIdleWatcher(httpServer *http.Server) {
 func (s *Server) restartNow(httpServer *http.Server) {
 	log.Printf("[RESTART] Scanner idle — restarting now")
 	if s.discordWebhook != "" {
-		s.sendDiscord(0x4dabf7, "🔄 Xalgorix Restarting", "Scanner is idle. Restarting now; interrupted work (if any) auto-resumes.")
+		s.sendDiscord(0x4dabf7, "🔄 AI-DAST-ING Restarting", "Scanner is idle. Restarting now; interrupted work (if any) auto-resumes.")
 	}
 	if s.telegramConfigured() {
-		s.sendTelegram(0x4dabf7, "🔄 Xalgorix Restarting", "Scanner is idle. Restarting now; interrupted work (if any) auto-resumes.")
+		s.sendTelegram(0x4dabf7, "🔄 AI-DAST-ING Restarting", "Scanner is idle. Restarting now; interrupted work (if any) auto-resumes.")
 	}
 
 	// Belt-and-suspenders: reap any stray tool processes before we go.
@@ -1770,7 +1770,7 @@ func (s *Server) handleScan(w http.ResponseWriter, r *http.Request) {
 				msg += " The dashboard's own listener and the unspecified address (0.0.0.0 / ::) are never scannable, even with local targets enabled — point the scan at the app's actual host:port instead."
 			} else {
 				// Self-hosted operators can opt in; tell them exactly how.
-				msg += " To scan a locally-hosted app on a self-hosted install, enable local targets: Settings → Security → \"Allow local targets\", or set XALGORIX_ALLOW_LOCAL_TARGETS=true in ~/.xalgorix.env and restart. (The dashboard's own listener stays protected either way. Leave this OFF on shared/hosted deployments.)"
+				msg += " To scan a locally-hosted app on a self-hosted install, enable local targets: Settings → Security → \"Allow local targets\", or set AIDASTING_ALLOW_LOCAL_TARGETS=true in ~/.ai-dast-ing.env and restart. (The dashboard's own listener stays protected either way. Leave this OFF on shared/hosted deployments.)"
 			}
 			http.Error(w, msg, http.StatusBadRequest)
 			return
@@ -2026,7 +2026,7 @@ func (s *Server) handleStop(w http.ResponseWriter, r *http.Request) {
 // handleRestart restarts the backend. By default the restart is graceful: it
 // waits until no scan instance is active and no tool process is leased, then
 // restarts cleanly (in-flight scans auto-resume afterwards). This is the HTTP
-// equivalent of `xalgorix --restart-when-idle` (SIGUSR1) and shares the watcher.
+// equivalent of `ai-dast-ing --restart-when-idle` (SIGUSR1) and shares the watcher.
 //
 // With force=true (query param ?force=true or JSON body {"force":true}) the
 // restart is IMMEDIATE: it interrupts any in-flight scans/tools and restarts
@@ -2049,12 +2049,12 @@ func (s *Server) handleRestart(w http.ResponseWriter, r *http.Request) {
 	if restartForceRequested(r) {
 		log.Printf("[RESTART] /api/restart FORCE requested (idle=%v) — restarting immediately, interrupting any in-flight work", idle)
 		if s.discordWebhook != "" {
-			s.sendDiscord(0xff6b6b, "🔁 Xalgorix Force Restart",
-				"An immediate restart was requested. Xalgorix is restarting now; in-flight processes are interrupted and resumable queues will recover after startup.")
+			s.sendDiscord(0xff6b6b, "🔁 AI-DAST-ING Force Restart",
+				"An immediate restart was requested. AI-DAST-ING is restarting now; in-flight processes are interrupted and resumable queues will recover after startup.")
 		}
 		if s.telegramConfigured() {
-			s.sendTelegram(0xff6b6b, "🔁 Xalgorix Force Restart",
-				"An immediate restart was requested. Xalgorix is restarting now; in-flight processes are interrupted and resumable queues will recover after startup.")
+			s.sendTelegram(0xff6b6b, "🔁 AI-DAST-ING Force Restart",
+				"An immediate restart was requested. AI-DAST-ING is restarting now; in-flight processes are interrupted and resumable queues will recover after startup.")
 		}
 		// Prevent an already-scheduled idle watcher from also firing.
 		s.restartWhenIdle.Store(true)
@@ -2189,7 +2189,7 @@ func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
 		"allow_list":         allowList,
 		// read_deny is the deny-list applied to Filesystem_Tool reads.
 		// Reads outside allow_list succeed by default; only paths under
-		// these roots are rejected. Set XALGORIX_READ_DENY_LIST
+		// these roots are rejected. Set AIDASTING_READ_DENY_LIST
 		// (colon-separated) to extend the defaults.
 		"read_deny": readDeny,
 	})
@@ -2690,7 +2690,7 @@ func (s *Server) handleInstanceAction(w http.ResponseWriter, r *http.Request) {
 	// delayed POST registration and work admission. A map lookup performed
 	// before that lock can go stale and tombstone an ID while its live instance
 	// continues running.
-	if r.Header.Get("X-Xalgorix-Exact-Instance") == "1" &&
+	if r.Header.Get("X-AI-DAST-ING-Exact-Instance") == "1" &&
 		len(parts) >= 2 && parts[1] == "stop" && r.Method == http.MethodPost {
 		rec, notifyListeners, err := s.cancelExactDispatch(instanceID)
 		if err != nil {
@@ -3382,7 +3382,7 @@ func (s *Server) handleDownloadReport(w http.ResponseWriter, r *http.Request) {
 	reportPath, err := s.generateReportAt(rec, scanDir)
 	if err != nil {
 		log.Printf("Report generation error: %v", err)
-		fallbackPath := filepath.Join(scanDir, fmt.Sprintf("xalgorix_report_%s.pdf", scanID))
+		fallbackPath := filepath.Join(scanDir, fmt.Sprintf("aidasting_report_%s.pdf", scanID))
 		if info, statErr := os.Stat(fallbackPath); statErr == nil && info.Mode().IsRegular() {
 			reportPath = fallbackPath
 		} else {
@@ -3407,7 +3407,7 @@ func (s *Server) handleDownloadReport(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/pdf")
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"xalgorix_report_%s.pdf\"", scanID))
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"aidasting_report_%s.pdf\"", scanID))
 	http.ServeFile(w, r, reportPath)
 }
 
@@ -3449,8 +3449,8 @@ func (s *Server) handleRateLimit(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if _, err := s.applyEnvironmentUpdates(map[string]string{
-			"XALGORIX_RATE_LIMIT_REQUESTS": strconv.Itoa(req.Requests),
-			"XALGORIX_RATE_LIMIT_WINDOW":   strconv.Itoa(req.Window),
+			"AIDASTING_RATE_LIMIT_REQUESTS": strconv.Itoa(req.Requests),
+			"AIDASTING_RATE_LIMIT_WINDOW":   strconv.Itoa(req.Window),
 		}); err != nil {
 			log.Printf("Failed to save rate limit settings: %v", err)
 			http.Error(w, "failed to save rate limit settings", http.StatusInternalServerError)
@@ -3535,7 +3535,7 @@ func (s *Server) handleAgentMailSettings(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-// handleVersion returns the current Xalgorix version
+// handleVersion returns the current AI-DAST-ING version
 func (s *Server) handleVersion(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(map[string]any{
@@ -3555,10 +3555,10 @@ func (s *Server) handleStopNotify(w http.ResponseWriter, r *http.Request) {
 
 	// Send Discord notification if webhook is configured
 	if s.discordWebhook != "" {
-		s.sendDiscord(0xff6b6b, "🛑 Xalgorix Stopped", "The Xalgorix service has been stopped by the user.")
+		s.sendDiscord(0xff6b6b, "🛑 AI-DAST-ING Stopped", "The AI-DAST-ING service has been stopped by the user.")
 	}
 	if s.telegramConfigured() {
-		s.sendTelegram(0xff6b6b, "🛑 Xalgorix Stopped", "The Xalgorix service has been stopped by the user.")
+		s.sendTelegram(0xff6b6b, "🛑 AI-DAST-ING Stopped", "The AI-DAST-ING service has been stopped by the user.")
 	}
 
 	_ = json.NewEncoder(w).Encode(map[string]string{"status": "notified"})
@@ -3752,7 +3752,7 @@ func (s *Server) handleGetScan(w http.ResponseWriter, r *http.Request) {
 			}
 			// Remove the persisted resume file so the startup auto-resume
 			// goroutine never replays this queue (previously the only fix was
-			// wiping the whole .xalgorix data dir).
+			// wiping the whole .ai-dast-ing data dir).
 			s.clearQueueState(id)
 			delete(s.instances, id)
 		}

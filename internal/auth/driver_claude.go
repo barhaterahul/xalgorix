@@ -32,7 +32,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/providers"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
 )
 
 // claudeCredentialPathFn resolves the on-disk path to the Claude
@@ -280,7 +280,7 @@ func (d *claudeReuseDriver) Complete(ctx context.Context, e providers.Entry, in 
 
 	// Prefer the catalog entry's declared scopes over whatever
 	// the credential file embeds — the catalog is the operator's
-	// authoritative source of truth for what scopes this xalgorix
+	// authoritative source of truth for what scopes this ai-dast-ing
 	// install actually requires. If the catalog declares no
 	// scopes, fall back to the credential file's list (which may
 	// be empty, which is fine).
@@ -326,7 +326,7 @@ func (d *claudeReuseDriver) Complete(ctx context.Context, e providers.Entry, in 
 // protocol (Requirements 10.1–10.4) applies even to credentials
 // that originated from the CLI import. When the catalog entry does
 // not declare a TokenEndpoint — some Claude CLI configurations do
-// not expose one to xalgorix — we cannot perform an upstream
+// not expose one to ai-dast-ing — we cannot perform an upstream
 // rotation, so we surface ErrReauthRequired and rely on the
 // operator re-running the CLI sign-in to produce a fresh credential
 // file. That keeps the failure mode identical to the

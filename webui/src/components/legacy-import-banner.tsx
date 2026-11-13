@@ -6,7 +6,7 @@ import {
 
 /**
  * One-time banner surfaced after the server has migrated scan records
- * from the pre-migration `~/xalgorix-data/` directory into the active
+ * from the pre-migration `~/ai-dast-ing-data/` directory into the active
  * data dir. The count comes from `GET /api/legacy-import/status` which
  * exposes the in-memory counter populated by `importLegacyDataDir()`
  * at startup. Dismissal hits `POST /api/legacy-import/status` which
@@ -36,7 +36,7 @@ export function LegacyImportBanner() {
           Imported {data.count} legacy{" "}
           {data.count === 1 ? "scan" : "scans"} from{" "}
           <code className="rounded bg-emerald-500/10 px-1 py-0.5 font-mono">
-            ~/xalgorix-data/
+            ~/ai-dast-ing-data/
           </code>
           .{" "}
           <Link

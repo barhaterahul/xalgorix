@@ -3,10 +3,10 @@ package reporting
 import (
 	"strconv"
 
-	"github.com/xalgord/xalgorix/v4/internal/methodology"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/methodology"
 )
 
-// MethodologyPhaseNames maps each phase number in the Xalgorix 22-phase
+// MethodologyPhaseNames maps each phase number in the AI-DAST-ING 22-phase
 // methodology to its display name. It is DERIVED from the canonical
 // internal/methodology registry - the single phase-definition source shared
 // by the agent planner, the report generators, and the web layer - so this

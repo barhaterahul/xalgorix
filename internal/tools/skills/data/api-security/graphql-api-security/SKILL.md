@@ -140,7 +140,7 @@ curl -sk -X POST "https://TARGET/graphql" \
 - Field suggestions in error messages (recon, not a vuln)
 - Batching that is properly rate-limited per operation
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `terminal_execute` with curl for precise query construction
 - Python for generating deep/complex queries programmatically
 - `authz_matrix` for cross-role GraphQL differential

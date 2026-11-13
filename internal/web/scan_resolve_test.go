@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/auth"
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/providers"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/auth"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
 )
 
 func TestResolveScanCredentialsUsesActiveLLMProfile(t *testing.T) {
@@ -72,7 +72,7 @@ func TestResolveScanCredentialsUsesCredentialFreeProviderAndBareModel(t *testing
 
 // TestResolveScanCredentialsStripsLegacyPrefixForCredentialFreeProvider verifies
 // the no-auth branch strips a matching "<provider>/" prefix from a legacy
-// XALGORIX_LLM value (while still preserving provider-native slashes, since only
+// AIDASTING_LLM value (while still preserving provider-native slashes, since only
 // the matching provider prefix is removed).
 func TestResolveScanCredentialsStripsLegacyPrefixForCredentialFreeProvider(t *testing.T) {
 	s := &Server{catalog: providers.NewService()}

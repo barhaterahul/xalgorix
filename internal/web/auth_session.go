@@ -16,7 +16,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -27,7 +27,7 @@ var (
 	sessionReaperOnce sync.Once
 )
 
-const sessionCookieName = "xalgorix_session"
+const sessionCookieName = "aidasting_session"
 const sessionDuration = 24 * time.Hour
 const sessionReaperInterval = 15 * time.Minute
 
@@ -63,7 +63,7 @@ type loginAttempt struct {
 
 // Login-limiter defaults. Every threshold is operator-tunable via env (see
 // loginRateLimitDisabled / loginEnvMinutes / loginEnvInt), and
-// XALGORIX_LOGIN_RATE_LIMIT=off disables the limiter entirely.
+// AIDASTING_LOGIN_RATE_LIMIT=off disables the limiter entirely.
 const (
 	defaultLoginWindow   = 15 * time.Minute
 	defaultLoginMaxFails = 10
@@ -71,7 +71,7 @@ const (
 )
 
 // loginRateLimitDisabled reports whether the per-IP login limiter is fully
-// disabled via XALGORIX_LOGIN_RATE_LIMIT=off (accepted spellings: off,
+// disabled via AIDASTING_LOGIN_RATE_LIMIT=off (accepted spellings: off,
 // disabled, false, 0, no). Intended for deployments where the login endpoint
 // is not reachable from the public internet (the scanner sits behind a
 // network-level allowlist or a reverse-proxy gate), or where a pooled
@@ -79,7 +79,7 @@ const (
 // lock out legitimate automation. Settings are read per attempt, so
 // configuration changes apply on the next login without a restart.
 func loginRateLimitDisabled() bool {
-	switch strings.ToLower(strings.TrimSpace(os.Getenv("XALGORIX_LOGIN_RATE_LIMIT"))) {
+	switch strings.ToLower(strings.TrimSpace(os.Getenv("AIDASTING_LOGIN_RATE_LIMIT"))) {
 	case "off", "disabled", "false", "0", "no":
 		return true
 	}
@@ -124,7 +124,7 @@ func loginIsLocked(ip string) (bool, int) {
 	loginAttemptsMu.Lock()
 	defer loginAttemptsMu.Unlock()
 	now := time.Now()
-	window := loginEnvMinutes("XALGORIX_LOGIN_WINDOW_MINUTES", defaultLoginWindow)
+	window := loginEnvMinutes("AIDASTING_LOGIN_WINDOW_MINUTES", defaultLoginWindow)
 	// Opportunistic GC — bounded work, runs only when this IP is queried.
 	for k, v := range loginAttempts {
 		if now.Sub(v.firstFail) > window && now.After(v.lockUntil) {
@@ -142,10 +142,10 @@ func loginIsLocked(ip string) (bool, int) {
 }
 
 // loginRecordFailure increments the failure counter for an IP. After
-// XALGORIX_LOGIN_MAX_FAILURES (default 10) within
-// XALGORIX_LOGIN_WINDOW_MINUTES (default 15), subsequent attempts are locked
-// out for XALGORIX_LOGIN_LOCKOUT_MINUTES (default 5). With
-// XALGORIX_LOGIN_RATE_LIMIT=off nothing is recorded at all.
+// AIDASTING_LOGIN_MAX_FAILURES (default 10) within
+// AIDASTING_LOGIN_WINDOW_MINUTES (default 15), subsequent attempts are locked
+// out for AIDASTING_LOGIN_LOCKOUT_MINUTES (default 5). With
+// AIDASTING_LOGIN_RATE_LIMIT=off nothing is recorded at all.
 func loginRecordFailure(ip string) {
 	if loginRateLimitDisabled() {
 		return
@@ -153,15 +153,15 @@ func loginRecordFailure(ip string) {
 	loginAttemptsMu.Lock()
 	defer loginAttemptsMu.Unlock()
 	now := time.Now()
-	window := loginEnvMinutes("XALGORIX_LOGIN_WINDOW_MINUTES", defaultLoginWindow)
+	window := loginEnvMinutes("AIDASTING_LOGIN_WINDOW_MINUTES", defaultLoginWindow)
 	a := loginAttempts[ip]
 	if a == nil || now.Sub(a.firstFail) > window {
 		loginAttempts[ip] = &loginAttempt{failures: 1, firstFail: now}
 		return
 	}
 	a.failures++
-	if a.failures >= loginEnvInt("XALGORIX_LOGIN_MAX_FAILURES", defaultLoginMaxFails) {
-		a.lockUntil = now.Add(loginEnvMinutes("XALGORIX_LOGIN_LOCKOUT_MINUTES", defaultLoginLockFor))
+	if a.failures >= loginEnvInt("AIDASTING_LOGIN_MAX_FAILURES", defaultLoginMaxFails) {
+		a.lockUntil = now.Add(loginEnvMinutes("AIDASTING_LOGIN_LOCKOUT_MINUTES", defaultLoginLockFor))
 	}
 }
 
@@ -173,7 +173,7 @@ func loginRecordSuccess(ip string) {
 }
 
 // clientIP extracts a comparable client identifier from the request. We
-// intentionally do not trust X-Forwarded-For; if you put xalgorix behind a
+// intentionally do not trust X-Forwarded-For; if you put ai-dast-ing behind a
 // reverse proxy you should bind it to loopback and let the proxy enforce
 // auth, or extend this helper to honor a configured trusted-proxy list.
 func clientIP(r *http.Request) string {
@@ -300,7 +300,7 @@ func authConfigured(cfg *config.Config) bool {
 // authMiddleware protects routes when auth is configured. Two independent
 // authentication flows pass through here:
 //
-//   - human: POST /api/auth/login + username/password -> xalgorix_session
+//   - human: POST /api/auth/login + username/password -> aidasting_session
 //     cookie, with browser CSRF checks and the per-IP login rate limiter;
 //   - machine: Authorization: Bearer <API token> -> direct API access with no
 //     session, no CSRF requirement (browsers never auto-attach bearer
@@ -435,7 +435,7 @@ func (s *Server) verifyPassword(presented string) bool {
 		return false
 	}
 	plaintextPasswordWarnOnce.Do(func() {
-		log.Printf("[auth] WARNING: XALGORIX_PASSWORD is set in plaintext. Migrate to XALGORIX_PASSWORD_HASH (bcrypt) — see README.")
+		log.Printf("[auth] WARNING: AIDASTING_PASSWORD is set in plaintext. Migrate to AIDASTING_PASSWORD_HASH (bcrypt) — see README.")
 	})
 	return subtle.ConstantTimeCompare([]byte(presented), []byte(s.cfg.Password)) == 1
 }

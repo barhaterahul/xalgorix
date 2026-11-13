@@ -10,8 +10,8 @@ import (
 	"strings"
 	"sync"
 
-	oobsrv "github.com/xalgord/xalgorix/v4/internal/oob"
-	"github.com/xalgord/xalgorix/v4/internal/tools"
+	oobsrv "github.com/barhaterahul/ai-dast-ing/v4/internal/oob"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
 )
 
 // Consecutive empty polls per callback token are tracked so the tool can tell

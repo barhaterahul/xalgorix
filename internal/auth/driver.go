@@ -31,7 +31,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/providers"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
 )
 
 // Clock abstracts wall-clock reads so the device-code driver's
@@ -60,7 +60,7 @@ func (realClock) Now() time.Time { return time.Now() }
 
 // StartOptions carries per-request inputs the dashboard hands to a
 // Driver.Start call. BindAddr is the dashboard's effective
-// XALGORIX_BIND value — the PKCE driver inspects it at flow start
+// AIDASTING_BIND value — the PKCE driver inspects it at flow start
 // and refuses to bind a non-loopback listener (Requirement 13.2),
 // returning a paste-mode StartResult instead. PreferPaste lets the
 // operator force the paste-fallback shape even on a loopback bind
@@ -173,7 +173,7 @@ type Driver interface {
 // before the profile is removed from disk so the upstream issuer
 // has a chance to invalidate the access / refresh token. Failures
 // are logged but never block the delete — the operator's intent is
-// "remove this credential from xalgorix" and a flaky upstream
+// "remove this credential from ai-dast-ing" and a flaky upstream
 // must not strand a profile in the on-disk store.
 //
 // Implemented by: pkceDriver, deviceCodeDriver. Not implemented by

@@ -1,8 +1,8 @@
-# Xalgorix — AI Autonomous Penetration Testing
+# AI-DAST-ING — AI Autonomous Penetration Testing
 
 **Self-hosted AI pentester that finds, exploits, and verifies real vulnerabilities.**
 
-Most scanners *detect*. Xalgorix *proves* — an autonomous LLM agent works a full 22-phase methodology, then an independent verifier re-exploits every finding before it's reported, so you get proof with evidence, not a wall of maybes to triage.
+Most scanners *detect*. AI-DAST-ING *proves* — an autonomous LLM agent works a full 22-phase methodology, then an independent verifier re-exploits every finding before it's reported, so you get proof with evidence, not a wall of maybes to triage.
 
 This image is **batteries-included**: it's built on Kali Linux with hundreds of offensive-security tools preinstalled, and it keeps every package manager available so the agent can auto-install anything else it needs at runtime.
 
@@ -18,23 +18,23 @@ This image is **batteries-included**: it's built on Kali Linux with hundreds of 
 
 ```bash
 docker run --rm -p 9137:9137 \
-  -e XALGORIX_LLM=openai/gpt-5.6 \
-  -e XALGORIX_API_KEY=your_openai_api_key \
-  -v xalgorix-data:/data \
-  xalgord/xalgorix:latest
+  -e AIDASTING_LLM=openai/gpt-5.6 \
+  -e AIDASTING_API_KEY=your_openai_api_key \
+  -v ai-dast-ing-data:/data \
+  barhaterahul/ai-dast-ing:latest
 ```
 
 Then open **http://127.0.0.1:9137**.
 
 For best autonomous scanning results, choose a current frontier model with strong reasoning and reliable tool calling. The example model can be replaced with any newer compatible provider model ID.
 
-> Use Xalgorix only against systems you own or are explicitly authorized to test.
+> Use AI-DAST-ING only against systems you own or are explicitly authorized to test.
 
 ---
 
 ## Reviewing GitHub pull requests (free, no install)
 
-Prefer security review straight on your PRs? Install the **[Xalgorix GitHub App](https://github.com/apps/xalgorix/installations/new)** — it comments a security review on each pull request's diff (injection, broken auth/IDOR, SSRF, secrets, unsafe patterns), updates in place on new commits, and re-runs when you comment `@xalgorix review`. No workflow file, API key, or account required. This container image is for the deeper, self-hosted exploit-verified pentest.
+Prefer security review straight on your PRs? Install the **[AI-DAST-ING GitHub App](https://github.com/apps/ai-dast-ing/installations/new)** — it comments a security review on each pull request's diff (injection, broken auth/IDOR, SSRF, secrets, unsafe patterns), updates in place on new commits, and re-runs when you comment `@ai-dast-ing review`. No workflow file, API key, or account required. This container image is for the deeper, self-hosted exploit-verified pentest.
 
 ---
 
@@ -46,11 +46,11 @@ An extensive toolset ships preinstalled — `nmap`, `nuclei`, `httpx`, `subfinde
 
 | Variable | Required | Description |
 | --- | --- | --- |
-| `XALGORIX_LLM` | ✅ | Model ID, usually with a provider prefix, e.g. `openai/gpt-5.6`. For best results use a current frontier model; MiniMax and local models remain supported. |
-| `XALGORIX_API_KEY` | ✅ | API key for the configured LLM provider. |
-| `XALGORIX_API_BASE` | — | Custom OpenAI-compatible base URL. |
-| `XALGORIX_USERNAME` / `XALGORIX_PASSWORD` | — | Dashboard auth. **Required** before exposing the dashboard beyond localhost. |
-| `XALGORIX_DATA_DIR` | — | Scan output / reports location. Defaults to `/data` (mount a volume). |
+| `AIDASTING_LLM` | ✅ | Model ID, usually with a provider prefix, e.g. `openai/gpt-5.6`. For best results use a current frontier model; MiniMax and local models remain supported. |
+| `AIDASTING_API_KEY` | ✅ | API key for the configured LLM provider. |
+| `AIDASTING_API_BASE` | — | Custom OpenAI-compatible base URL. |
+| `AIDASTING_USERNAME` / `AIDASTING_PASSWORD` | — | Dashboard auth. **Required** before exposing the dashboard beyond localhost. |
+| `AIDASTING_DATA_DIR` | — | Scan output / reports location. Defaults to `/data` (mount a volume). |
 
 - **Port:** `9137` (dashboard + API). The container binds `0.0.0.0` internally; publish with `-p 9137:9137`.
 - **Volume:** mount `/data` to persist scans and reports across restarts.
@@ -68,14 +68,14 @@ An extensive toolset ships preinstalled — `nmap`, `nuclei`, `httpx`, `subfinde
 ## Security notes
 
 - The container runs as **root by design** — the engine only enables runtime tool auto-install for uid 0, and `apt`/`go`/`cargo` installs need system write access. Treat the container as a disposable, network-isolated scanning sandbox.
-- **Never expose the dashboard publicly without `XALGORIX_USERNAME`/`XALGORIX_PASSWORD`.** The server refuses external binding without auth.
+- **Never expose the dashboard publicly without `AIDASTING_USERNAME`/`AIDASTING_PASSWORD`.** The server refuses external binding without auth.
 - No scan data, API keys, or findings leave the container unless you configure outbound integrations (Discord/Telegram/webhooks).
 
 ## Links
 
-- **Source & docs:** https://github.com/xalgorix/xalgorix
-- **Documentation:** https://docs.xalgorix.com
-- **Hosted (no install):** https://www.xalgorix.com
-- **One-line install (Linux or macOS, amd64/arm64):** `curl -sSL https://www.xalgorix.com/install | bash`
+- **Source & docs:** https://github.com/ai-dast-ing/ai-dast-ing
+- **Documentation:** https://docs.ai-dast-ing.com
+- **Hosted (no install):** https://www.ai-dast-ing.com
+- **One-line install (Linux or macOS, amd64/arm64):** `curl -sSL https://www.ai-dast-ing.com/install | bash`
 
 Released under the Apache License 2.0.

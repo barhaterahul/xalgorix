@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
 )
 
 func TestEffectiveRequestRatePolicy_CustomInstructionOverridesConfig(t *testing.T) {
@@ -31,8 +31,8 @@ func TestEffectiveRequestRatePolicy_UsesMostRestrictiveConfig(t *testing.T) {
 	if policy.MaxRPS != 2 {
 		t.Fatalf("MaxRPS = %v, want 2", policy.MaxRPS)
 	}
-	if policy.Source != "XALGORIX_RATE_RPS" {
-		t.Fatalf("Source = %q, want XALGORIX_RATE_RPS", policy.Source)
+	if policy.Source != "AIDASTING_RATE_RPS" {
+		t.Fatalf("Source = %q, want AIDASTING_RATE_RPS", policy.Source)
 	}
 }
 

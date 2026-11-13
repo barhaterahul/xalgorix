@@ -28,8 +28,8 @@ func TestLoginLimiter_DefaultsLockOutAfterThreshold(t *testing.T) {
 
 // Thresholds are env-tunable: MAX_FAILURES=2 + LOCKOUT_MINUTES=1.
 func TestLoginLimiter_EnvTunableThresholds(t *testing.T) {
-	t.Setenv("XALGORIX_LOGIN_MAX_FAILURES", "2")
-	t.Setenv("XALGORIX_LOGIN_LOCKOUT_MINUTES", "1")
+	t.Setenv("AIDASTING_LOGIN_MAX_FAILURES", "2")
+	t.Setenv("AIDASTING_LOGIN_LOCKOUT_MINUTES", "1")
 	ip := "203.0.113.11"
 	loginRecordSuccess(ip)
 	loginRecordFailure(ip)
@@ -39,31 +39,31 @@ func TestLoginLimiter_EnvTunableThresholds(t *testing.T) {
 	loginRecordFailure(ip)
 	locked, retry := loginIsLocked(ip)
 	if !locked {
-		t.Fatal("two failures must lock with XALGORIX_LOGIN_MAX_FAILURES=2")
+		t.Fatal("two failures must lock with AIDASTING_LOGIN_MAX_FAILURES=2")
 	}
 	if retry > 61 {
-		t.Fatalf("lockout must respect XALGORIX_LOGIN_LOCKOUT_MINUTES=1, got %ds", retry)
+		t.Fatalf("lockout must respect AIDASTING_LOGIN_LOCKOUT_MINUTES=1, got %ds", retry)
 	}
 	loginRecordSuccess(ip)
 }
 
-// XALGORIX_LOGIN_RATE_LIMIT=off disables the limiter entirely: no lockouts
+// AIDASTING_LOGIN_RATE_LIMIT=off disables the limiter entirely: no lockouts
 // regardless of failure volume.
 func TestLoginLimiter_DisabledViaEnvNeverLocks(t *testing.T) {
-	t.Setenv("XALGORIX_LOGIN_RATE_LIMIT", "off")
+	t.Setenv("AIDASTING_LOGIN_RATE_LIMIT", "off")
 	ip := "203.0.113.12"
 	for i := 0; i < 100; i++ {
 		loginRecordFailure(ip)
 	}
 	if locked, retry := loginIsLocked(ip); locked || retry != 0 {
-		t.Fatalf("XALGORIX_LOGIN_RATE_LIMIT=off must disable the limiter, got locked=%v retry=%d", locked, retry)
+		t.Fatalf("AIDASTING_LOGIN_RATE_LIMIT=off must disable the limiter, got locked=%v retry=%d", locked, retry)
 	}
 }
 
 // While disabled, failures are not recorded at all — re-enabling the limiter
 // later starts from a clean slate.
 func TestLoginLimiter_DisabledDoesNotRecordFailures(t *testing.T) {
-	t.Setenv("XALGORIX_LOGIN_RATE_LIMIT", "off")
+	t.Setenv("AIDASTING_LOGIN_RATE_LIMIT", "off")
 	ip := "203.0.113.13"
 	loginRecordFailure(ip)
 	loginRecordFailure(ip)
@@ -73,7 +73,7 @@ func TestLoginLimiter_DisabledDoesNotRecordFailures(t *testing.T) {
 	if recorded {
 		t.Fatal("a disabled limiter must not record failure state")
 	}
-	t.Setenv("XALGORIX_LOGIN_RATE_LIMIT", "")
+	t.Setenv("AIDASTING_LOGIN_RATE_LIMIT", "")
 	if locked, _ := loginIsLocked(ip); locked {
 		t.Fatal("failures recorded while disabled must not lock after re-enabling")
 	}
@@ -83,8 +83,8 @@ func TestLoginLimiter_DisabledDoesNotRecordFailures(t *testing.T) {
 // Invalid or non-positive env values fall back to the defaults instead of
 // silently disabling the limiter.
 func TestLoginLimiter_InvalidEnvFallsBack(t *testing.T) {
-	t.Setenv("XALGORIX_LOGIN_MAX_FAILURES", "not-a-number")
-	t.Setenv("XALGORIX_LOGIN_WINDOW_MINUTES", "-5")
+	t.Setenv("AIDASTING_LOGIN_MAX_FAILURES", "not-a-number")
+	t.Setenv("AIDASTING_LOGIN_WINDOW_MINUTES", "-5")
 	ip := "203.0.113.14"
 	loginRecordSuccess(ip)
 	for i := 0; i < 10; i++ {

@@ -16,7 +16,7 @@ import (
 // fleet of running scans cannot stampede the upstream model and starve the
 // host of file descriptors, sockets, and HTTP/2 streams.
 //
-// The cap is initialized lazily on first use from the XALGORIX_LLM_MAX_INFLIGHT
+// The cap is initialized lazily on first use from the AIDASTING_LLM_MAX_INFLIGHT
 // environment variable, falling back to 4 × EffectiveMaxInstances() with a
 // floor of 1 when the env value is missing or non-positive.
 
@@ -33,16 +33,16 @@ var (
 	llmCap int64
 )
 
-// initLLMSemaphore reads XALGORIX_LLM_MAX_INFLIGHT and sizes llmInFlight.
+// initLLMSemaphore reads AIDASTING_LLM_MAX_INFLIGHT and sizes llmInFlight.
 //
 // Resolution order:
-//  1. If XALGORIX_LLM_MAX_INFLIGHT parses to a positive integer, use it.
+//  1. If AIDASTING_LLM_MAX_INFLIGHT parses to a positive integer, use it.
 //  2. Otherwise default to 4 × EffectiveMaxInstances(), with a floor of 1.
 //
 // The function is invoked exactly once via llmOnce; subsequent acquires reuse
 // the semaphore and the cap value.
 func initLLMSemaphore() {
-	n, _ := strconv.Atoi(os.Getenv("XALGORIX_LLM_MAX_INFLIGHT"))
+	n, _ := strconv.Atoi(os.Getenv("AIDASTING_LLM_MAX_INFLIGHT"))
 	if n <= 0 {
 		eff, _ := EffectiveMaxInstances()
 		if eff < 1 {

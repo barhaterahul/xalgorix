@@ -47,7 +47,7 @@ export interface ProviderKeyStatus {
 // to the login screen without each component having to handle it.
 // We avoid importing the store directly to keep this module free of
 // circular deps with the rest of the app.
-const AUTH_EXPIRED_EVENT = "xalgorix:auth-expired";
+const AUTH_EXPIRED_EVENT = "ai-dast-ing:auth-expired";
 let lastAuthExpiredDispatch = 0;
 
 function dispatchAuthExpired() {

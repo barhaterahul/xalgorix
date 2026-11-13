@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/xalgord/xalgorix/v4/internal/tools/httpclient"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/httpclient"
 )
 
 // injectionPoint describes WHERE a verifier places its payload: the query string

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
 )
 
 // newGeminiCapturingServer returns an httptest server that records the request
@@ -24,7 +24,7 @@ func newGeminiCapturingServer(t *testing.T, gotBody *[]byte) *httptest.Server {
 }
 
 // TestGeminiRequestSendsSafetySettings proves that with the default
-// XALGORIX_GEMINI_SAFETY posture (BLOCK_NONE), a native Gemini request carries a
+// AIDASTING_GEMINI_SAFETY posture (BLOCK_NONE), a native Gemini request carries a
 // safetySettings array covering HARM_CATEGORY_DANGEROUS_CONTENT so Gemini's
 // content filter cannot refuse legitimate authorized-security-testing output.
 func TestGeminiRequestSendsSafetySettings(t *testing.T) {
@@ -67,7 +67,7 @@ func TestGeminiRequestSendsSafetySettings(t *testing.T) {
 }
 
 // TestGeminiRequestOmitsSafetySettingsForDefault proves the opt-out path: when
-// the operator sets XALGORIX_GEMINI_SAFETY=default (or leaves it empty), Xalgorix
+// the operator sets AIDASTING_GEMINI_SAFETY=default (or leaves it empty), AI-DAST-ING
 // sends NO safetySettings and Gemini applies its own server-side defaults —
 // preserving the pre-change behavior byte-for-byte.
 func TestGeminiRequestOmitsSafetySettingsForDefault(t *testing.T) {
@@ -95,7 +95,7 @@ func TestGeminiRequestOmitsSafetySettingsForDefault(t *testing.T) {
 			t.Fatalf("request body is not valid geminiRequest JSON: %v\nbody=%s", err, gotBody)
 		}
 		if len(req.SafetySettings) != 0 {
-			t.Errorf("XALGORIX_GEMINI_SAFETY=%q sent %d safetySettings; want 0 (server-side defaults)", raw, len(req.SafetySettings))
+			t.Errorf("AIDASTING_GEMINI_SAFETY=%q sent %d safetySettings; want 0 (server-side defaults)", raw, len(req.SafetySettings))
 		}
 	}
 }
@@ -140,7 +140,7 @@ func TestGeminiBlockDetailSurfacesSafety(t *testing.T) {
 	if !strings.Contains(detail, "SAFETY") {
 		t.Errorf("detail %q does not mention the SAFETY finish/block reason", detail)
 	}
-	if !strings.Contains(detail, "XALGORIX_GEMINI_SAFETY") {
+	if !strings.Contains(detail, "AIDASTING_GEMINI_SAFETY") {
 		t.Errorf("detail %q does not surface the remediation env var", detail)
 	}
 

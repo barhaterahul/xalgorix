@@ -1,4 +1,4 @@
-# Semgrep configuration for xalgorix.
+# Semgrep configuration for ai-dast-ing.
 #
 # Consumed by `make sec` and by the security CI workflow.
 #
@@ -6,7 +6,7 @@
 # - Public registry rulesets are pulled by their `p/<name>` shortcuts when
 #   `make sec` is invoked with network access.
 # - The `rules:` section below holds first-party rules tailored to the
-#   xalgorix codebase. Keep these scoped to genuine smells: noisy rules
+#   ai-dast-ing codebase. Keep these scoped to genuine smells: noisy rules
 #   should live in `p/*` registry packs, not here.
 #
 # Schema reference: https://semgrep.dev/docs/writing-rules/rule-syntax
@@ -22,7 +22,7 @@
 #   - p/owasp-top-ten
 
 rules:
-  - id: xalgorix-no-md5-sha1-for-auth
+  - id: ai-dast-ing-no-md5-sha1-for-auth
     message: >-
       MD5 and SHA-1 are not collision-resistant; never use them for
       authentication, signing, or token derivation. Use SHA-256 or bcrypt

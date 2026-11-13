@@ -2,7 +2,7 @@
 // authentication for API clients (the SaaS backend, CI, integrations) that is
 // fully separate from the human dashboard login:
 //
-//	human:     POST /api/auth/login + username/password -> xalgorix_session cookie
+//	human:     POST /api/auth/login + username/password -> aidasting_session cookie
 //	machine:   Authorization: Bearer <token> header -> direct API access, no cookie
 //
 // The two flows are independent security layers, deliberately:

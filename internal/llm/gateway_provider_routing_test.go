@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/providers"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
 )
 
 // TestExplicitGatewayProvider_KeepsVendorModelIDs is the regression test for
@@ -248,7 +248,7 @@ func mustHost(t *testing.T, rawURL string) string {
 
 // TestCatalogProviderWithoutBase_UsesCatalogBase covers the client and legacy
 // fallbacks for a chat-completions catalog provider with no
-// XALGORIX_API_BASE. They used to fall back to the generic default host
+// AIDASTING_API_BASE. They used to fall back to the generic default host
 // because only the legacy providers had a default base URL.
 func TestCatalogProviderWithoutBase_UsesCatalogBase(t *testing.T) {
 	cases := []struct {

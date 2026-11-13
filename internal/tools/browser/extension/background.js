@@ -1,4 +1,4 @@
-// background.js — MV3 Service Worker for Xalgorix extension.
+// background.js — MV3 Service Worker for AI-DAST-ING extension.
 // Maintains a WebSocket connection back to the Go agent on localhost:38401.
 // Routes commands to content scripts and returns results.
 //
@@ -32,13 +32,13 @@ function connect() {
   try {
     ws = new WebSocket(WS_URL);
   } catch (e) {
-    console.warn("[xalgorix-bg] WebSocket constructor failed:", e.message);
+    console.warn("[ai-dast-ing-bg] WebSocket constructor failed:", e.message);
     scheduleReconnect();
     return;
   }
 
   ws.onopen = () => {
-    console.log("[xalgorix-bg] Connected to agent");
+    console.log("[ai-dast-ing-bg] Connected to agent");
     reconnectAttempts = 0;
 
     // Announce ourselves with extension capabilities
@@ -54,7 +54,7 @@ function connect() {
     try {
       msg = JSON.parse(event.data);
     } catch (e) {
-      console.error("[xalgorix-bg] Invalid JSON from agent:", event.data);
+      console.error("[ai-dast-ing-bg] Invalid JSON from agent:", event.data);
       return;
     }
 
@@ -72,11 +72,11 @@ function connect() {
   };
 
   ws.onerror = (event) => {
-    console.warn("[xalgorix-bg] WebSocket error");
+    console.warn("[ai-dast-ing-bg] WebSocket error");
   };
 
   ws.onclose = (event) => {
-    console.log(`[xalgorix-bg] Disconnected (code=${event.code})`);
+    console.log(`[ai-dast-ing-bg] Disconnected (code=${event.code})`);
     ws = null;
     scheduleReconnect();
   };
@@ -86,7 +86,7 @@ function scheduleReconnect() {
   if (reconnectTimer) return;
   const delay = Math.min(RECONNECT_BASE_MS * Math.pow(2, reconnectAttempts), RECONNECT_MAX_MS);
   reconnectAttempts++;
-  console.log(`[xalgorix-bg] Reconnecting in ${delay}ms (attempt ${reconnectAttempts})`);
+  console.log(`[ai-dast-ing-bg] Reconnecting in ${delay}ms (attempt ${reconnectAttempts})`);
   reconnectTimer = setTimeout(() => {
     reconnectTimer = null;
     connect();
@@ -106,7 +106,7 @@ function wsSend(data) {
 async function handleAgentCommand(msg) {
   const { requestId, command, args } = msg;
   if (!requestId || !command) {
-    console.warn("[xalgorix-bg] Invalid command (missing requestId/command):", msg);
+    console.warn("[ai-dast-ing-bg] Invalid command (missing requestId/command):", msg);
     return;
   }
 
@@ -269,10 +269,10 @@ async function handleGetTabs() {
 // ── Keepalive (MV3 anti-termination) ──────────────────────────────────
 
 // Use chrome.alarms for reliable keepalive (survives service worker suspension)
-chrome.alarms.create("xalgorix-keepalive", { periodInMinutes: 0.3 }); // ~18s
+chrome.alarms.create("ai-dast-ing-keepalive", { periodInMinutes: 0.3 }); // ~18s
 
 chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === "xalgorix-keepalive") {
+  if (alarm.name === "ai-dast-ing-keepalive") {
     // Ping to keep WS alive and prevent MV3 termination
     if (ws && ws.readyState === WebSocket.OPEN) {
       wsSend({ type: "keepalive", timestamp: Date.now() });
@@ -286,7 +286,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 // Connect on install/update
 chrome.runtime.onInstalled.addListener(() => {
-  console.log("[xalgorix-bg] Extension installed/updated");
+  console.log("[ai-dast-ing-bg] Extension installed/updated");
   connect();
 });
 

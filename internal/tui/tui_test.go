@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/agent"
-	"github.com/xalgord/xalgorix/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/agent"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
 )
 
 func TestHumanizeTokens(t *testing.T) {
@@ -61,7 +61,7 @@ func TestFormatCostNote(t *testing.T) {
 		"2.00M tokens",
 		"billed to your own LLM provider",
 		"1 credit per",
-		"xalgorix.com/hosted-vs-self-hosted",
+		"ai-dast-ing.com/hosted-vs-self-hosted",
 	} {
 		if !strings.Contains(remote, want) {
 			t.Errorf("remote cost note missing %q:\n%s", want, remote)

@@ -12,7 +12,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/xalgord/xalgorix/v4/internal/tools/skills"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/skills"
 )
 
 // LoadedSkillInfo records one successfully loaded canonical skill: what was

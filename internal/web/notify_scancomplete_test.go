@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
 )
 
 // TestNotifyScanComplete_DefaultsOff verifies the scan-completion summary
@@ -34,7 +34,7 @@ func TestEnvironmentSettings_AppliesNotifyScanComplete(t *testing.T) {
 	t.Setenv("HOME", home)
 	s := newTestServer(t, &config.Config{RateLimitRequests: 60, RateLimitWindow: 60})
 
-	body := `{"values":{"XALGORIX_NOTIFY_SCAN_COMPLETE":"true"}}`
+	body := `{"values":{"AIDASTING_NOTIFY_SCAN_COMPLETE":"true"}}`
 	rr := httptest.NewRecorder()
 	s.handleEnvironmentSettings(rr, httptest.NewRequest(http.MethodPost, "/api/settings/environment", strings.NewReader(body)))
 	if rr.Code != http.StatusOK {
@@ -55,15 +55,15 @@ func TestEnvironmentSettings_AppliesNotifyScanComplete(t *testing.T) {
 	}
 	found := false
 	for _, v := range resp.Variables {
-		if v.Key == "XALGORIX_NOTIFY_SCAN_COMPLETE" {
+		if v.Key == "AIDASTING_NOTIFY_SCAN_COMPLETE" {
 			found = true
 			if v.Value != "true" {
-				t.Fatalf("expected XALGORIX_NOTIFY_SCAN_COMPLETE value \"true\", got %q", v.Value)
+				t.Fatalf("expected AIDASTING_NOTIFY_SCAN_COMPLETE value \"true\", got %q", v.Value)
 			}
 		}
 	}
 	if !found {
-		t.Fatalf("XALGORIX_NOTIFY_SCAN_COMPLETE missing from settings GET response")
+		t.Fatalf("AIDASTING_NOTIFY_SCAN_COMPLETE missing from settings GET response")
 	}
 }
 

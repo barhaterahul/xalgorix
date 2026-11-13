@@ -13,7 +13,7 @@ import "strings"
 // SecretEnvKey is the single source of truth for which inherited variables are
 // operator secrets, shared by every tool that builds a subprocess environment so
 // the deny-lists cannot drift apart. Callers additionally drop the whole
-// XALGORIX_* namespace (re-adding the few non-secret ones they need), so this
+// AIDASTING_* namespace (re-adding the few non-secret ones they need), so this
 // set only needs to enumerate the secrets that live OUTSIDE that namespace plus,
 // for completeness as a standalone predicate, the namespaced ones.
 //
@@ -25,7 +25,7 @@ import "strings"
 // OS-level isolation (an unprivileged user, a container/VM, a read-only root),
 // which is the real boundary for executing tools against untrusted input.
 var operatorSecretEnvKeys = map[string]bool{
-	// Non-namespaced operator secrets — these are the ones a plain XALGORIX_*
+	// Non-namespaced operator secrets — these are the ones a plain AIDASTING_*
 	// namespace scrub does NOT catch, so enumerating them here is what keeps
 	// every tool's environment free of them.
 	"GEMINI_API_KEY":       true,
@@ -34,24 +34,24 @@ var operatorSecretEnvKeys = map[string]bool{
 	"CAIDO_API_TOKEN":      true,
 	"INBOUND_EMAIL_SECRET": true,
 
-	// Namespaced credentials — redundant with a XALGORIX_* scrub, listed so the
+	// Namespaced credentials — redundant with a AIDASTING_* scrub, listed so the
 	// predicate (and SanitizeEnviron) is correct on its own.
-	"XALGORIX_API_KEY":            true,
-	"XALGORIX_API_KEYS":           true,
-	"XALGORIX_API_TOKEN":          true,
-	"XALGORIX_USERNAME":           true,
-	"XALGORIX_PASSWORD":           true,
-	"XALGORIX_PASSWORD_HASH":      true,
-	"XALGORIX_PROXY_URL":          true,
-	"XALGORIX_PROXY_FILE":         true,
-	"XALGORIX_PROXY_ROTATION":     true,
-	"XALGORIX_TARGET_AUTH":        true,
-	"XALGORIX_TARGET_AUTH_B":      true,
-	"XALGORIX_DISCORD_WEBHOOK":    true,
-	"XALGORIX_TELEGRAM_BOT_TOKEN": true,
-	"XALGORIX_TELEGRAM_CHAT_ID":   true,
-	"XALGORIX_OOB_API_KEY":        true,
-	"XALGORIX_OOB_HOST":           true,
+	"AIDASTING_API_KEY":            true,
+	"AIDASTING_API_KEYS":           true,
+	"AIDASTING_API_TOKEN":          true,
+	"AIDASTING_USERNAME":           true,
+	"AIDASTING_PASSWORD":           true,
+	"AIDASTING_PASSWORD_HASH":      true,
+	"AIDASTING_PROXY_URL":          true,
+	"AIDASTING_PROXY_FILE":         true,
+	"AIDASTING_PROXY_ROTATION":     true,
+	"AIDASTING_TARGET_AUTH":        true,
+	"AIDASTING_TARGET_AUTH_B":      true,
+	"AIDASTING_DISCORD_WEBHOOK":    true,
+	"AIDASTING_TELEGRAM_BOT_TOKEN": true,
+	"AIDASTING_TELEGRAM_CHAT_ID":   true,
+	"AIDASTING_OOB_API_KEY":        true,
+	"AIDASTING_OOB_HOST":           true,
 }
 
 // SecretEnvKey reports whether an environment variable name holds an operator
@@ -67,7 +67,7 @@ func SecretEnvKey(key string) bool {
 
 // SanitizeEnviron returns a copy of env with every SecretEnvKey entry removed.
 // Entries without an '=' are preserved unchanged. It does NOT strip the wider
-// XALGORIX_* namespace; callers that want that apply it alongside SecretEnvKey.
+// AIDASTING_* namespace; callers that want that apply it alongside SecretEnvKey.
 func SanitizeEnviron(env []string) []string {
 	out := make([]string, 0, len(env))
 	for _, kv := range env {

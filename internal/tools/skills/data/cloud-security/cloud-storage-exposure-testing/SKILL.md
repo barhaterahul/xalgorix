@@ -73,9 +73,9 @@ Prove it: actually list and read. Conversely, `allAuthenticatedUsers` (GCS `allU
 ### Step 3: Write/Delete Probes (where scope permits)
 ```bash
 # Create a uniquely-named test object — never touch existing data
-echo "xalgorix-probe-$(date +%s)" > /tmp/probe.txt
-aws s3 cp /tmp/probe.txt s3://<bucket>/xalgorix-probe-test.txt --no-sign-request
-aws s3api put-object --bucket <bucket> --key xalgorix-probe-test.txt --body /tmp/probe.txt --no-sign-request
+echo "ai-dast-ing-probe-$(date +%s)" > /tmp/probe.txt
+aws s3 cp /tmp/probe.txt s3://<bucket>/ai-dast-ing-probe-test.txt --no-sign-request
+aws s3api put-object --bucket <bucket> --key ai-dast-ing-probe-test.txt --body /tmp/probe.txt --no-sign-request
 # Overwrite/delete probes only with explicit runtime authorization for state changes
 ```
 
@@ -127,7 +127,7 @@ A bucket existing is not a vulnerability. A wildcard policy is not proof. Read/l
 - Expired presigned URLs
 - Buckets belonging to third parties that merely share a naming seed
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `terminal_execute` with aws CLI/az/gsutil/curl for direct evidence
 - Python for seed-based candidate generation (bounded wordlists)
 - GCPBucketBrute optional for anonymous+authenticated enumeration with custom keywords

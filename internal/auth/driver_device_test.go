@@ -34,7 +34,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/providers"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
 )
 
 // ----------------------------------------------------------------------
@@ -164,7 +164,7 @@ func (d *deviceServer) entry() providers.Entry {
 		BaseURL:                     d.server.URL,
 		HeaderStyle:                 "openai",
 		Flow:                        "device_code",
-		ClientID:                    "xalgorix-test",
+		ClientID:                    "ai-dast-ing-test",
 		DeviceAuthorizationEndpoint: d.server.URL + "/device",
 		TokenEndpoint:               d.server.URL + "/token",
 	}

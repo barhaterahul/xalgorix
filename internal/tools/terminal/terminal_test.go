@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
 )
 
 func TestIsBlockedCommand_DangerousAndObfuscatedInputs(t *testing.T) {
@@ -258,7 +258,7 @@ func TestPrepareRequestRateRuntimeCreatesWrappersAndPythonHook(t *testing.T) {
 	if !strings.Contains(joined, "PYTHONPATH="+rt.PythonPath) {
 		t.Fatalf("PYTHONPATH missing rate hook: %s", joined)
 	}
-	if !strings.Contains(joined, "XALGORIX_RATE_DELAY_MS=334") {
+	if !strings.Contains(joined, "AIDASTING_RATE_DELAY_MS=334") {
 		t.Fatalf("rate delay env missing: %s", joined)
 	}
 }
@@ -388,12 +388,12 @@ func TestCommandEnvStripsOperatorSecrets(t *testing.T) {
 	// only the Python tool scrubbed them. They must be gone from both now.
 	t.Setenv("AGENTMAIL_API_KEY", "am-secret")
 	t.Setenv("CAIDO_API_TOKEN", "caido-secret")
-	t.Setenv("XALGORIX_PASSWORD", "admin-secret")
+	t.Setenv("AIDASTING_PASSWORD", "admin-secret")
 	// Third-party recon tool keys must still reach executed tools.
 	t.Setenv("GITHUB_TOKEN", "ghp-keepme")
 
 	joined := strings.Join(commandEnv("/home/tester", "/home/tester/go", "/tmp/work", requestRateRuntime{}), "\n")
-	for _, leaked := range []string{"AGENTMAIL_API_KEY=", "CAIDO_API_TOKEN=", "XALGORIX_PASSWORD="} {
+	for _, leaked := range []string{"AGENTMAIL_API_KEY=", "CAIDO_API_TOKEN=", "AIDASTING_PASSWORD="} {
 		if strings.Contains(joined, leaked) {
 			t.Errorf("commandEnv leaked operator secret %q to the tool environment", leaked)
 		}
@@ -404,7 +404,7 @@ func TestCommandEnvStripsOperatorSecrets(t *testing.T) {
 }
 
 func TestIsBlockedCommand_CredentialFile(t *testing.T) {
-	if reason := isBlockedCommand("cat /root/.xalgorix.env"); reason == "" {
+	if reason := isBlockedCommand("cat /root/.ai-dast-ing.env"); reason == "" {
 		t.Error("isBlockedCommand allowed reading the scanner credential file")
 	}
 	// Fetching a target's own /.env is a legitimate web check and must not trip.

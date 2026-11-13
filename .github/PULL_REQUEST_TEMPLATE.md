@@ -1,5 +1,5 @@
 <!--
-Thanks for contributing to Xalgorix! Please fill this out so we can review quickly.
+Thanks for contributing to AI-DAST-ING! Please fill this out so we can review quickly.
 `main` is branch-protected — PRs are the only way in. CI runs make lint,
 golangci-lint, go vet, and the test suite on every PR.
 -->

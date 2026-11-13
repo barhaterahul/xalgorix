@@ -1,6 +1,6 @@
-# Xalgorix Architecture
+# AI-DAST-ING Architecture
 
-Xalgorix is a single Go binary that runs an autonomous, LLM-driven web/API
+AI-DAST-ING is a single Go binary that runs an autonomous, LLM-driven web/API
 penetration test against an authorized target and produces an evidence-backed
 report. This document describes the code as it is today; it is the source of
 truth for how the packages fit together.
@@ -8,7 +8,7 @@ truth for how the packages fit together.
 ## High-level layers
 
 ```
-Runtime            cmd/xalgorix        binary entrypoint + OS service wiring
+Runtime            cmd/ai-dast-ing        binary entrypoint + OS service wiring
    │  dispatches (web mode / scan mode)
    ▼
 Web Platform       internal/web        local HTTP API + embedded React dashboard,
@@ -29,7 +29,7 @@ Cross-cutting: `internal/scanctx` (per-scan isolation), `internal/reporting`
 `internal/sandbox` + `internal/scopeguard` (safety), `internal/config`
 (configuration).
 
-## Runtime — `cmd/xalgorix`
+## Runtime — `cmd/ai-dast-ing`
 
 - `main.go` — parses flags/config and dispatches: **web mode** starts the
   dashboard + API server (`internal/web`); **scan mode** (and CLI subcommands
@@ -242,31 +242,31 @@ target + instruction
 
 ## Configuration
 
-Read from `~/.xalgorix.env` (and process env). Key variables:
+Read from `~/.ai-dast-ing.env` (and process env). Key variables:
 
 | Variable | Purpose |
 | --- | --- |
-| `XALGORIX_LLM` | provider-native model ID |
-| `XALGORIX_LLM_PROVIDER` | provider selected by the dashboard for catalog routing |
-| `XALGORIX_API_KEY` / `XALGORIX_API_BASE` | LLM credentials / custom endpoint |
-| `XALGORIX_BIND` | dashboard listen address, default `127.0.0.1` (set `0.0.0.0` to expose; port defaults to `9137`) |
-| `XALGORIX_PASSWORD` / `XALGORIX_PASSWORD_HASH` | dashboard auth |
-| `XALGORIX_DATA_DIR` | where scan records are stored |
-| `XALGORIX_MAX_ITERATIONS` / `_MAX_DURATION` / `_MAX_TOKENS` / `_MAX_TOOL_CALLS` | per-scan budgets |
-| `XALGORIX_MAX_NON_PROGRESS` | active seconds without validated assessment evidence; default 3600, 0 disables the clock |
-| `XALGORIX_MAX_INSTANCES` | authoritative concurrent scan capacity when set; otherwise capacity is derived from live RAM headroom |
-| `XALGORIX_SCAN_MEMORY_BUDGET_MB` | estimated RAM required for each newly admitted scan (auto-scaled when unset) |
-| `XALGORIX_RATE_LIMIT_REQUESTS` / `_RATE_LIMIT_WINDOW` / `_RATE_RPS` / `_RATE_BURST` | request throttling |
-| `XALGORIX_PROXY_URL` / `_PROXY_FILE` / `_PROXY_ROTATION` | upstream proxying |
-| `XALGORIX_OOB_*`, `XALGORIX_INTERACTSH_*` | out-of-band callback config |
-| `XALGORIX_DISCORD_WEBHOOK` / `_DISCORD_MIN_SEVERITY` | Discord notifications |
-| `XALGORIX_TELEGRAM_BOT_TOKEN` / `_CHAT_ID` / `_MIN_SEVERITY` | Telegram notifications |
-| `XALGORIX_NOTIFY_SCAN_COMPLETE` | Opt in to end-of-scan Discord/Telegram summaries (default `false`; per-vulnerability alerts are unaffected) |
+| `AIDASTING_LLM` | provider-native model ID |
+| `AIDASTING_LLM_PROVIDER` | provider selected by the dashboard for catalog routing |
+| `AIDASTING_API_KEY` / `AIDASTING_API_BASE` | LLM credentials / custom endpoint |
+| `AIDASTING_BIND` | dashboard listen address, default `127.0.0.1` (set `0.0.0.0` to expose; port defaults to `9137`) |
+| `AIDASTING_PASSWORD` / `AIDASTING_PASSWORD_HASH` | dashboard auth |
+| `AIDASTING_DATA_DIR` | where scan records are stored |
+| `AIDASTING_MAX_ITERATIONS` / `_MAX_DURATION` / `_MAX_TOKENS` / `_MAX_TOOL_CALLS` | per-scan budgets |
+| `AIDASTING_MAX_NON_PROGRESS` | active seconds without validated assessment evidence; default 3600, 0 disables the clock |
+| `AIDASTING_MAX_INSTANCES` | authoritative concurrent scan capacity when set; otherwise capacity is derived from live RAM headroom |
+| `AIDASTING_SCAN_MEMORY_BUDGET_MB` | estimated RAM required for each newly admitted scan (auto-scaled when unset) |
+| `AIDASTING_RATE_LIMIT_REQUESTS` / `_RATE_LIMIT_WINDOW` / `_RATE_RPS` / `_RATE_BURST` | request throttling |
+| `AIDASTING_PROXY_URL` / `_PROXY_FILE` / `_PROXY_ROTATION` | upstream proxying |
+| `AIDASTING_OOB_*`, `AIDASTING_INTERACTSH_*` | out-of-band callback config |
+| `AIDASTING_DISCORD_WEBHOOK` / `_DISCORD_MIN_SEVERITY` | Discord notifications |
+| `AIDASTING_TELEGRAM_BOT_TOKEN` / `_CHAT_ID` / `_MIN_SEVERITY` | Telegram notifications |
+| `AIDASTING_NOTIFY_SCAN_COMPLETE` | Opt in to end-of-scan Discord/Telegram summaries (default `false`; per-vulnerability alerts are unaffected) |
 
 Secrets (password hash, bot token, API keys) are never returned by any API
 response — only a `*_configured` boolean is surfaced.
 
-When `XALGORIX_MAX_INSTANCES` is set, scan admission uses that exact total
+When `AIDASTING_MAX_INSTANCES` is set, scan admission uses that exact total
 capacity and does not reduce it using the adaptive RAM estimate. Heavy tool
 execution remains separately throttled by live CPU and memory pressure, and a
 critically full disk still blocks new scans. When the variable is unset,

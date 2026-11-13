@@ -93,7 +93,7 @@ escalation candidate (actAs/tokenCreator/setIamPolicy held)
 - Key creation disabled by org policy (hardening observation, not a finding)
 - Expired/stale bindings from deleted principals
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `terminal_execute` with gcloud for every primitive; Policy Analyzer for effective-permission hypotheses
 - Ledger: candidate impersonation chains with constraint state and verified proofs
 - Restore: `gcloud iam service-accounts keys delete`, `remove-iam-policy-binding`, function/service deletion

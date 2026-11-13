@@ -1,6 +1,6 @@
 package agent
 
-import "github.com/xalgord/xalgorix/v4/internal/scanctx"
+import "github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
 
 // roleToolScope maps a delegated specialist's canonical role to the tools whose
 // DOCUMENTATION is withheld from its system prompt. Hidden tools stay fully
@@ -37,7 +37,7 @@ var roleToolScope = map[string][]string{
 }
 
 // applyRoleToolScope withholds role-foreign tool documentation from this
-// DELEGATED agent's system prompt when XALGORIX_ROLE_SCOPED_TOOLS is enabled.
+// DELEGATED agent's system prompt when AIDASTING_ROLE_SCOPED_TOOLS is enabled.
 // Only called for delegated specialists — the root coordinator and the
 // independent verifier keep their full schemas unconditionally.
 func (a *Agent) applyRoleToolScope() {

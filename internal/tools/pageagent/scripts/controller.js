@@ -1,4 +1,4 @@
-// controller.js — In-page element interaction engine for Xalgorix
+// controller.js — In-page element interaction engine for AI-DAST-ING
 // Injected via CDP.  Provides precise control over individual UI elements
 // using correct event dispatching order (inspiration: page-agent's ai-motion).
 //

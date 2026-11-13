@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
 )
 
 func TestResolvedVersion(t *testing.T) {
@@ -75,7 +75,7 @@ func TestIsNewer(t *testing.T) {
 }
 
 func TestServiceUnitUsesDedicatedWorkspaceAndContinuesAfterChildOOM(t *testing.T) {
-	unit := serviceUnitContent("/root", "/usr/local/bin/xalgorix")
+	unit := serviceUnitContent("/root", "/usr/local/bin/ai-dast-ing")
 
 	for _, want := range []string{
 		"WorkingDirectory=/root",
@@ -87,11 +87,11 @@ func TestServiceUnitUsesDedicatedWorkspaceAndContinuesAfterChildOOM(t *testing.T
 		}
 	}
 
-	// Task 3.6 / R6.4: the unit must NOT pin the legacy XALGORIX_WORKSPACE
+	// Task 3.6 / R6.4: the unit must NOT pin the legacy AIDASTING_WORKSPACE
 	// env var — the active workspace root is owned by
-	// config.resolveDataDir (XALGORIX_DATA_DIR / ~/.xalgorix/data).
-	if strings.Contains(unit, "XALGORIX_WORKSPACE") {
-		t.Fatalf("service unit must not set XALGORIX_WORKSPACE (deprecated by Task 3.6):\n%s", unit)
+	// config.resolveDataDir (AIDASTING_DATA_DIR / ~/.ai-dast-ing/data).
+	if strings.Contains(unit, "AIDASTING_WORKSPACE") {
+		t.Fatalf("service unit must not set AIDASTING_WORKSPACE (deprecated by Task 3.6):\n%s", unit)
 	}
 }
 
@@ -100,8 +100,8 @@ func TestServiceAccessLinesLoopbackExplainExternalSetup(t *testing.T) {
 
 	for _, want := range []string{
 		"Web UI: http://localhost:9137 (loopback only)",
-		"XALGORIX_BIND=0.0.0.0",
-		"XALGORIX_USERNAME",
+		"AIDASTING_BIND=0.0.0.0",
+		"AIDASTING_USERNAME",
 		"restart",
 	} {
 		if !strings.Contains(lines, want) {
@@ -133,7 +133,7 @@ func TestServiceAccessLinesNetworkExposed(t *testing.T) {
 func TestServiceAccessLinesExternalWithoutAuthWarns(t *testing.T) {
 	lines := strings.Join(serviceAccessLines(&config.Config{BindAddr: "0.0.0.0"}, defaultWebPort), "\n")
 
-	if !strings.Contains(lines, "external bind requires XALGORIX_USERNAME") ||
+	if !strings.Contains(lines, "external bind requires AIDASTING_USERNAME") ||
 		!strings.Contains(lines, "will refuse to start without auth") {
 		t.Fatalf("missing external bind auth warning:\n%s", lines)
 	}

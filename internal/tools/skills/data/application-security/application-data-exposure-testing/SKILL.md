@@ -13,7 +13,7 @@ tags:
 - pii
 - differential
 version: '2.0'
-author: Krishna Kumar (xalgord)
+author: ING
 license: Apache-2.0
 intent: offensive
 phase: application-testing
@@ -110,7 +110,7 @@ Good proof: the trace contains a database connection string / internal endpoint 
 - Enumeration-flavored errors that are actually rate-limited to uselessness - state the limit and the remaining impact honestly
 - Framework/version banners without a demonstrated consequence
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 
 - authz_matrix - automated same-object different-identity payload diffs (the core primitive here)
 - http_request to fetch each serializer (Accept headers, format params, export endpoints)

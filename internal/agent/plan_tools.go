@@ -25,7 +25,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/xalgord/xalgorix/v4/internal/tools"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
 )
 
 // planTaskInput is the LLM-supplied task shape for build_plan.

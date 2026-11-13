@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/agent"
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/agent"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
 )
 
 // processEvent is the single choke point every agent event flows through on

@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/attacksurface"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/attacksurface"
 )
 
 // handleUploadTargets parses a text file with one target per line.

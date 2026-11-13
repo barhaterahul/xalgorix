@@ -180,28 +180,28 @@ func TestService_GetUnknown(t *testing.T) {
 }
 
 // TestClientIDForEntry_EnvOverride asserts the
-// XALGORIX_<UPPER_ID>_OAUTH_CLIENT_ID escape hatch wins over the
+// AIDASTING_<UPPER_ID>_OAUTH_CLIENT_ID escape hatch wins over the
 // compiled-in ClientID, and that the absence of the env var
 // returns the compiled-in default unchanged.
 func TestClientIDForEntry_EnvOverride(t *testing.T) {
 	e := Entry{ID: "google", ClientID: ""}
 
 	t.Run("default empty when env unset", func(t *testing.T) {
-		t.Setenv("XALGORIX_GOOGLE_OAUTH_CLIENT_ID", "")
+		t.Setenv("AIDASTING_GOOGLE_OAUTH_CLIENT_ID", "")
 		if got := ClientIDForEntry(e); got != "" {
 			t.Errorf("ClientIDForEntry default = %q, want empty", got)
 		}
 	})
 
 	t.Run("env override wins", func(t *testing.T) {
-		t.Setenv("XALGORIX_GOOGLE_OAUTH_CLIENT_ID", "operator-supplied-client-id")
+		t.Setenv("AIDASTING_GOOGLE_OAUTH_CLIENT_ID", "operator-supplied-client-id")
 		if got := ClientIDForEntry(e); got != "operator-supplied-client-id" {
 			t.Errorf("ClientIDForEntry override = %q, want operator-supplied-client-id", got)
 		}
 	})
 
 	t.Run("compiled-in default when env unset and ClientID present", func(t *testing.T) {
-		t.Setenv("XALGORIX_COPILOT_OAUTH_CLIENT_ID", "")
+		t.Setenv("AIDASTING_COPILOT_OAUTH_CLIENT_ID", "")
 		entry := Entry{ID: "copilot", ClientID: "Iv1.b507a08c87ecfe98"}
 		if got := ClientIDForEntry(entry); got != "Iv1.b507a08c87ecfe98" {
 			t.Errorf("ClientIDForEntry copilot default = %q, want Iv1.b507a08c87ecfe98", got)

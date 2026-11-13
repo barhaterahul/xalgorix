@@ -1,7 +1,7 @@
-# Contributing to Xalgorix
+# Contributing to AI-DAST-ING
 
-Thanks for your interest in contributing. Xalgorix is a self-hosted,
-autonomous AI pentesting engine: a single Go binary (`xalgorix`) that serves
+Thanks for your interest in contributing. AI-DAST-ING is a self-hosted,
+autonomous AI pentesting engine: a single Go binary (`ai-dast-ing`) that serves
 an embedded React dashboard (`webui`) and runs scans locally. This document
 covers the local development workflow.
 
@@ -11,11 +11,11 @@ By participating you agree to our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 New here? These labels are the best entry points:
 
-- [`good first issue`](https://github.com/xalgorix/xalgorix/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+- [`good first issue`](https://github.com/ai-dast-ing/ai-dast-ing/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
   — small, well-scoped tasks that don't require deep knowledge of the codebase.
-- [`help wanted`](https://github.com/xalgorix/xalgorix/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
+- [`help wanted`](https://github.com/ai-dast-ing/ai-dast-ing/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
   — issues we'd love community help on.
-- [`documentation`](https://github.com/xalgorix/xalgorix/issues?q=is%3Aissue+is%3Aopen+label%3Adocumentation)
+- [`documentation`](https://github.com/ai-dast-ing/ai-dast-ing/issues?q=is%3Aissue+is%3Aopen+label%3Adocumentation)
   — documentation improvements, great for a first PR.
 
 Comment on an issue to let us know you're picking it up so we don't double up.
@@ -36,7 +36,7 @@ Small fixes (typos, docs, obvious bugs) don't need an issue first — just open 
 
 Install the following on your workstation:
 
-- **Go 1.26+** — building and testing the `xalgorix` binary.
+- **Go 1.26+** — building and testing the `ai-dast-ing` binary.
 - **Node.js 20+** and **npm** — building the embedded `webui` dashboard bundle.
 - **GNU Make** — the entry point for every common task.
 
@@ -50,7 +50,7 @@ Optional but recommended:
 The Makefile wraps every common task:
 
 ```bash
-make build          # builds webui, then the binary into ./build/xalgorix
+make build          # builds webui, then the binary into ./build/ai-dast-ing
 make run            # build + run the web UI locally
 make test           # runs the Go test suite
 make test-race      # tests with the race detector
@@ -72,7 +72,7 @@ CI (`.github/workflows/ci.yml`).
 
 | Path                 | Purpose                                                        |
 | -------------------- | -------------------------------------------------------------- |
-| `cmd/xalgorix/`      | CLI entry point and service lifecycle (`--web`, `--start`, …). |
+| `cmd/ai-dast-ing/`      | CLI entry point and service lifecycle (`--web`, `--start`, …). |
 | `internal/web/`      | HTTP server, dashboard API, and embedded static assets.        |
 | `internal/agent/`    | The autonomous scanning agent loop.                            |
 | `internal/llm/`      | LLM provider catalog, router, and client.                      |

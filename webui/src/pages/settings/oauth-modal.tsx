@@ -267,7 +267,7 @@ export default function OAuthModal({
         <DialogHeader>
           <DialogTitle>{heading}</DialogTitle>
           <DialogDescription>
-            xalgorix will store the resulting credential under
+            ai-dast-ing will store the resulting credential under
             <span className="ml-1 font-mono">
               {provider}:{profileId || "default"}
             </span>
@@ -288,7 +288,7 @@ export default function OAuthModal({
               error === "codex cli credentials not found" && (
                 <p className="text-xs text-muted-foreground">
                   Run <code className="font-mono">codex login</code> as the
-                  Xalgorix service user, or make the host file
+                  AI-DAST-ING service user, or make the host file
                   <code className="mx-1 font-mono">~/.codex/auth.json</code>
                   available at
                   <code className="ml-1 font-mono">
@@ -390,7 +390,7 @@ export default function OAuthModal({
           !startResult.authURL && (
             <div className="space-y-3 rounded-md border border-border bg-muted/30 p-4 text-sm">
               <p>
-                xalgorix will read the credential file already present on
+                ai-dast-ing will read the credential file already present on
                 this host (created by the official CLI sign-in) and persist a
                 profile under{" "}
                 <code className="font-mono">
@@ -451,7 +451,7 @@ function LoopbackBody({ startResult }: { startResult: OAuthStartResponse }) {
       <p>
         We opened the authorization page in a new tab. Complete the sign-in
         there; the browser will redirect back to a one-shot loopback listener
-        on this host and xalgorix will persist the credential automatically.
+        on this host and ai-dast-ing will persist the credential automatically.
       </p>
       {startResult.authURL && (
         <a
@@ -476,7 +476,7 @@ function DeviceBody({ startResult }: { startResult: OAuthStartResponse }) {
     <div className="space-y-3 rounded-md border border-border bg-muted/30 p-4 text-sm">
       <p>
         Open the verification page on any device and enter the user code
-        below. xalgorix is polling the provider for completion.
+        below. ai-dast-ing is polling the provider for completion.
       </p>
       <div className="grid gap-3 sm:grid-cols-[auto_1fr]">
         <div className="space-y-1">

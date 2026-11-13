@@ -219,7 +219,7 @@ function ResourcesBar({ resources }: { resources: InstancesResponse["resources"]
           label="HOST MEMORY"
           value={`${ramPct}%`}
           sub={(() => {
-            const used = `${Math.round(ramUsed)}MB used${rss > 0 ? ` · xalgorix ${rss}MB RSS` : ""}`
+            const used = `${Math.round(ramUsed)}MB used${rss > 0 ? ` · ai-dast-ing ${rss}MB RSS` : ""}`
             const capacity = `Capacity ${resources.effective_max_instances} · ${runningInstances} running · ${availableSlots} available`
             const cap = scanMem > 0
               ? `${capacity} · scan ${scanMem}MB${toolLimitText}`

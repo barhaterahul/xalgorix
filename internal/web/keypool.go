@@ -109,8 +109,8 @@ func (s *Server) handleKeyPool(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		restart, err := s.applyEnvironmentUpdates(map[string]string{
-			"XALGORIX_API_KEYS": strings.Join(clean, ","),
-			"XALGORIX_API_KEY":  clean[0],
+			"AIDASTING_API_KEYS": strings.Join(clean, ","),
+			"AIDASTING_API_KEY":  clean[0],
 		})
 		if err != nil {
 			writeJSONStatus(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})

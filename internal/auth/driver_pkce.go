@@ -10,7 +10,7 @@
 //     handler. This is the happy path described by Requirements
 //     6.1–6.5.
 //
-//  2. Paste fallback: when the operator has set XALGORIX_BIND to a
+//  2. Paste fallback: when the operator has set AIDASTING_BIND to a
 //     non-loopback address (Requirement 13.2), or when the
 //     dashboard explicitly requests paste mode (operator on a
 //     headless host without browser automation), the driver
@@ -57,7 +57,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/providers"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
 )
 
 // pkceFlowDeadline is the upper bound on how long a single PKCE
@@ -237,7 +237,7 @@ func (d *pkceDriver) Name() string { return "pkce" }
 // Start kicks off a PKCE flow. The behavior branches on whether
 // the dashboard's effective bind address is loopback:
 //
-//   - loopback (XALGORIX_BIND unset / "127.0.0.1") → bind an
+//   - loopback (AIDASTING_BIND unset / "127.0.0.1") → bind an
 //     ephemeral listener on 127.0.0.1:0 (Requirement 6.1, 13.1),
 //     mount the callback handler, return Mode="loopback" plus the
 //     authorization URL.
@@ -610,7 +610,7 @@ func (d *pkceDriver) callbackHandler(flow *pkceFlow) http.HandlerFunc {
 		}
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte("Sign-in complete. You can close this tab and return to xalgorix."))
+		_, _ = w.Write([]byte("Sign-in complete. You can close this tab and return to ai-dast-ing."))
 		d.signalFlow(flow, nil)
 	}
 }
@@ -755,7 +755,7 @@ func (d *pkceDriver) exchangeRefresh(ctx context.Context, e providers.Entry, cur
 //
 // The 1MiB cap on response body reads is defensive — token
 // endpoints return a few hundred bytes at most; capping protects
-// xalgorix from a misbehaving upstream that streams unbounded
+// ai-dast-ing from a misbehaving upstream that streams unbounded
 // data.
 func (d *pkceDriver) postTokenForm(ctx context.Context, endpoint string, form url.Values) (pkceTokenResponse, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, strings.NewReader(form.Encode()))
@@ -948,7 +948,7 @@ func pkceRandomFlowID() (string, error) {
 
 // pkceIsLoopbackBind reports whether addr names the loopback
 // interface. Treats the empty string and "localhost" as loopback
-// (the dashboard's effective default when XALGORIX_BIND is
+// (the dashboard's effective default when AIDASTING_BIND is
 // unset). Strips a host:port suffix when present.
 //
 // Returns false for any non-loopback IPv4/IPv6 literal, including

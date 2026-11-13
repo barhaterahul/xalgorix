@@ -116,7 +116,7 @@ public function identified
 - Over-broad roles with no reachable execution primitive from the outside
 - CORS misconfigurations without concrete cross-origin impact
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `http_request`/curl for invocation testing; Python for payload generation
 - `terminal_execute` with aws/az/gcloud for credentialed review
 - Ledger: function inventory with auth model, verified invocation, identity reach

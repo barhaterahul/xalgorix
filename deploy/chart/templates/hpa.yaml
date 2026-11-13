@@ -2,14 +2,14 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "xalgorix.fullname" . }}
+  name: {{ include "ai-dast-ing.fullname" . }}
   labels:
-    {{- include "xalgorix.labels" . | nindent 4 }}
+    {{- include "ai-dast-ing.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "xalgorix.fullname" . }}
+    name: {{ include "ai-dast-ing.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:

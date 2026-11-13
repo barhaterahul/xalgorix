@@ -1,4 +1,4 @@
-# Default values for the xalgorix chart.
+# Default values for the ai-dast-ing chart.
 # Each key is documented in helm-docs style so the comments render as
 # documentation on Artifact Hub.
 
@@ -8,7 +8,7 @@ replicaCount: 1
 # -- Container image settings.
 image:
   # -- Image repository.
-  repository: ghcr.io/xalgord/xalgorix
+  repository: ghcr.io/barhaterahul/ai-dast-ing
   # -- Image tag.
   # @default -- The chart `appVersion`.
   tag: ""
@@ -30,7 +30,7 @@ serviceAccount:
   # -- Whether a service account should be created.
   create: true
   # -- Whether to automatically mount the service account API credentials.
-  # Xalgorix never talks to the Kubernetes API; leave disabled unless a
+  # AI-DAST-ING never talks to the Kubernetes API; leave disabled unless a
   # sidecar in the pod needs it.
   automount: false
   # -- Annotations added to the service account.
@@ -73,7 +73,7 @@ service:
   # @default -- The service port.
   # targetPort: 9137
 
-# -- Dashboard credentials, rendered as XALGORIX_USERNAME and XALGORIX_PASSWORD
+# -- Dashboard credentials, rendered as AIDASTING_USERNAME and AIDASTING_PASSWORD
 # environment variables in the chart Secret. When empty, the container
 # entrypoint generates a random admin password and prints it once to the
 # container logs.
@@ -83,30 +83,30 @@ auth:
   # -- Dashboard login password.
   password: ""
   # -- Name of an existing Secret holding the dashboard credentials. It
-  # must contain `XALGORIX_USERNAME` and `XALGORIX_PASSWORD` keys. When set,
+  # must contain `AIDASTING_USERNAME` and `AIDASTING_PASSWORD` keys. When set,
   # `username` and `password` are ignored and no credentials are written to
   # the chart-managed Secret.
   existingSecret: ""
 
 # -- Extra environment variables injected into the container.
 # - `raw`: plain key/value pairs set directly on the container; use for any
-#   `XALGORIX_*` variable without a dedicated value above.
+#   `AIDASTING_*` variable without a dedicated value above.
 # - `config`: rendered into a ConfigMap and injected via `envFrom`.
 # - `secret`: rendered into a Secret and injected via `envFrom`.
 # Settings changed in the dashboard's Settings UI persist to
-# /data/.xalgorix.env and take precedence over these at startup.
+# /data/.ai-dast-ing.env and take precedence over these at startup.
 env:
   # -- Plain key/value pairs set directly on the container.
   raw: {}
-  #  XALGORIX_LLM: openai/gpt-5.6
+  #  AIDASTING_LLM: openai/gpt-5.6
 
   # -- Key/value pairs rendered into a ConfigMap and injected via `envFrom`.
   config: {}
-  #  XALGORIX_RATE_RPS: "5"
+  #  AIDASTING_RATE_RPS: "5"
 
   # -- Key/value pairs rendered into a Secret and injected via `envFrom`.
   secret: {}
-  #  XALGORIX_API_KEY: change-me
+  #  AIDASTING_API_KEY: change-me
 
 # -- Persistent volume for /data (scans, reports and the persisted settings
 # file the dashboard writes to).
@@ -147,7 +147,7 @@ readinessProbe: {}
 # -- Horizontal pod autoscaler for the deployment.
 autoscaling:
   # -- Whether to create a HorizontalPodAutoscaler instead of a fixed replica count.
-  # WARNING: Xalgorix is stateful (scans, reports and the persisted settings
+  # WARNING: AI-DAST-ING is stateful (scans, reports and the persisted settings
   # file live under /data). Scaling beyond one replica is NOT supported with
   # local persistence: the default ReadWriteOnce PVC cannot multi-attach, and
   # even with ReadWriteMany storage each replica keeps independent scan state.
@@ -177,15 +177,15 @@ ingress:
   #  cert-manager.io/cluster-issuer: letsencrypt-prod
   # -- Hosts and paths served by the application.
   hosts:
-    - host: xalgorix.local
+    - host: ai-dast-ing.local
       paths:
         - path: /
           pathType: Prefix
   # -- TLS configuration for the Ingress.
   tls: []
-  #  - secretName: xalgorix-tls
+  #  - secretName: ai-dast-ing-tls
   #    hosts:
-  #      - xalgorix.local
+  #      - ai-dast-ing.local
 
 # -- Gateway API HTTPRoute, an alternative to the Ingress.
 # Requires the `gateway.networking.k8s.io` CRDs and an existing Gateway.

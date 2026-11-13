@@ -25,17 +25,17 @@ func denyCovers(list []string, path string) bool {
 func TestReadDenyListCoversScannerCredentialStores(t *testing.T) {
 	t.Setenv("SUDO_USER", "operator")
 	t.Setenv("CODEX_HOME", "/srv/codex-home")
-	t.Setenv("XALGORIX_CODEX_AUTH_FILE", "/srv/codex/auth-override.json")
+	t.Setenv("AIDASTING_CODEX_AUTH_FILE", "/srv/codex/auth-override.json")
 
 	home := t.TempDir()
 	dataDir := filepath.Join(t.TempDir(), "data")
 	list := resolveReadDenyList(home, dataDir, "")
 
 	for _, want := range []string{
-		filepath.Join(home, ".xalgorix.env"),
-		"/etc/xalgorix.env",
-		"/root/.xalgorix.env",
-		"/home/operator/.xalgorix.env",
+		filepath.Join(home, ".ai-dast-ing.env"),
+		"/etc/ai-dast-ing.env",
+		"/root/.ai-dast-ing.env",
+		"/home/operator/.ai-dast-ing.env",
 		filepath.Join(dataDir, "llm_keys.json"),
 		filepath.Join(dataDir, "llm_keys.json", "llm_keys.json"), // legacy nested layout
 		filepath.Join(dataDir, "auth-profiles.json"),
@@ -56,7 +56,7 @@ func TestReadDenyListCoversScannerCredentialStores(t *testing.T) {
 		dataDir,
 		filepath.Join(dataDir, "2026-11-13", "scan-1", "findings.json"),
 		filepath.Join(dataDir, "auth-profiles.json.lock"),
-		filepath.Join(home, ".xalgorix", "skills", "x.md"),
+		filepath.Join(home, ".ai-dast-ing", "skills", "x.md"),
 		"/usr/share/wordlists/rockyou.txt",
 	} {
 		if denyCovers(list, allowed) {
@@ -67,7 +67,7 @@ func TestReadDenyListCoversScannerCredentialStores(t *testing.T) {
 
 func TestReadDenyListKeepsOperatorEntries(t *testing.T) {
 	list := resolveReadDenyList(t.TempDir(), "", "/opt/secrets: /srv/other ")
-	for _, want := range []string{"/opt/secrets", "/srv/other", "/etc/xalgorix.env"} {
+	for _, want := range []string{"/opt/secrets", "/srv/other", "/etc/ai-dast-ing.env"} {
 		if !denyCovers(list, want) {
 			t.Errorf("deny-list does not cover %s", want)
 		}
@@ -79,7 +79,7 @@ func TestReadDenyListKeepsOperatorEntries(t *testing.T) {
 // sibling rule keeps agent file tools off it while it exists.
 func TestWritePrivateFileAtomicallyStagesUnderDeniedName(t *testing.T) {
 	dir := t.TempDir()
-	target := filepath.Join(dir, ".xalgorix.env")
+	target := filepath.Join(dir, ".ai-dast-ing.env")
 	if err := os.Chmod(dir, 0o500); err != nil {
 		t.Skip(err)
 	}
@@ -91,14 +91,14 @@ func TestWritePrivateFileAtomicallyStagesUnderDeniedName(t *testing.T) {
 	if !strings.Contains(err.Error(), "create temporary env file") {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if !strings.Contains(err.Error(), ".xalgorix.env.tmp-") {
+	if !strings.Contains(err.Error(), ".ai-dast-ing.env.tmp-") {
 		t.Errorf("staging file name %q does not use the <env file>.tmp-* pattern", err.Error())
 	}
 	if err := writePrivateFileAtomically(target, []byte("A=1\n")); err != nil {
 		t.Fatal(err)
 	}
 	entries, _ := os.ReadDir(dir)
-	if len(entries) != 1 || entries[0].Name() != ".xalgorix.env" {
+	if len(entries) != 1 || entries[0].Name() != ".ai-dast-ing.env" {
 		t.Errorf("leftover staging files: %v", entries)
 	}
 }

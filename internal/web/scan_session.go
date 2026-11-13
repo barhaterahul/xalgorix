@@ -11,12 +11,12 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/xalgord/xalgorix/v4/internal/agent"
-	"github.com/xalgord/xalgorix/v4/internal/llm"
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
-	"github.com/xalgord/xalgorix/v4/internal/scopeguard"
-	"github.com/xalgord/xalgorix/v4/internal/tools/notes"
-	"github.com/xalgord/xalgorix/v4/internal/tools/reporting"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/agent"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/llm"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scopeguard"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/notes"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/reporting"
 )
 
 // vulnNotificationDetails renders the Markdown body pushed to Telegram/Discord
@@ -271,7 +271,7 @@ func (s *Server) executeScanSession(sess *scanSession) {
 	if sess.llmClient != nil {
 		agentOpts = append(agentOpts, agent.WithLLMClient(sess.llmClient))
 	}
-	agnt := agent.NewAgent(sess.cfg, "XalgorixAgent", events, scopeguard.Config{
+	agnt := agent.NewAgent(sess.cfg, "AidastingAgent", events, scopeguard.Config{
 		BindAddr:           s.cfg.BindAddr,
 		Port:               s.port,
 		AllowLoopbackPorts: sess.allowLoopbackPorts,
@@ -527,7 +527,7 @@ func (s *Server) executeScanSession(sess *scanSession) {
 		if p, err := s.generateReportAt(sess.record, sess.scanDir); err == nil {
 			log.Printf("PDF report saved: %s", p)
 			// Scan-completion summary ("Scan Finished") is opt-in via
-			// XALGORIX_NOTIFY_SCAN_COMPLETE (default off) so operators get only
+			// AIDASTING_NOTIFY_SCAN_COMPLETE (default off) so operators get only
 			// per-vulnerability alerts, not a summary after every scan (including
 			// clean scans). Per-finding notifications are sent separately in
 			// processEvent and are unaffected by this toggle.
@@ -688,7 +688,7 @@ func (s *Server) processEvent(evt agent.Event, sess *scanSession) {
 							wsEvt.Vulns = []VulnSummary{vs}
 							log.Printf("[VULN] Vuln broadcast real-time: %s %s", vs.Severity, vs.Title)
 
-							// Discord: vulnerability found (respects XALGORIX_DISCORD_MIN_SEVERITY)
+							// Discord: vulnerability found (respects AIDASTING_DISCORD_MIN_SEVERITY)
 							sevColor := 0xef4444 // red for critical/high
 							switch vs.Severity {
 							case "medium":

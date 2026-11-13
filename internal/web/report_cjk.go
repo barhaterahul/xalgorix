@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	"github.com/go-pdf/fpdf"
-	"github.com/xalgord/xalgorix/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
 )
 
 // reportPDF wraps *fpdf.Fpdf so the report generator can transparently render
@@ -39,7 +39,7 @@ func (p *reportPDF) SetFont(family, style string, size float64) {
 }
 
 // reportCJKFontFamily is the internal family name used for the embedded font.
-const reportCJKFontFamily = "XalgorixCJK"
+const reportCJKFontFamily = "AidastingCJK"
 
 // languageNeedsEmbeddedFont reports whether a language uses a script the core
 // PDF fonts cannot render and therefore needs an embedded TrueType font.
@@ -56,7 +56,7 @@ func languageNeedsEmbeddedFont(lang string) bool {
 // TrueType font. fpdf can only parse standalone .ttf (glyf-outline) files — it
 // does NOT support TrueType Collections (.ttc) or CFF/OpenType (.otf) — so only
 // .ttf candidates are listed here. Operators whose distro only ships .ttc/.otf
-// CJK fonts can point XALGORIX_PDF_CJK_FONT at any .ttf they extract/install.
+// CJK fonts can point AIDASTING_PDF_CJK_FONT at any .ttf they extract/install.
 var candidateCJKFontPaths = []string{
 	"/usr/share/fonts/truetype/noto/NotoSansCJKsc-Regular.ttf",
 	"/usr/share/fonts/truetype/noto/NotoSansSC-Regular.ttf",
@@ -72,7 +72,7 @@ var (
 
 // loadEmbeddedCJKFont resolves and caches the CJK TrueType font bytes. It is
 // consulted only for languages that need it. Resolution order:
-//  1. XALGORIX_PDF_CJK_FONT — explicit operator-supplied .ttf path.
+//  1. AIDASTING_PDF_CJK_FONT — explicit operator-supplied .ttf path.
 //  2. A short list of common system .ttf locations.
 //
 // Returns nil when no usable .ttf is found; the caller then falls back to the
@@ -90,7 +90,7 @@ func loadEmbeddedCJKFont() []byte {
 // usable .ttf is found.
 func resolveCJKFontBytes() []byte {
 	var paths []string
-	if custom := strings.TrimSpace(os.Getenv("XALGORIX_PDF_CJK_FONT")); custom != "" {
+	if custom := strings.TrimSpace(os.Getenv("AIDASTING_PDF_CJK_FONT")); custom != "" {
 		paths = append(paths, custom)
 	}
 	paths = append(paths, candidateCJKFontPaths...)
@@ -136,7 +136,7 @@ func newReportPDF(language string) *reportPDF {
 	fontBytes := loadEmbeddedCJKFont()
 	if len(fontBytes) == 0 {
 		log.Printf("[report] output language %q needs an embedded CJK font, but none was found; "+
-			"set XALGORIX_PDF_CJK_FONT to a .ttf to render non-Latin text in the PDF. "+
+			"set AIDASTING_PDF_CJK_FONT to a .ttf to render non-Latin text in the PDF. "+
 			"Falling back to core fonts (non-Latin glyphs will not render).",
 			config.NormalizeLanguage(language))
 		return pdf

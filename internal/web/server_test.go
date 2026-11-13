@@ -20,13 +20,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/agent"
-	"github.com/xalgord/xalgorix/v4/internal/auth"
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/llm"
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
-	"github.com/xalgord/xalgorix/v4/internal/scopeguard"
-	"github.com/xalgord/xalgorix/v4/internal/tools/reporting"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/agent"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/auth"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/llm"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scopeguard"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/reporting"
 )
 
 // swapTelegramAPIBaseForTest temporarily replaces the package-level
@@ -54,7 +54,7 @@ func newTestServer(t *testing.T, cfg *config.Config) *Server {
 	// NewServer now derives s.dataDir from cfg.DataDir (Task 3.6 / R6.4),
 	// so seed a per-test temp dir BEFORE construction. Otherwise
 	// rebuildInstancesFromDisk / loadSchedulesFromDisk would touch the
-	// real ~/.xalgorix/data tree (or worse, the test's CWD).
+	// real ~/.ai-dast-ing/data tree (or worse, the test's CWD).
 	if cfg.DataDir == "" {
 		cfg.DataDir = t.TempDir()
 	}
@@ -81,7 +81,7 @@ func newTestServer(t *testing.T, cfg *config.Config) *Server {
 // A best-effort cleanup tolerates the leftover files instead.
 func bestEffortDataDir(t *testing.T, s *Server) {
 	t.Helper()
-	dir, err := os.MkdirTemp("", "xalgorix-scan-test-")
+	dir, err := os.MkdirTemp("", "ai-dast-ing-scan-test-")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1863,9 +1863,9 @@ func TestHandleRateLimitSettings_ClampsAndReplacesLimiter(t *testing.T) {
 func TestAgentMailSettings_MasksAndPreservesExistingKey(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
-	envFile := filepath.Join(home, ".xalgorix.env")
+	envFile := filepath.Join(home, ".ai-dast-ing.env")
 	oldKey := "old-secret-12345678"
-	if err := os.WriteFile(envFile, []byte("XALGORIX_LLM=test\nAGENTMAIL_POD=oldpod\nAGENTMAIL_API_KEY="+oldKey+"\n"), 0o644); err != nil {
+	if err := os.WriteFile(envFile, []byte("AIDASTING_LLM=test\nAGENTMAIL_POD=oldpod\nAGENTMAIL_API_KEY="+oldKey+"\n"), 0o644); err != nil {
 		t.Fatalf("write env file: %v", err)
 	}
 
@@ -1929,10 +1929,10 @@ func TestAgentMailSettings_MasksAndPreservesExistingKey(t *testing.T) {
 func TestLLMSettings_MasksPreservesAndPersists(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
-	envFile := filepath.Join(home, ".xalgorix.env")
+	envFile := filepath.Join(home, ".ai-dast-ing.env")
 	oldAPIKey := "old-llm-secret-12345678"
 	oldGeminiKey := "old-gemini-secret-87654321"
-	if err := os.WriteFile(envFile, []byte("XALGORIX_LLM=old/model\nXALGORIX_API_KEY="+oldAPIKey+"\nGEMINI_API_KEY="+oldGeminiKey+"\n"), 0o644); err != nil {
+	if err := os.WriteFile(envFile, []byte("AIDASTING_LLM=old/model\nAIDASTING_API_KEY="+oldAPIKey+"\nGEMINI_API_KEY="+oldGeminiKey+"\n"), 0o644); err != nil {
 		t.Fatalf("write env file: %v", err)
 	}
 
@@ -1983,11 +1983,11 @@ func TestLLMSettings_MasksPreservesAndPersists(t *testing.T) {
 	}
 	env := string(data)
 	for _, want := range []string{
-		"XALGORIX_LLM=openai/gpt-5.4",
-		"XALGORIX_API_BASE=https://api.openai.com/v1",
-		"XALGORIX_API_KEY=" + oldAPIKey,
+		"AIDASTING_LLM=openai/gpt-5.4",
+		"AIDASTING_API_BASE=https://api.openai.com/v1",
+		"AIDASTING_API_KEY=" + oldAPIKey,
 		"GEMINI_API_KEY=" + oldGeminiKey,
-		"XALGORIX_REASONING_EFFORT=medium",
+		"AIDASTING_REASONING_EFFORT=medium",
 	} {
 		if !strings.Contains(env, want) {
 			t.Fatalf("env file missing %q:\n%s", want, env)
@@ -1998,12 +1998,12 @@ func TestLLMSettings_MasksPreservesAndPersists(t *testing.T) {
 // TestLLMSettings_CatalogShape_APIKeyCreatesProfile validates the
 // v4.4.22 POST shape: a (provider, authMethod=api_key, apiKey, model)
 // bundle must Put an auth.Profile into the store, write the matching
-// XALGORIX_LLM_PROFILE env var, and continue to write the legacy env
+// AIDASTING_LLM_PROFILE env var, and continue to write the legacy env
 // trio so existing scripts keep working.
 func TestLLMSettings_CatalogShape_APIKeyCreatesProfile(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
-	envFile := filepath.Join(home, ".xalgorix.env")
+	envFile := filepath.Join(home, ".ai-dast-ing.env")
 	if err := os.WriteFile(envFile, []byte(""), 0o644); err != nil {
 		t.Fatalf("seed env file: %v", err)
 	}
@@ -2036,13 +2036,13 @@ func TestLLMSettings_CatalogShape_APIKeyCreatesProfile(t *testing.T) {
 		t.Fatalf("profile APIKey = %q, want sk-test-12345", prof.APIKey)
 	}
 
-	// XALGORIX_LLM_PROFILE must be wired so the resolver can pick
+	// AIDASTING_LLM_PROFILE must be wired so the resolver can pick
 	// up the new profile.
 	if s.cfg.LLMProfile != "openai:default" {
 		t.Fatalf("LLMProfile = %q, want openai:default", s.cfg.LLMProfile)
 	}
-	if got := os.Getenv("XALGORIX_LLM_PROFILE"); got != "openai:default" {
-		t.Fatalf("env XALGORIX_LLM_PROFILE = %q, want openai:default", got)
+	if got := os.Getenv("AIDASTING_LLM_PROFILE"); got != "openai:default" {
+		t.Fatalf("env AIDASTING_LLM_PROFILE = %q, want openai:default", got)
 	}
 
 	// Legacy env vars must still be written for the legacyResolver
@@ -2085,7 +2085,7 @@ func TestLLMSettings_CatalogShape_APIKeyCreatesProfile(t *testing.T) {
 func TestLLMSettings_CredentialFreeProviderClearsProfileAndStoresBareModel(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
-	if err := os.WriteFile(filepath.Join(home, ".xalgorix.env"), []byte(""), 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(home, ".ai-dast-ing.env"), []byte(""), 0o600); err != nil {
 		t.Fatalf("seed env file: %v", err)
 	}
 	s := newTestServer(t, &config.Config{
@@ -2122,7 +2122,7 @@ func TestLLMSettings_CredentialFreeProviderClearsProfileAndStoresBareModel(t *te
 func TestLLMSettings_CustomProviderPersistsOllamaCompatibility(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
-	envFile := filepath.Join(home, ".xalgorix.env")
+	envFile := filepath.Join(home, ".ai-dast-ing.env")
 	if err := os.WriteFile(envFile, []byte(""), 0o600); err != nil {
 		t.Fatalf("seed env file: %v", err)
 	}
@@ -2151,11 +2151,11 @@ func TestLLMSettings_CustomProviderPersistsOllamaCompatibility(t *testing.T) {
 	}
 	env := string(data)
 	for _, want := range []string{
-		"XALGORIX_LLM_PROVIDER=custom",
-		"XALGORIX_LLM=reasoning-model:latest",
-		"XALGORIX_API_BASE=http://models.example:9443/v1",
-		"XALGORIX_REASONING_EFFORT=none",
-		"XALGORIX_OLLAMA_COMPATIBLE=true",
+		"AIDASTING_LLM_PROVIDER=custom",
+		"AIDASTING_LLM=reasoning-model:latest",
+		"AIDASTING_API_BASE=http://models.example:9443/v1",
+		"AIDASTING_REASONING_EFFORT=none",
+		"AIDASTING_OLLAMA_COMPATIBLE=true",
 	} {
 		if !strings.Contains(env, want) {
 			t.Fatalf("env file missing %q:\n%s", want, env)
@@ -2166,12 +2166,12 @@ func TestLLMSettings_CustomProviderPersistsOllamaCompatibility(t *testing.T) {
 func TestLLMSettings_LocalRuntimeReSavePreservesAPIBase(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
-	envFile := filepath.Join(home, ".xalgorix.env")
+	envFile := filepath.Join(home, ".ai-dast-ing.env")
 	if err := os.WriteFile(envFile, []byte(""), 0o600); err != nil {
 		t.Fatalf("seed env file: %v", err)
 	}
 	// Mimic a local llama.cpp / Ollama endpoint that is NOT the catalog
-	// default loopback URL: the operator already pointed Xalgorix at the
+	// default loopback URL: the operator already pointed AI-DAST-ING at the
 	// host gateway so the container can reach it.
 	s := newTestServer(t, &config.Config{
 		LLMProvider:     "ollama",
@@ -2226,11 +2226,11 @@ func TestLLMSettingsPreservesProviderNativeModelPath(t *testing.T) {
 
 // TestLLMSettings_CatalogShape_ActiveOnly validates the "pick existing
 // profile" branch: when only activeProfileKey is supplied (no new
-// credentials), the handler just writes XALGORIX_LLM_PROFILE.
+// credentials), the handler just writes AIDASTING_LLM_PROFILE.
 func TestLLMSettings_CatalogShape_ActiveOnly(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
-	if err := os.WriteFile(filepath.Join(home, ".xalgorix.env"), []byte(""), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(home, ".ai-dast-ing.env"), []byte(""), 0o644); err != nil {
 		t.Fatalf("seed env file: %v", err)
 	}
 
@@ -2266,7 +2266,7 @@ func TestLLMSettings_CatalogShape_ActiveOnly(t *testing.T) {
 func TestLLMSettings_CatalogShape_RejectsUnknownProvider(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
-	if err := os.WriteFile(filepath.Join(home, ".xalgorix.env"), []byte(""), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(home, ".ai-dast-ing.env"), []byte(""), 0o644); err != nil {
 		t.Fatalf("seed env file: %v", err)
 	}
 
@@ -2288,13 +2288,13 @@ func TestLLMSettings_CatalogShape_RejectsUnknownProvider(t *testing.T) {
 // test for the "provider reverts after refresh" bug: switching the provider
 // while leaving the API key masked (**** — the UI tells the operator to keep
 // it to preserve the saved key) must still persist the new provider by moving
-// the XALGORIX_LLM_PROFILE pointer. Previously the api_key branch was gated on
+// the AIDASTING_LLM_PROFILE pointer. Previously the api_key branch was gated on
 // a freshly-typed key, so only the model env var changed and the provider
 // derived back to the stale profile on the next GET.
 func TestLLMSettings_CatalogShape_ProviderSwitchWithMaskedKey(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
-	if err := os.WriteFile(filepath.Join(home, ".xalgorix.env"), []byte(""), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(home, ".ai-dast-ing.env"), []byte(""), 0o644); err != nil {
 		t.Fatalf("seed env file: %v", err)
 	}
 
@@ -2363,7 +2363,7 @@ func TestEnvironmentSettings_RejectsUnknownAndUpdatesRuntime(t *testing.T) {
 	}
 
 	rr = httptest.NewRecorder()
-	body := strings.NewReader(`{"values":{"XALGORIX_RATE_LIMIT_REQUESTS":"2000","XALGORIX_RATE_LIMIT_WINDOW":"1","XALGORIX_DISCORD_WEBHOOK":"https://discord.example/webhook","XALGORIX_BIND":"0.0.0.0","XALGORIX_LLM_MAX_INFLIGHT":"4","XALGORIX_MAX_CONCURRENT_AGENTS":"1","XALGORIX_ITERATION_DELAY":"3.5"}}`)
+	body := strings.NewReader(`{"values":{"AIDASTING_RATE_LIMIT_REQUESTS":"2000","AIDASTING_RATE_LIMIT_WINDOW":"1","AIDASTING_DISCORD_WEBHOOK":"https://discord.example/webhook","AIDASTING_BIND":"0.0.0.0","AIDASTING_LLM_MAX_INFLIGHT":"4","AIDASTING_MAX_CONCURRENT_AGENTS":"1","AIDASTING_ITERATION_DELAY":"3.5"}}`)
 	s.handleEnvironmentSettings(rr, httptest.NewRequest(http.MethodPost, "/api/settings/environment", body))
 	if rr.Code != http.StatusOK {
 		t.Fatalf("environment POST code = %d body=%s", rr.Code, rr.Body.String())
@@ -2387,19 +2387,19 @@ func TestEnvironmentSettings_RejectsUnknownAndUpdatesRuntime(t *testing.T) {
 	if !resp.RestartRequired {
 		t.Fatal("expected restartRequired for bind change")
 	}
-	data, err := os.ReadFile(filepath.Join(home, ".xalgorix.env"))
+	data, err := os.ReadFile(filepath.Join(home, ".ai-dast-ing.env"))
 	if err != nil {
 		t.Fatalf("read env file: %v", err)
 	}
 	env := string(data)
 	for _, want := range []string{
-		"XALGORIX_RATE_LIMIT_REQUESTS=1000",
-		"XALGORIX_RATE_LIMIT_WINDOW=10",
-		"XALGORIX_DISCORD_WEBHOOK=https://discord.example/webhook",
-		"XALGORIX_BIND=0.0.0.0",
-		"XALGORIX_LLM_MAX_INFLIGHT=4",
-		"XALGORIX_MAX_CONCURRENT_AGENTS=1",
-		"XALGORIX_ITERATION_DELAY=3.5",
+		"AIDASTING_RATE_LIMIT_REQUESTS=1000",
+		"AIDASTING_RATE_LIMIT_WINDOW=10",
+		"AIDASTING_DISCORD_WEBHOOK=https://discord.example/webhook",
+		"AIDASTING_BIND=0.0.0.0",
+		"AIDASTING_LLM_MAX_INFLIGHT=4",
+		"AIDASTING_MAX_CONCURRENT_AGENTS=1",
+		"AIDASTING_ITERATION_DELAY=3.5",
 	} {
 		if !strings.Contains(env, want) {
 			t.Fatalf("env file missing %q:\n%s", want, env)
@@ -3010,7 +3010,7 @@ func TestHandleGetScan_MarksTelegramConfigured(t *testing.T) {
 
 // TestEnvironmentSettings_AppliesTelegramAndRedactsToken mirrors the
 // Discord env-settings test: POSTing the three Telegram vars updates
-// both cfg.* and the server runtime fields, persists to ~/.xalgorix.env,
+// both cfg.* and the server runtime fields, persists to ~/.ai-dast-ing.env,
 // and the GET response masks the bot token (Sensitive: true) while the
 // chat ID (non-secret) round-trips in cleartext.
 func TestEnvironmentSettings_AppliesTelegramAndRedactsToken(t *testing.T) {
@@ -3018,7 +3018,7 @@ func TestEnvironmentSettings_AppliesTelegramAndRedactsToken(t *testing.T) {
 	t.Setenv("HOME", home)
 	s := newTestServer(t, &config.Config{RateLimitRequests: 60, RateLimitWindow: 60})
 
-	body := strings.NewReader(`{"values":{"XALGORIX_TELEGRAM_BOT_TOKEN":"987654321:ZZ-TOPSECRET-99","XALGORIX_TELEGRAM_CHAT_ID":"-1001234567890","XALGORIX_TELEGRAM_MIN_SEVERITY":"critical"}}`)
+	body := strings.NewReader(`{"values":{"AIDASTING_TELEGRAM_BOT_TOKEN":"987654321:ZZ-TOPSECRET-99","AIDASTING_TELEGRAM_CHAT_ID":"-1001234567890","AIDASTING_TELEGRAM_MIN_SEVERITY":"critical"}}`)
 	rr := httptest.NewRecorder()
 	s.handleEnvironmentSettings(rr, httptest.NewRequest(http.MethodPost, "/api/settings/environment", body))
 	if rr.Code != http.StatusOK {
@@ -3047,21 +3047,21 @@ func TestEnvironmentSettings_AppliesTelegramAndRedactsToken(t *testing.T) {
 	if strings.Contains(gotBody, "987654321:ZZ-TOPSECRET-99") {
 		t.Fatalf("full telegram bot token NOT redacted in GET response: %s", gotBody)
 	}
-	if !strings.Contains(gotBody, "XALGORIX_TELEGRAM_BOT_TOKEN") {
+	if !strings.Contains(gotBody, "AIDASTING_TELEGRAM_BOT_TOKEN") {
 		t.Fatalf("telegram bot token setting missing from GET response: %s", gotBody)
 	}
 
 	// The env file on disk must contain the cleartext values so the next
 	// process restart picks them up (matching Discord behavior).
-	data, err := os.ReadFile(filepath.Join(home, ".xalgorix.env"))
+	data, err := os.ReadFile(filepath.Join(home, ".ai-dast-ing.env"))
 	if err != nil {
 		t.Fatalf("read env file: %v", err)
 	}
 	env := string(data)
 	for _, want := range []string{
-		"XALGORIX_TELEGRAM_BOT_TOKEN=987654321:ZZ-TOPSECRET-99",
-		"XALGORIX_TELEGRAM_CHAT_ID=-1001234567890",
-		"XALGORIX_TELEGRAM_MIN_SEVERITY=critical",
+		"AIDASTING_TELEGRAM_BOT_TOKEN=987654321:ZZ-TOPSECRET-99",
+		"AIDASTING_TELEGRAM_CHAT_ID=-1001234567890",
+		"AIDASTING_TELEGRAM_MIN_SEVERITY=critical",
 	} {
 		if !strings.Contains(env, want) {
 			t.Fatalf("env file missing %q:\n%s", want, env)
@@ -3549,7 +3549,7 @@ func TestEnvironmentSettings_IterationDelayClampingAndRunningAgentUpdate(t *test
 
 	// Clamped at 300
 	rr := httptest.NewRecorder()
-	body := strings.NewReader(`{"values":{"XALGORIX_ITERATION_DELAY":"450"}}`)
+	body := strings.NewReader(`{"values":{"AIDASTING_ITERATION_DELAY":"450"}}`)
 	s.handleEnvironmentSettings(rr, httptest.NewRequest(http.MethodPost, "/api/settings/environment", body))
 	if rr.Code != http.StatusOK {
 		t.Fatalf("environment POST code = %d body=%s", rr.Code, rr.Body.String())
@@ -3557,13 +3557,13 @@ func TestEnvironmentSettings_IterationDelayClampingAndRunningAgentUpdate(t *test
 	if s.cfg.IterationDelaySec != 300 {
 		t.Fatalf("expected iteration delay clamped to 300, got %v", s.cfg.IterationDelaySec)
 	}
-	if delay := s.envSettingValue("XALGORIX_ITERATION_DELAY"); delay != "300" {
+	if delay := s.envSettingValue("AIDASTING_ITERATION_DELAY"); delay != "300" {
 		t.Fatalf("expected envSettingValue '300', got %q", delay)
 	}
 
 	// Dynamic update: verify running agent received new delay
 	rr = httptest.NewRecorder()
-	body = strings.NewReader(`{"values":{"XALGORIX_ITERATION_DELAY":"5.5"}}`)
+	body = strings.NewReader(`{"values":{"AIDASTING_ITERATION_DELAY":"5.5"}}`)
 	s.handleEnvironmentSettings(rr, httptest.NewRequest(http.MethodPost, "/api/settings/environment", body))
 	if rr.Code != http.StatusOK {
 		t.Fatalf("environment POST code = %d body=%s", rr.Code, rr.Body.String())
@@ -3574,7 +3574,7 @@ func TestEnvironmentSettings_IterationDelayClampingAndRunningAgentUpdate(t *test
 
 	// Clamped at 0 for negative
 	rr = httptest.NewRecorder()
-	body = strings.NewReader(`{"values":{"XALGORIX_ITERATION_DELAY":"-10"}}`)
+	body = strings.NewReader(`{"values":{"AIDASTING_ITERATION_DELAY":"-10"}}`)
 	s.handleEnvironmentSettings(rr, httptest.NewRequest(http.MethodPost, "/api/settings/environment", body))
 	if rr.Code != http.StatusOK {
 		t.Fatalf("environment POST code = %d body=%s", rr.Code, rr.Body.String())

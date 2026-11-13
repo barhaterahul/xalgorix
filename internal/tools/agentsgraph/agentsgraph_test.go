@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/tools"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
 )
 
 func agentIDFromResult(t *testing.T, metadata map[string]any) string {
@@ -260,7 +260,7 @@ func TestCompletedResultMustBeCollected(t *testing.T) {
 }
 
 func TestSerialSpecialistExecution(t *testing.T) {
-	t.Setenv("XALGORIX_MAX_CONCURRENT_AGENTS", "1")
+	t.Setenv("AIDASTING_MAX_CONCURRENT_AGENTS", "1")
 	startedOrder := make([]string, 0, 3)
 	var mu sync.Mutex
 	releaseCh := map[string]chan struct{}{
@@ -334,7 +334,7 @@ func TestSerialSpecialistExecution(t *testing.T) {
 }
 
 func TestStopWithQueuedAgents(t *testing.T) {
-	t.Setenv("XALGORIX_MAX_CONCURRENT_AGENTS", "1")
+	t.Setenv("AIDASTING_MAX_CONCURRENT_AGENTS", "1")
 	spec1Started := make(chan struct{})
 	spec1Block := make(chan struct{})
 

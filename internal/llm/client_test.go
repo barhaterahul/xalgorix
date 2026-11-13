@@ -15,9 +15,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/auth"
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/providers"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/auth"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
 )
 
 // newTestClient returns a Client wired to a minimal Config — enough for the
@@ -968,7 +968,7 @@ func newResolverFixture(t *testing.T, tempDir string, seedEntry providers.Entry,
 
 // TestResolver_LegacyFallbackDecision validates Property 5 for the
 // legacy branch: when the catalog reports zero entries AND
-// XALGORIX_LLM matches Legacy_Provider_Shape, Resolve must dispatch
+// AIDASTING_LLM matches Legacy_Provider_Shape, Resolve must dispatch
 // through the legacy provider table and return a URL byte-identical
 // to the pre-feature Client.resolveEndpoint output.
 //
@@ -1035,7 +1035,7 @@ func TestResolver_LegacyFallbackDecision(t *testing.T) {
 // catalog branch: any time cfg.LLMProfile names a saved profile and
 // the profile's Provider matches a Builtin() catalog entry, Resolve
 // dispatches through catalogResolver regardless of whether
-// XALGORIX_LLM names a legacy slug. The test asserts the URL,
+// AIDASTING_LLM names a legacy slug. The test asserts the URL,
 // HeaderStyle, and credentials all come from the Builtin() entry +
 // stored profile — never from the legacy provider table.
 //
@@ -1147,7 +1147,7 @@ func TestResolver_CatalogPreemptsLegacy(t *testing.T) {
 
 // TestResolver_NoCatalogNoLegacy_ReturnsConfigError validates
 // Property 5 for the error branch: when the catalog is empty AND
-// XALGORIX_LLM does not match Legacy_Provider_Shape, Resolve must
+// AIDASTING_LLM does not match Legacy_Provider_Shape, Resolve must
 // return a *ConfigError so the HTTP layer can surface "no provider
 // configured" instead of dispatching a malformed request.
 //

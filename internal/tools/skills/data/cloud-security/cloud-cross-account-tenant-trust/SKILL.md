@@ -39,7 +39,7 @@ aws iam get-role --role-name <role> --query "Role.AssumeRolePolicyDocument"
 # A trust policy with Principal: arn:aws:iam::<account>:root is only a CANDIDATE:
 # it delegates to the whole account, not to you. You also need sts:AssumeRole in YOUR
 # identity policy, and every condition satisfied (ExternalId, MFA, aws:SourceOrgID...).
-aws sts assume-role --role-arn <arn> --role-session-name xalgorix-test --external-id <id-if-known>
+aws sts assume-role --role-arn <arn> --role-session-name ai-dast-ing-test --external-id <id-if-known>
 ```
 
 ### AWS — Resource Policies
@@ -103,7 +103,7 @@ trust candidate (policy/registration/federation observed)
 - Conditions that genuinely block your context (org-id mismatch)
 - Expired federation configurations
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `terminal_execute` with aws/az/gcloud for policy reads and assumption calls
 - PMapper/CloudFox optional for graph hypothesis generation — every edge verified manually
 - Ledger: trust edges with source, edge type, conditions, target, verified state

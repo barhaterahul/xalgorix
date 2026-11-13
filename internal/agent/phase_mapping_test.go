@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/methodology"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/methodology"
 )
 
 // TestCanonicalClassPhaseMapping is the table-driven lock over EVERY

@@ -20,7 +20,7 @@ import (
 // schema, so a malformed call becomes impossible rather than merely repaired.
 //
 // Everything here is inert unless the operator opts in via
-// XALGORIX_NATIVE_TOOL_CALLS and the endpoint speaks the OpenAI protocol.
+// AIDASTING_NATIVE_TOOL_CALLS and the endpoint speaks the OpenAI protocol.
 
 // ToolDefinition is the provider-neutral description of one tool offered to the
 // model through the native channel.
@@ -110,7 +110,7 @@ func (j *jsonString) UnmarshalJSON(b []byte) error {
 // buildChatTools converts provider-neutral definitions into the wire format of
 // the chat-completions `tools` array.
 //
-// Every parameter is declared as type "string": xalgorix executors take
+// Every parameter is declared as type "string": ai-dast-ing executors take
 // map[string]string, and structured arguments (task lists, header maps) are
 // already carried as JSON-encoded strings on the XML path too, so the two
 // channels stay interchangeable. The output is sorted by name so the request

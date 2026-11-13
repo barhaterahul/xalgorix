@@ -5,8 +5,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
-	"github.com/xalgord/xalgorix/v4/internal/tools"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
 )
 
 func TestCheckFalsePositive_MissingHeaders(t *testing.T) {
@@ -897,7 +897,7 @@ func TestHasConcreteRCEExecutionProof(t *testing.T) {
 		},
 		{
 			name:  "response bound random canary",
-			proof: "The response body returned XALGORIX_RCE_CANARY_a81f5d after the injected echo command.",
+			proof: "The response body returned AIDASTING_RCE_CANARY_a81f5d after the injected echo command.",
 			want:  true,
 		},
 	}

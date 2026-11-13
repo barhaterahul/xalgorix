@@ -11,10 +11,10 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/xalgord/xalgorix/v4/internal/agent"
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/scopeguard"
-	"github.com/xalgord/xalgorix/v4/internal/tools/reporting"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/agent"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scopeguard"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/reporting"
 )
 
 // ─── Color Palette ────────────────────────────────────────────────────────────
@@ -53,12 +53,12 @@ var (
 // ─── Banner ───────────────────────────────────────────────────────────────────
 
 const Banner = `
- ██╗  ██╗ █████╗ ██╗      ██████╗  ██████╗ ██████╗ ██╗██╗  ██╗
- ╚██╗██╔╝██╔══██╗██║     ██╔════╝ ██╔═══██╗██╔══██╗██║╚██╗██╔╝
-  ╚███╔╝ ███████║██║     ██║  ███╗██║   ██║██████╔╝██║ ╚███╔╝
-  ██╔██╗ ██╔══██║██║     ██║   ██║██║   ██║██╔══██╗██║ ██╔██╗
- ██╔╝ ██╗██║  ██║███████╗╚██████╔╝╚██████╔╝██║  ██║██║██╔╝ ██╗
- ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝`
+ █████╗ ██╗      ██████╗  █████╗ ███████╗████████╗   ██╗███╗   ██╗ ██████╗ 
+██╔══██╗██║      ██╔══██╗██╔══██╗██╔════╝╚══██╔══╝   ██║████╗  ██║██╔════╝ 
+███████║██║█████╗██║  ██║███████║███████╗   ██║█████╗██║██╔██╗ ██║██║  ███╗
+██╔══██║██║╚════╝██║  ██║██╔══██║╚════██║   ██║╚════╝██║██║╚██╗██║██║   ██║
+██║  ██║██║      ██████╔╝██║  ██║███████║   ██║      ██║██║ ╚████║╚██████╔╝
+╚═╝  ╚═╝╚═╝      ╚═════╝ ╚═╝  ╚═╝╚══════╝   ╚═╝      ╚═╝╚═╝  ╚═══╝ ╚═════╝ `
 
 // ─── Messages ─────────────────────────────────────────────────────────────────
 
@@ -104,7 +104,7 @@ func NewModel(cfg *config.Config, targets []string, instruction string) Model {
 
 func (m Model) Init() tea.Cmd {
 	return tea.Batch(
-		tea.SetWindowTitle("Xalgorix"),
+		tea.SetWindowTitle("AI-DAST-ING"),
 		tick(),
 	)
 }
@@ -183,7 +183,7 @@ func (m *Model) startAgent() tea.Cmd {
 	// TUI runs without the dashboard listener, so the localGuard's
 	// listener-port rule is dormant. Default BindAddr ("127.0.0.1") and
 	// Port (0) keep loopback / RFC1918 / link-local rejection active.
-	m.ag = agent.NewAgent(m.cfg, "XalgorixAgent", m.events, scopeguard.Config{BindAddr: "127.0.0.1", Port: 0})
+	m.ag = agent.NewAgent(m.cfg, "AidastingAgent", m.events, scopeguard.Config{BindAddr: "127.0.0.1", Port: 0})
 	m.agentRunning = true
 
 	m.chatLog = append(m.chatLog,
@@ -303,11 +303,11 @@ func (m Model) renderSplash() string {
 	// Animated splash
 	banner := bannerStyle.Render(Banner)
 
-	welcome := brightStyle.Render("Welcome to ") + titleStyle.Render("Xalgorix") + brightStyle.Render("!")
+	welcome := brightStyle.Render("Welcome to ") + titleStyle.Render("AI-DAST-ING") + brightStyle.Render("!")
 	tagline := dimStyle.Render("Autonomous AI Pentesting Engine")
 
 	// Animated "Starting..." text
-	full := "Starting Xalgorix Agent"
+	full := "Starting AI-DAST-ING Agent"
 	var animText strings.Builder
 	for i, ch := range full {
 		dist := abs(i - (m.splashPhase % (len(full) + 8)))
@@ -329,7 +329,7 @@ func (m Model) renderSplash() string {
 		"",
 		animText.String(),
 		"",
-		titleStyle.Render("xalgorix.io"),
+		titleStyle.Render("ai-dast-ing.io"),
 	)
 
 	return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, content)
@@ -338,7 +338,7 @@ func (m Model) renderSplash() string {
 func (m Model) renderMain() string {
 	// Header bar
 	header := headerStyle.Width(m.width).Render(
-		fmt.Sprintf(" XALGORIX  │  Tools: %d  │  Vulns: %d  │  Iter: %d  │  %s",
+		fmt.Sprintf(" AI-DAST-ING  │  Tools: %d  │  Vulns: %d  │  Iter: %d  │  %s",
 			m.toolCount, m.vulnCount, m.iterCount, m.statusText()),
 	)
 
@@ -469,7 +469,7 @@ func SplashText(version string) string {
 	var b strings.Builder
 	b.WriteString(Banner)
 	b.WriteString("\n\n")
-	b.WriteString(fmt.Sprintf("  Welcome to Xalgorix! v%s\n", version))
+	b.WriteString(fmt.Sprintf("  Welcome to AI-DAST-ING! v%s\n", version))
 	b.WriteString("  Autonomous AI Pentesting Engine\n\n")
 	return b.String()
 }
@@ -553,7 +553,7 @@ func FormatCostNote(cfg *config.Config, totalTokens int, costUSD float64) string
 	}
 	b.WriteString("  The hosted cloud runs the same exploit-verified scan for 1 credit per\n")
 	b.WriteString("  live host — no API keys, no token bills, infra + OOB managed for you:\n")
-	b.WriteString("    → https://www.xalgorix.com/hosted-vs-self-hosted\n")
+	b.WriteString("    → https://www.ai-dast-ing.com/hosted-vs-self-hosted\n")
 	return b.String()
 }
 
@@ -620,7 +620,7 @@ func RunInteractive(cfg *config.Config, targets []string, instruction string) er
 	return err
 }
 
-// RunCLI runs Xalgorix in non-interactive CLI mode.
+// RunCLI runs AI-DAST-ING in non-interactive CLI mode.
 func RunCLI(cfg *config.Config, targets []string, instruction string, codeScan string) {
 	fmt.Print(SplashText("0.1.0"))
 
@@ -655,7 +655,7 @@ func RunCLI(cfg *config.Config, targets []string, instruction string, codeScan s
 	// CLI mode has no dashboard listener; localGuard defaults keep the
 	// loopback / RFC1918 / link-local rejection active without firing
 	// the listener-port rule.
-	ag := agent.NewAgent(cfg, "XalgorixAgent", events, guard)
+	ag := agent.NewAgent(cfg, "AidastingAgent", events, guard)
 	if codeMode != agent.CodeScanNone {
 		ag.SetCodeScanMode(codeMode)
 	}

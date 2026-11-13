@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
 )
 
 // Newer OpenAI models (GPT-5 family, o-series reasoning models) reject the

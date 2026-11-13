@@ -12,7 +12,7 @@
 //  2. R11.3: When ProviderProfile is empty, defer to
 //     legacyOrCatalogDefaultEndpoint, which mirrors the existing
 //     Settings free-text path (legacy resolver when the catalog is
-//     empty AND XALGORIX_LLM matches Legacy_Provider_Shape;
+//     empty AND AIDASTING_LLM matches Legacy_Provider_Shape;
 //     otherwise the catalog's first-entry / first-profile default).
 //  3. R11.4: Ad-hoc Model / APIKey / APIBase overrides take
 //     precedence over whatever step 1 or 2 produced. APIKey
@@ -41,9 +41,9 @@ import (
 	"path"
 	"strings"
 
-	"github.com/xalgord/xalgorix/v4/internal/auth"
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/llm"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/auth"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/llm"
 )
 
 // errAPIBaseNeedsKey is returned when a scan request moves LLM traffic to a
@@ -419,7 +419,7 @@ func isZeroEndpoint(ep llm.Endpoint) bool {
 }
 
 // modelForConfiguredProvider strips a matching legacy "<provider>/" prefix
-// from XALGORIX_LLM while preserving provider-native IDs that contain a slash.
+// from AIDASTING_LLM while preserving provider-native IDs that contain a slash.
 // Mirrors the legacy resolver's model derivation
 // (internal/llm/resolver.go) so the active-profile path and the
 // legacy path agree on the outbound model string. Returns "" when
@@ -440,7 +440,7 @@ func modelForConfiguredProvider(llmValue, provider string) string {
 //  1. Catalog non-empty → first catalog entry + first matching
 //     profile, built via buildEndpoint. This is the "current default
 //     provider" view the dashboard renders for the Settings page.
-//  2. Catalog empty AND XALGORIX_LLM matches Legacy_Provider_Shape
+//  2. Catalog empty AND AIDASTING_LLM matches Legacy_Provider_Shape
 //     → defer to llm.NewCompositeResolver(WithLegacy(cfg)) and
 //     return its Resolve result. This is the Legacy_Fallback path
 //     (Requirements 2.1, 2.3).
@@ -477,7 +477,7 @@ func (s *Server) legacyOrCatalogDefaultEndpoint(ctx context.Context, cfg *config
 	}
 	// Branch 0 — active credential pointer (cfg.LLMProfile) wins.
 	// This mirrors the composite resolver's defaultCatalogPick
-	// (internal/llm/resolver.go): when XALGORIX_LLM_PROFILE names a
+	// (internal/llm/resolver.go): when AIDASTING_LLM_PROFILE names a
 	// "<provider>:<profileId>" that resolves to a live
 	// (Auth_Profile, Catalog_Entry) pair, that profile's endpoint
 	// is used directly rather than the catalog's first-entry
@@ -491,7 +491,7 @@ func (s *Server) legacyOrCatalogDefaultEndpoint(ctx context.Context, cfg *config
 			if entry, ok, err := s.catalog.Get(ctx, prof.Provider); err == nil && ok {
 				// The operator's typed model (cfg.LLM, stripped of
 				// any "<provider>/" prefix) wins over the catalog
-				// default so XALGORIX_LLM=google/gemini-test-model
+				// default so AIDASTING_LLM=google/gemini-test-model
 				// routes to gemini-test-model rather than the
 				// catalog's first listed model.
 				preferModel := modelForConfiguredProvider(cfg.LLM, prof.Provider)
@@ -524,7 +524,7 @@ func (s *Server) legacyOrCatalogDefaultEndpoint(ctx context.Context, cfg *config
 	}
 
 	// Branch 2 — Legacy_Fallback. Only engages when the operator's
-	// XALGORIX_LLM names one of the eight known legacy slugs;
+	// AIDASTING_LLM names one of the eight known legacy slugs;
 	// arbitrary custom values fall through to branch 3.
 	if cfg != nil && llm.LegacyProviderShape(cfg.LLM) {
 		r := llm.NewCompositeResolver(llm.WithLegacy(cfg))

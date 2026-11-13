@@ -5,7 +5,7 @@ import { useI18n, LANGUAGES } from "@/i18n";
 
 // Compact language picker for the topbar. Switches the dashboard UI language
 // immediately (client-side, persisted to localStorage). The AI output language
-// is a separate server setting (XALGORIX_LANGUAGE) configurable under
+// is a separate server setting (AIDASTING_LANGUAGE) configurable under
 // Settings → Environment.
 export function LanguageSwitcher() {
   const { lang, setLanguage, t } = useI18n();

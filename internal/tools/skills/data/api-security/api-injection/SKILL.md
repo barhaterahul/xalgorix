@@ -84,7 +84,7 @@ An injection finding requires ALL of:
 - Time jitter without a payload-correlated pattern
 - OOB callbacks from client-side resolution rather than the server
 
-## Xalgorix Tool Strategy
+## AI-DAST-ING Tool Strategy
 - `http_request`/curl for exact payload control; Python for dialect and encoding matrices
 - `oob_callback` for blind confirmation
 - sqlmap where a confirmed injection needs deep extraction; ffuf for parameter discovery

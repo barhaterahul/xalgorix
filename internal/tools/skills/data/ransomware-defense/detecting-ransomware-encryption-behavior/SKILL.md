@@ -16,7 +16,7 @@ tags:
 - file-monitoring
 - heuristics
 version: 1.0.0
-author: Krishna Kumar (xalgord)
+author: ING
 license: Apache-2.0
 nist_csf:
 - PR.DS-11

@@ -7,9 +7,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/xalgord/xalgorix/v4/internal/scopeguard"
-	"github.com/xalgord/xalgorix/v4/internal/tools"
-	"github.com/xalgord/xalgorix/v4/internal/tools/httpclient"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scopeguard"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/httpclient"
 )
 
 // bodyContractCandidates is a compact, generic set of high-signal JSON field
@@ -22,7 +22,7 @@ var bodyContractCandidates = []string{
 	"query", "q", "search", "page", "limit", "data", "value", "enabled",
 }
 
-const bodyContractSentinel = "xalgorix_probe"
+const bodyContractSentinel = "aidasting_probe"
 
 // registerProbeBodyContractTool installs probe_body_contract: a deterministic
 // JSON body-contract discovery tool. arjun and the surface machinery only see

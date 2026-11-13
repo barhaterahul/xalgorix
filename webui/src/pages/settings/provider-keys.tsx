@@ -153,7 +153,7 @@ export default function ProviderKeysManager({ className }: ProviderKeysManagerPr
           Multi-Provider Model Router
         </CardTitle>
         <CardDescription>
-          Configure API keys for multiple providers — xalgorix automatically routes
+          Configure API keys for multiple providers — ai-dast-ing automatically routes
           models like <code className="text-xs">gpt-5.6</code>,{" "}
           <code className="text-xs">claude-fable-5</code>, or{" "}
           <code className="text-xs">gemini-3.5-flash</code> to the correct provider.

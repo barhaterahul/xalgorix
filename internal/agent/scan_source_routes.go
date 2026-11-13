@@ -22,9 +22,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
-	"github.com/xalgord/xalgorix/v4/internal/tools"
-	"github.com/xalgord/xalgorix/v4/internal/tools/codesearch"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/codesearch"
 )
 
 // maxRouteSeed caps how many route hypotheses a single sweep seeds so a large
@@ -51,7 +51,7 @@ func (a *Agent) scanSourceRoutesTool(args map[string]string) (tools.Result, erro
 		return tools.Result{Error: "no scan context — scan_source_routes needs a scan to seed hypotheses into"}, nil
 	}
 	if codesearch.GetSourceRoot(a.scanCtx.ID) == "" {
-		return tools.Result{Output: "❌ Whitebox source not configured for this scan (set XALGORIX_SOURCE_REPO to a git URL or local path). Fall back to black-box discovery: crawl the live target and read client-side JS bundles to map routes."}, nil
+		return tools.Result{Output: "❌ Whitebox source not configured for this scan (set AIDASTING_SOURCE_REPO to a git URL or local path). Fall back to black-box discovery: crawl the live target and read client-side JS bundles to map routes."}, nil
 	}
 
 	maxRoutes := 60

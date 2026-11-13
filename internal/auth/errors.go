@@ -22,7 +22,7 @@ var ErrUnknownProvider = errors.New("unknown provider")
 // acquire the exclusive flock on auth-profiles.json within the 5s
 // deadline. The HTTP layer maps this to 503 Service Unavailable so
 // the caller can retry — a 5s wait already represents heavy
-// contention from another xalgorix process or a stuck lock holder.
+// contention from another ai-dast-ing process or a stuck lock holder.
 //
 // Validates: Requirement 4.3.
 var ErrLockTimeout = errors.New("auth-profiles flock timeout")

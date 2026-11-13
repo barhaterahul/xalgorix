@@ -16,7 +16,7 @@ tags:
 - prowler
 - security-hardening
 version: 1.0.0
-author: Krishna Kumar (xalgord)
+author: ING
 license: Apache-2.0
 nist_ai_rmf:
 - GOVERN-1.1

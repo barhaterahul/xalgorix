@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
 )
 
 func TestExecutionCheckpointRestoresPlanEvidenceAndSpentBudget(t *testing.T) {

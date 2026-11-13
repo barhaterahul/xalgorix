@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/providers"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
 	"golang.org/x/term"
 )
 
@@ -55,7 +55,7 @@ func runSetup(in io.Reader, out io.Writer) (bool, error) {
 	}
 	p := &setupPrompter{in: in, buf: bufio.NewReader(in), out: out}
 
-	if err := p.println("\nWelcome to Xalgorix setup"); err != nil {
+	if err := p.println("\nWelcome to AI-DAST-ING setup"); err != nil {
 		return false, err
 	}
 	if err := p.println("Configure an LLM in a few steps. You can change advanced options later in Settings."); err != nil {
@@ -84,7 +84,7 @@ func runSetup(in io.Reader, out io.Writer) (bool, error) {
 	sameProvider := existingProvider(existing) == selected.id
 	modelDefault := selected.defaultModel
 	if sameProvider {
-		if current := bareSetupModel(existing["XALGORIX_LLM"], selected.id); current != "" {
+		if current := bareSetupModel(existing["AIDASTING_LLM"], selected.id); current != "" {
 			modelDefault = current
 		}
 	}
@@ -94,8 +94,8 @@ func runSetup(in io.Reader, out io.Writer) (bool, error) {
 	}
 
 	apiBase := strings.TrimSpace(entry.BaseURL)
-	if sameProvider && strings.TrimSpace(existing["XALGORIX_API_BASE"]) != "" {
-		apiBase = strings.TrimSpace(existing["XALGORIX_API_BASE"])
+	if sameProvider && strings.TrimSpace(existing["AIDASTING_API_BASE"]) != "" {
+		apiBase = strings.TrimSpace(existing["AIDASTING_API_BASE"])
 	}
 	if selected.id == "custom" || selected.id == "ollama" {
 		label := "API base URL"
@@ -112,7 +112,7 @@ func runSetup(in io.Reader, out io.Writer) (bool, error) {
 	if selected.needsAPIKey {
 		currentKey := ""
 		if sameProvider {
-			currentKey = strings.TrimSpace(existing["XALGORIX_API_KEY"])
+			currentKey = strings.TrimSpace(existing["AIDASTING_API_KEY"])
 		}
 		apiKey, err = p.secret("API key", currentKey)
 		if err != nil {
@@ -124,11 +124,11 @@ func runSetup(in io.Reader, out io.Writer) (bool, error) {
 	}
 
 	updates := map[string]string{
-		"XALGORIX_LLM_PROVIDER": selected.id,
-		"XALGORIX_LLM":          model,
-		"XALGORIX_API_BASE":     apiBase,
-		"XALGORIX_API_KEY":      apiKey,
-		"XALGORIX_LLM_PROFILE":  "",
+		"AIDASTING_LLM_PROVIDER": selected.id,
+		"AIDASTING_LLM":          model,
+		"AIDASTING_API_BASE":     apiBase,
+		"AIDASTING_API_KEY":      apiKey,
+		"AIDASTING_LLM_PROFILE":  "",
 	}
 	if err := config.UpdateEnvFile(path, updates); err != nil {
 		return false, err
@@ -161,7 +161,7 @@ func runSetup(in io.Reader, out io.Writer) (bool, error) {
 		return false, err
 	}
 	if !launch {
-		if err := p.println("\nSetup complete. Start later with: xalgorix --web"); err != nil {
+		if err := p.println("\nSetup complete. Start later with: ai-dast-ing --web"); err != nil {
 			return false, err
 		}
 	}
@@ -178,10 +178,10 @@ func setupProviderIndex(id string) int {
 }
 
 func existingProvider(values map[string]string) string {
-	if provider := strings.ToLower(strings.TrimSpace(values["XALGORIX_LLM_PROVIDER"])); provider != "" {
+	if provider := strings.ToLower(strings.TrimSpace(values["AIDASTING_LLM_PROVIDER"])); provider != "" {
 		return provider
 	}
-	model := strings.ToLower(strings.TrimSpace(values["XALGORIX_LLM"]))
+	model := strings.ToLower(strings.TrimSpace(values["AIDASTING_LLM"]))
 	if slash := strings.IndexByte(model, '/'); slash > 0 {
 		candidate := model[:slash]
 		if _, ok := providers.LookupBuiltin(candidate); ok {

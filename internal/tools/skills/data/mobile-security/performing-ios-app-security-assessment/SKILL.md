@@ -9,7 +9,7 @@ description: 'Performs comprehensive iOS application security assessments using 
   '
 domain: cybersecurity
 subdomain: mobile-security
-author: Krishna Kumar (xalgord)
+author: ING
 tags:
 - mobile-security
 - ios

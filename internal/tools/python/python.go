@@ -13,13 +13,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	egressproxy "github.com/xalgord/xalgorix/v4/internal/proxy"
-	"github.com/xalgord/xalgorix/v4/internal/resources"
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
-	"github.com/xalgord/xalgorix/v4/internal/tools"
-	"github.com/xalgord/xalgorix/v4/internal/tools/iolimit"
-	"github.com/xalgord/xalgorix/v4/internal/tools/terminal"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	egressproxy "github.com/barhaterahul/ai-dast-ing/v4/internal/proxy"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/resources"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/iolimit"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/terminal"
 )
 
 // configureProcessGroupKill starts cmd in its own process group and installs a
@@ -235,13 +235,13 @@ func pythonWorkspaceEnv(workDir string) []string {
 		"XDG_CACHE_HOME":          true,
 		"XDG_CONFIG_HOME":         true,
 		"XDG_DATA_HOME":           true,
-		"XALGORIX_WORKSPACE":      true,
+		"AIDASTING_WORKSPACE":      true,
 		"PYTHONDONTWRITEBYTECODE": true,
 	}
 	// The agent must never see the operator's provider keys, admin-console
 	// login, proxy credentials, or integration tokens through
 	// `import os; os.environ` in a python_action call. The loop below drops the
-	// whole XALGORIX_* namespace plus the non-namespaced operator secrets via the
+	// whole AIDASTING_* namespace plus the non-namespaced operator secrets via the
 	// shared tools.SecretEnvKey deny-list — the same one terminal.go uses, so the
 	// two tools' environments cannot drift apart.
 	env := make([]string, 0, len(os.Environ())+7)
@@ -253,9 +253,9 @@ func pythonWorkspaceEnv(workDir string) []string {
 		if replace[key] {
 			continue
 		}
-		// Drop the whole XALGORIX_* namespace (tools never need it; the few safe
+		// Drop the whole AIDASTING_* namespace (tools never need it; the few safe
 		// ones are re-added below) and any non-namespaced operator secret.
-		if strings.HasPrefix(key, "XALGORIX_") || tools.SecretEnvKey(key) {
+		if strings.HasPrefix(key, "AIDASTING_") || tools.SecretEnvKey(key) {
 			continue
 		}
 		env = append(env, kv)
@@ -266,7 +266,7 @@ func pythonWorkspaceEnv(workDir string) []string {
 		"XDG_CACHE_HOME="+filepath.Join(workDir, ".cache"),
 		"XDG_CONFIG_HOME="+filepath.Join(workDir, ".config"),
 		"XDG_DATA_HOME="+filepath.Join(workDir, ".local", "share"),
-		"XALGORIX_WORKSPACE="+workDir,
+		"AIDASTING_WORKSPACE="+workDir,
 		"PYTHONDONTWRITEBYTECODE=1",
 	)
 }

@@ -7,7 +7,7 @@ import (
 	"syscall"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
 )
 
 func TestExecutePython_ValidationErrors(t *testing.T) {
@@ -97,6 +97,6 @@ func TestExecutePython_RunsInSeparateProcessGroup(t *testing.T) {
 		t.Fatalf("parse child process group from %q: %v", res.Output, err)
 	}
 	if childPGID == parentPGID {
-		t.Fatalf("python_action used parent process group %d; cleanup could kill xalgorix", parentPGID)
+		t.Fatalf("python_action used parent process group %d; cleanup could kill ai-dast-ing", parentPGID)
 	}
 }

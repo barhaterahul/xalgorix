@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/xalgord/xalgorix/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
 )
 
 // scanHeaderTools are the bundled tools that accept a repeatable
@@ -14,7 +14,7 @@ import (
 var scanHeaderTools = []string{"httpx", "nuclei"}
 
 // InjectScanHeadersIntoCommand appends the operator-configured scan headers
-// (XALGORIX_SCAN_HEADERS / -H) as -H "Name: value" flags to every httpx and
+// (AIDASTING_SCAN_HEADERS / -H) as -H "Name: value" flags to every httpx and
 // nuclei invocation in command, so bundled-tool traffic carries the same
 // identifying header as the agent's own requests. It is pipe-aware (each
 // piped stage is handled independently) and idempotent — a header already

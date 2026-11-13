@@ -39,7 +39,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/xalgord/xalgorix/v4/internal/providers"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
 )
 
 // setupStubCatalog is a tiny CatalogResolver returning a single
@@ -122,7 +122,7 @@ func newSetupTestFixture(t *testing.T) *setupTestFixture {
 		BaseURL:       f.server.URL,
 		HeaderStyle:   "anthropic",
 		Flow:          "setup_token",
-		ClientID:      "xalgorix-anthropic",
+		ClientID:      "ai-dast-ing-anthropic",
 		TokenEndpoint: f.server.URL + "/token",
 		Scopes:        []string{"read", "write"},
 	}

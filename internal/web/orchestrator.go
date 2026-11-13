@@ -17,14 +17,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xalgord/xalgorix/v4/internal/agent"
-	"github.com/xalgord/xalgorix/v4/internal/config"
-	"github.com/xalgord/xalgorix/v4/internal/resources"
-	"github.com/xalgord/xalgorix/v4/internal/safe"
-	"github.com/xalgord/xalgorix/v4/internal/scanctx"
-	"github.com/xalgord/xalgorix/v4/internal/tools/notes"
-	"github.com/xalgord/xalgorix/v4/internal/tools/reporting"
-	"github.com/xalgord/xalgorix/v4/internal/tools/terminal"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/agent"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/config"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/resources"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/safe"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/notes"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/reporting"
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/terminal"
 )
 
 // ────────────────────────────────────────────────────────
@@ -1223,7 +1223,7 @@ func (s *Server) runWildcardTarget(ctx context.Context, scanCfg *config.Config, 
 			parentRecord.SubScanSkipped += skipped
 		}
 		subdomains = kept
-		log.Printf("[wildcard] Explicitly capped full subdomain scans at %d; skipping %d discovered candidates (XALGORIX_MAX_WILDCARD_SUBDOMAINS); mandatory targets retained", len(kept), skipped)
+		log.Printf("[wildcard] Explicitly capped full subdomain scans at %d; skipping %d discovered candidates (AIDASTING_MAX_WILDCARD_SUBDOMAINS); mandatory targets retained", len(kept), skipped)
 		s.broadcastToInstance(req.InstanceID, WSEvent{
 			Type:    "message",
 			Target:  target,
