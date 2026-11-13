@@ -10,6 +10,8 @@ package web
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/barhaterahul/ai-dast-ing/v4/internal/providers"
 )
 
 // jsonWriteBodyLimit caps the request body size every JSON write
@@ -66,7 +68,27 @@ func (s *Server) handleListProviders(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	writeJSONStatus(w, http.StatusOK, entries)
+	writeJSONStatus(w, http.StatusOK, filterVisibleProviders(entries))
+}
+
+// visibleProviderIDs restricts the LLM Settings dropdown to the
+// providers this build offers: GitHub Copilot and the Custom Provider
+// (for local / self-hosted OpenAI-compatible LLMs). The full
+// compiled-in catalog still backs provider resolution and model
+// routing; this only narrows what the dashboard enumerates.
+var visibleProviderIDs = map[string]bool{"copilot": true, "custom": true}
+
+// filterVisibleProviders returns only the catalog entries whose ID is
+// in visibleProviderIDs, preserving order. It allocates a fresh slice
+// so the caller's snapshot is not mutated.
+func filterVisibleProviders(entries []providers.Entry) []providers.Entry {
+	out := make([]providers.Entry, 0, len(visibleProviderIDs))
+	for _, e := range entries {
+		if visibleProviderIDs[e.ID] {
+			out = append(out, e)
+		}
+	}
+	return out
 }
 
 // writeCatalogError writes err to w as a generic catalog-lookup

@@ -57,6 +57,9 @@ func (s *Server) handleGetProviderKeys(w http.ResponseWriter, _ *http.Request) {
 
 	result := make([]providerKeyStatus, 0, len(catalog))
 	for _, entry := range catalog {
+		if !visibleProviderIDs[entry.ID] {
+			continue // this build offers only GitHub Copilot + Custom
+		}
 		if entry.ID == "custom" || entry.BaseURL == "" {
 			continue // skip providers without a known base URL
 		}
