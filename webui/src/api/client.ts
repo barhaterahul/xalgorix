@@ -1,7 +1,6 @@
 import type {
   AuthProfile,
   AuthStatus,
-  AgentMailSettings,
   CatalogEntry,
   EnvironmentSettings,
   InstancesResponse,
@@ -327,13 +326,6 @@ export const api = {
   rateLimit: () => http<RateLimitSettings>("/api/settings/rate-limit"),
   updateRateLimit: (req: RateLimitSettings) =>
     http<RateLimitSettings>("/api/settings/rate-limit", {
-      method: "POST",
-      json: req,
-    }),
-
-  agentMail: () => http<AgentMailSettings>("/api/settings/agentmail"),
-  updateAgentMail: (req: { pod: string; apiKey: string }) =>
-    http<AgentMailSettings>("/api/settings/agentmail", {
       method: "POST",
       json: req,
     }),

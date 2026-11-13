@@ -24,7 +24,6 @@ import (
 	"github.com/barhaterahul/ai-dast-ing/v4/internal/scanctx"
 	"github.com/barhaterahul/ai-dast-ing/v4/internal/scopeguard"
 	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools"
-	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/agentmail"
 	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/agentsgraph"
 	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/browser"
 	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/codesearch"
@@ -469,7 +468,6 @@ func NewAgent(cfg *config.Config, name string, events chan Event, localGuard sco
 	finish.Register(reg)
 	python.Register(reg)
 	websearch.Register(reg)
-	agentmail.Register(reg)
 	skillstool.Register(reg, cfg.SkillsDir)
 	oobtool.Register(reg)
 	codesearch.Register(reg)

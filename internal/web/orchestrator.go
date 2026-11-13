@@ -170,7 +170,6 @@ func (s *Server) registerMultiScan(req ScanRequest, instanceIDs ...string) (*mul
 		CurrentPhase:        firstSelectedPhase(req.Phases),
 		CompanyName:         req.CompanyName,
 		LogoPath:            req.LogoPath,
-		DiscordWebhook:      req.DiscordWebhook,
 		TargetAuth:          req.TargetAuth,
 		TargetAuthSecondary: req.TargetAuthSecondary,
 		SourceRepo:          req.SourceRepo,
@@ -588,10 +587,6 @@ func (s *Server) runRegisteredMultiScan(run *multiScanRun, scanCfg *config.Confi
 	// process exits during admission/startup.
 	req.InstanceID = instanceID // (re)thread instance ID; also set before the admission wait
 	s.running.Store(true)
-	scanDiscordWebhook := strings.TrimSpace(req.DiscordWebhook)
-	if scanDiscordWebhook == "" {
-		scanDiscordWebhook = s.discordWebhook
-	}
 
 	if req.IsResume {
 		log.Printf("[AUTO-RESUME] Skipping state reset — preserving vulns, notes, and recon files from previous session")
@@ -622,13 +617,6 @@ func (s *Server) runRegisteredMultiScan(run *multiScanRun, scanCfg *config.Confi
 		TotalTargets: totalTargets,
 		CurrentPhase: firstSelectedPhase(req.Phases),
 	})
-
-	// Discord: scan started
-	s.sendDiscordTo(scanDiscordWebhook, 0x00ff88, "🚀 Scan Started", fmt.Sprintf("**Targets:** %s\n**Mode:** %s\n**Total:** %d target(s)", strings.Join(req.Targets, ", "), req.ScanMode, totalTargets))
-	// Telegram: scan started
-	if s.telegramConfigured() {
-		s.sendTelegram(0x00ff88, "🚀 Scan Started", fmt.Sprintf("**Targets:** %s\n**Mode:** %s\n**Total:** %d target(s)", strings.Join(req.Targets, ", "), req.ScanMode, totalTargets))
-	}
 
 	interruptedQueue := false
 	for i, target := range req.Targets {
@@ -691,44 +679,9 @@ func (s *Server) runRegisteredMultiScan(run *multiScanRun, scanCfg *config.Confi
 		return
 	}
 
-	// Queue-level scan completion summary — use the instance's accumulated
-	// vulnerability count (don't read from inst.sctx.ID; it may point to a
-	// cleaned-up session context). The helper applies the same opt-in gate as
-	// the per-report Telegram notification.
-	vulnCount := 0
-	s.instancesMu.RLock()
-	if inst, ok := s.instances[instanceID]; ok {
-		inst.mu.RLock()
-		vulnCount = inst.VulnCount
-		inst.mu.RUnlock()
-	}
-	s.instancesMu.RUnlock()
-	s.sendScanCompletionSummary(scanDiscordWebhook, totalTargets, vulnCount)
-
 	log.Printf("[INFO] runMultiScan main body complete")
 }
 
-// sendScanCompletionSummary sends the queue-level completion notification to
-// the configured Discord and Telegram channels. Completion notifications are
-// opt-in; per-finding alerts are sent elsewhere and are unaffected.
-func (s *Server) sendScanCompletionSummary(discordWebhook string, totalTargets, vulnCount int) {
-	if !s.notifyScanComplete.Load() {
-		return
-	}
-
-	if vulnCount > 0 {
-		desc := fmt.Sprintf("**Targets:** %d completed\n**Vulnerabilities:** %d found\n**Completed at:** %s", totalTargets, vulnCount, time.Now().Format("15:04:05 MST"))
-		s.sendDiscordTo(discordWebhook, 0x3b82f6, "✅ Scan Finished - Vulnerabilities Found", desc)
-		if s.telegramConfigured() {
-			s.sendTelegram(0x3b82f6, "✅ Scan Finished - Vulnerabilities Found", desc)
-		}
-	} else {
-		s.sendDiscordTo(discordWebhook, 0x3b82f6, "✅ Scan Finished", fmt.Sprintf("**Targets:** %d completed\n**Vulnerabilities:** 0 found\n**Completed at:** %s", totalTargets, time.Now().Format("15:04:05 MST")))
-		if s.telegramConfigured() {
-			s.sendTelegram(0x3b82f6, "✅ Scan Finished", fmt.Sprintf("**Targets:** %d completed\n**Vulnerabilities:** 0 found\n**Completed at:** %s", totalTargets, time.Now().Format("15:04:05 MST")))
-		}
-	}
-}
 
 // ────────────────────────────────────────────────────────
 // Mode-specific target handlers
@@ -894,7 +847,6 @@ func (s *Server) runSingleTarget(ctx context.Context, scanCfg *config.Config, re
 		name:               req.Name,
 		userInstruction:    req.Instruction,
 		severityFilter:     req.SeverityFilter,
-		discordWebhook:     req.DiscordWebhook,
 		discoveryMode:      false,
 		genReport:          true,
 		resetState:         !resumed,
@@ -967,7 +919,6 @@ func (s *Server) runDASTTarget(ctx context.Context, scanCfg *config.Config, req 
 		name:               req.Name,
 		userInstruction:    req.Instruction,
 		severityFilter:     req.SeverityFilter,
-		discordWebhook:     req.DiscordWebhook,
 		discoveryMode:      false,
 		genReport:          true,
 		resetState:         !resumed,
@@ -1120,7 +1071,6 @@ func (s *Server) runWildcardTarget(ctx context.Context, scanCfg *config.Config, 
 			name:               req.Name,
 			userInstruction:    req.Instruction,
 			severityFilter:     req.SeverityFilter,
-			discordWebhook:     req.DiscordWebhook,
 			discoveryMode:      true,
 			genReport:          false,
 			resetState:         !resumed,
@@ -1467,7 +1417,6 @@ func (s *Server) runWildcardTarget(ctx context.Context, scanCfg *config.Config, 
 				name:                 req.Name,
 				userInstruction:      req.Instruction,
 				severityFilter:       req.SeverityFilter,
-				discordWebhook:       req.DiscordWebhook,
 				discoveryMode:        false,
 				genReport:            false,
 				resetState:           false, // accumulate vulns across subdomains
@@ -1515,9 +1464,6 @@ func (s *Server) runWildcardTarget(ctx context.Context, scanCfg *config.Config, 
 						ScanMode:                 "wildcard",
 						Instruction:              req.Instruction,
 						SeverityFilter:           append([]string(nil), req.SeverityFilter...),
-						DiscordWebhook:           req.DiscordWebhook,
-						DiscordWebhookConfigured: req.DiscordWebhook != "" || s.discordWebhook != "",
-						TelegramConfigured:       s.telegramConfigured(),
 						ReconMode:                req.ReconMode,
 						ScanIntensity:            req.ScanIntensity,
 						StartedAt:                time.Now().Format(time.RFC3339),
@@ -1534,14 +1480,7 @@ func (s *Server) runWildcardTarget(ctx context.Context, scanCfg *config.Config, 
 						summary.SourceScanID = subScanRecord.ID
 						subScanRecord.Vulns = append(subScanRecord.Vulns, summary)
 					}
-					reportPath, err := s.generateReportAt(&subScanRecord, subScanDir)
-					if err == nil {
-						desc := fmt.Sprintf("**Target:** %s\n**Vulnerabilities:** %d found", subdomain, len(newVulns))
-						s.sendDiscordWithFile(0x3b82f6, "🔴 Vulnerability Found - Report Ready", desc, reportPath)
-						if s.telegramConfigured() {
-							s.sendTelegramWithFile(0x3b82f6, "🔴 Vulnerability Found - Report Ready", desc, reportPath)
-						}
-					}
+					_, _ = s.generateReportAt(&subScanRecord, subScanDir)
 				}
 			}
 

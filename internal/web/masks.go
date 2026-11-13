@@ -8,7 +8,7 @@
 // it lets the test suite assert one canonical algorithm rather than
 // duplicate string-shape checks per handler.
 //
-// The shape mirrors maskAgentMailKey in server.go (~6303–6311) so
+// The shape is shared by all credential-masking helpers so
 // operators see consistent redaction across the dashboard:
 //
 //   - empty input          → "" (so the UI can render
@@ -27,9 +27,8 @@ import (
 )
 
 // maskAuthCredential redacts a credential string for outbound JSON
-// responses. The contract intentionally matches maskAgentMailKey so
-// the existing webui mask-detection logic (isMaskedAgentMailKey)
-// keeps working unchanged for the new /api/auth/profiles surface.
+// responses. The contract is stable so the existing webui mask-detection
+// logic keeps working unchanged for the /api/auth/profiles surface.
 //
 // Validates: Requirements 5.1, 5.2, 5.4.
 func maskAuthCredential(v string) string {

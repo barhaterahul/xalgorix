@@ -468,7 +468,7 @@ func reportVulnWithContextIDAndVerifier(contextID string, verifier FindingVerifi
 	// ── Gate 0.5: Reject fabricated / target-unreachable non-findings ──
 	// The shape-based gates below only check that a proof is present and
 	// well-formed, so two classes of NON-vulnerability slip through as
-	// medium+/critical and even reach Telegram/Discord: (1) simulated /
+	// medium+/critical and even reach operator alerting channels: (1) simulated /
 	// placeholder / "workaround to satisfy the engine" findings the agent
 	// invents to complete a task, and (2) a target reported as unreachable
 	// (host down / unresolvable) dressed up as a vuln. Reject both here,
@@ -1868,7 +1868,7 @@ func checkClaimConsistency(title, cwe, method, cvssVector, severity, description
 // calls report_vulnerability. They pass the shape-based gates because their
 // "proof" is real command output (a ping/curl transcript) or long prose — it
 // just is not evidence of a vulnerability — and then surface as critical/high
-// noise (including on Telegram/Discord). Matches the substring-gate style of
+// noise (including on operator alerting channels). Matches the substring-gate style of
 // checkFalsePositive.
 //
 //  1. SIMULATED / PLACEHOLDER / WORKAROUND findings — fabricated to "complete

@@ -51,13 +51,10 @@ import (
 var errAPIBaseNeedsKey = errors.New("api_base points to a different host than the configured LLM endpoint; include api_key in the same request (stored provider credentials are never sent to a request-supplied host)")
 
 // checkScanRequestDestinations validates the outbound destinations a scan
-// request chooses — the notification webhook and the LLM api_base — before
-// any scan state exists. Every wire entry point that starts a scan (POST
-// /api/scan and the WebSocket scan message) must call it.
+// request chooses — the LLM api_base — before any scan state exists. Every
+// wire entry point that starts a scan (POST /api/scan and the WebSocket scan
+// message) must call it.
 func (s *Server) checkScanRequestDestinations(ctx context.Context, req ScanRequest) error {
-	if err := s.validateScanWebhook(req.DiscordWebhook); err != nil {
-		return err
-	}
 	return s.checkScanAPIBaseOverride(ctx, req)
 }
 

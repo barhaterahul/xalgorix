@@ -118,9 +118,6 @@ export interface ScanRecord extends AssessmentOutcome {
   scan_mode?: string;
   instruction?: string;
   severity_filter?: string[];
-  discord_webhook?: string;
-  discord_webhook_configured?: boolean;
-  telegram_configured?: boolean;
   recon_mode?: "active" | "passive";
   scan_intensity?: "active" | "passive";
   events: WSEvent[];
@@ -260,7 +257,6 @@ export interface ScanRequest {
   model?: string;
   api_key?: string;
   api_base?: string;
-  discord_webhook?: string;
   severity_filter?: string[];
   name?: string;
   save_only?: boolean;
@@ -424,12 +420,6 @@ export interface RateLimitSettings {
   window: number;
 }
 
-export interface AgentMailSettings {
-  pod: string;
-  apiKey: string;
-  hasApiKey: boolean;
-}
-
 export interface LLMSettings {
   model: string;
   apiBase: string;
@@ -549,7 +539,6 @@ export interface ScanSchedule {
   scan_intensity?: "active" | "passive";
   company_name?: string;
   logo_path?: string;
-  discord_webhook?: string;
   model?: string;
   // Optional "<provider>:<profileId>" key naming the AuthProfile this
   // schedule should run scans under (provider-catalog-and-oauth, R14.4).

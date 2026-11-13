@@ -48,9 +48,6 @@ func (s *Server) freshScanRecordForSession(sess *scanSession, startedAt string) 
 		ScanMode:                 sess.scanMode,
 		Instruction:              sess.userInstruction,
 		SeverityFilter:           append([]string(nil), sess.severityFilter...),
-		DiscordWebhook:           sess.discordWebhook,
-		DiscordWebhookConfigured: sess.discordWebhook != "" || s.discordWebhook != "",
-		TelegramConfigured:       s.telegramConfigured(),
 		ReconMode:                normalizeActivityMode(sess.reconMode),
 		ScanIntensity:            normalizeActivityMode(sess.scanIntensity),
 		StartedAt:                startedAt,
@@ -80,9 +77,6 @@ func (s *Server) refreshResumedScanRecord(rec *ScanRecord, sess *scanSession, fa
 		rec.Instruction = sess.userInstruction
 	}
 	rec.SeverityFilter = append([]string(nil), sess.severityFilter...)
-	rec.DiscordWebhook = sess.discordWebhook
-	rec.DiscordWebhookConfigured = sess.discordWebhook != "" || s.discordWebhook != ""
-	rec.TelegramConfigured = s.telegramConfigured()
 	rec.ReconMode = normalizeActivityMode(sess.reconMode)
 	rec.ScanIntensity = normalizeActivityMode(sess.scanIntensity)
 	if rec.StartedAt == "" {

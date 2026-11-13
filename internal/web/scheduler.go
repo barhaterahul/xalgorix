@@ -46,7 +46,6 @@ type ScanSchedule struct {
 	ScanIntensity  string    `json:"scan_intensity,omitempty"`
 	CompanyName    string    `json:"company_name,omitempty"`
 	LogoPath       string    `json:"logo_path,omitempty"`
-	DiscordWebhook string    `json:"discord_webhook,omitempty"`
 	Model          string    `json:"model,omitempty"`
 }
 
@@ -325,7 +324,6 @@ func (s *Server) checkAndRunSchedules() {
 					ScanIntensity:  sch.ScanIntensity,
 					CompanyName:    sch.CompanyName,
 					LogoPath:       sch.LogoPath,
-					DiscordWebhook: sch.DiscordWebhook,
 					Name:           sch.Name + " (Scheduled)",
 					Model:          sch.Model,
 				}

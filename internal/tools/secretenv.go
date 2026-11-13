@@ -29,8 +29,6 @@ var operatorSecretEnvKeys = map[string]bool{
 	// namespace scrub does NOT catch, so enumerating them here is what keeps
 	// every tool's environment free of them.
 	"GEMINI_API_KEY":       true,
-	"AGENTMAIL_API_KEY":    true,
-	"AGENTMAIL_POD":        true,
 	"CAIDO_API_TOKEN":      true,
 	"INBOUND_EMAIL_SECRET": true,
 
@@ -47,9 +45,7 @@ var operatorSecretEnvKeys = map[string]bool{
 	"AIDASTING_PROXY_ROTATION":     true,
 	"AIDASTING_TARGET_AUTH":        true,
 	"AIDASTING_TARGET_AUTH_B":      true,
-	"AIDASTING_DISCORD_WEBHOOK":    true,
-	"AIDASTING_TELEGRAM_BOT_TOKEN": true,
-	"AIDASTING_TELEGRAM_CHAT_ID":   true,
+
 	"AIDASTING_OOB_API_KEY":        true,
 	"AIDASTING_OOB_HOST":           true,
 }

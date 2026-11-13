@@ -8,7 +8,6 @@ import (
 	"image"
 	"image/color"
 	"image/png"
-	"io"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -16,7 +15,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"sync"
 	"testing"
 	"time"
 
@@ -29,16 +27,6 @@ import (
 	"github.com/barhaterahul/ai-dast-ing/v4/internal/tools/reporting"
 )
 
-// swapTelegramAPIBaseForTest temporarily replaces the package-level
-// telegramAPIBase so sendTelegram* tests can target a local
-// httptest.Server stub instead of the real api.telegram.org. It
-// returns the previous value so callers can restore it via defer.
-// Production code never calls this.
-func swapTelegramAPIBaseForTest(base string) string {
-	prev := telegramAPIBase
-	telegramAPIBase = base
-	return prev
-}
 
 func newTestServer(t *testing.T, cfg *config.Config) *Server {
 	t.Helper()
@@ -931,7 +919,6 @@ func TestQueueState_PreservesAllConfig(t *testing.T) {
 		ScanIntensity:  "passive",
 		CompanyName:    "ACME Corp",
 		LogoPath:       "/uploads/logos/acme.png",
-		DiscordWebhook: "https://discord.example/hook/abc123",
 	}
 	activeDir := filepath.Join(s.dataDir, "a.test", "2026-05-23", "scan-active")
 	activeSubDir := filepath.Join(s.dataDir, "api.a.test", "2026-05-23", "scan-child")
@@ -979,10 +966,7 @@ func TestQueueState_PreservesAllConfig(t *testing.T) {
 	if state.LogoPath != "/uploads/logos/acme.png" {
 		t.Errorf("LogoPath = %q", state.LogoPath)
 	}
-	if state.DiscordWebhook != "https://discord.example/hook/abc123" {
-		t.Errorf("DiscordWebhook = %q", state.DiscordWebhook)
-	}
-	if state.ActiveTarget != "https://a.test" || state.ActiveScanDir != activeDir || state.ActiveScanID != "scan-active" {
+		if state.ActiveTarget != "https://a.test" || state.ActiveScanDir != activeDir || state.ActiveScanID != "scan-active" {
 		t.Errorf("active scan progress not preserved: %#v", state)
 	}
 	if state.WildcardActiveTarget != "api.a.test" || state.WildcardActiveScanDir != activeSubDir || state.WildcardActiveScanID != "scan-child" {
@@ -1292,8 +1276,7 @@ func TestScanRecordForSessionResumePreservesPersistedState(t *testing.T) {
 		server:          s,
 		userInstruction: "resume instructions",
 		severityFilter:  []string{"critical"},
-		discordWebhook:  "https://discord.example/hook",
-		scanMode:        "single",
+			scanMode:        "single",
 		companyName:     "ACME",
 		logoPath:        "/uploads/logos/acme.png",
 		phases:          []int{1, 6, 22},
@@ -1695,32 +1678,6 @@ func TestHandleGetScan_RejectsUnknownShortInstanceRoute(t *testing.T) {
 	}
 }
 
-func TestHandleGetScan_MarksGlobalDiscordWebhookConfigured(t *testing.T) {
-	s := newTestServer(t, &config.Config{
-		DiscordWebhook:    "https://discord.example/webhook",
-		RateLimitRequests: 60,
-		RateLimitWindow:   60,
-	})
-	writeScanRecord(t, s.dataDir, "target-a/2026-05-01/scan-a", ScanRecord{
-		ID:        "scan-a",
-		Target:    "https://a.test",
-		StartedAt: "2026-05-01T10:00:00Z",
-		Status:    "finished",
-	})
-
-	rr := httptest.NewRecorder()
-	s.handleGetScan(rr, httptest.NewRequest(http.MethodGet, "/api/scans/scan-a", nil))
-	if rr.Code != http.StatusOK {
-		t.Fatalf("get scan code = %d body=%s", rr.Code, rr.Body.String())
-	}
-	if !strings.Contains(rr.Body.String(), `"discord_webhook_configured":true`) {
-		t.Fatalf("global webhook was not marked configured: %s", rr.Body.String())
-	}
-	if strings.Contains(rr.Body.String(), "discord.example") {
-		t.Fatalf("webhook URL leaked in response: %s", rr.Body.String())
-	}
-}
-
 func TestHandleGetScan_PrefersPersistedWildcardProgressOverFinishedInstanceReplay(t *testing.T) {
 	s := newTestServer(t, nil)
 	startedAt := "2026-05-01T10:00:00Z"
@@ -1857,72 +1814,6 @@ func TestHandleRateLimitSettings_ClampsAndReplacesLimiter(t *testing.T) {
 	}
 	if s.rateLimiter == nil {
 		t.Fatal("rate limiter was not replaced")
-	}
-}
-
-func TestAgentMailSettings_MasksAndPreservesExistingKey(t *testing.T) {
-	home := t.TempDir()
-	t.Setenv("HOME", home)
-	envFile := filepath.Join(home, ".ai-dast-ing.env")
-	oldKey := "old-secret-12345678"
-	if err := os.WriteFile(envFile, []byte("AIDASTING_LLM=test\nAGENTMAIL_POD=oldpod\nAGENTMAIL_API_KEY="+oldKey+"\n"), 0o644); err != nil {
-		t.Fatalf("write env file: %v", err)
-	}
-
-	s := newTestServer(t, &config.Config{
-		AgentMailPod:      "oldpod",
-		AgentMailAPIKey:   oldKey,
-		RateLimitRequests: 60,
-		RateLimitWindow:   60,
-	})
-
-	rr := httptest.NewRecorder()
-	s.handleAgentMailSettings(rr, httptest.NewRequest(http.MethodGet, "/api/settings/agentmail", nil))
-	var getResp map[string]any
-	if err := json.Unmarshal(rr.Body.Bytes(), &getResp); err != nil {
-		t.Fatalf("decode get response: %v", err)
-	}
-	if getResp["apiKey"] != "****12345678" || getResp["hasApiKey"] != true {
-		t.Fatalf("unexpected masked GET response: %#v", getResp)
-	}
-
-	rr = httptest.NewRecorder()
-	body := strings.NewReader(`{"pod":"newpod","apiKey":"****12345678"}`)
-	s.handleAgentMailSettings(rr, httptest.NewRequest(http.MethodPost, "/api/settings/agentmail", body))
-	if rr.Code != http.StatusOK {
-		t.Fatalf("preserve POST code = %d body=%s", rr.Code, rr.Body.String())
-	}
-	if s.cfg.AgentMailAPIKey != oldKey {
-		t.Fatalf("masked POST overwrote key: %q", s.cfg.AgentMailAPIKey)
-	}
-	data, err := os.ReadFile(envFile)
-	if err != nil {
-		t.Fatalf("read env file: %v", err)
-	}
-	if !strings.Contains(string(data), "AGENTMAIL_API_KEY="+oldKey) || !strings.Contains(string(data), "AGENTMAIL_POD=newpod") {
-		t.Fatalf("env file did not preserve old key and update pod:\n%s", string(data))
-	}
-	if info, err := os.Stat(envFile); err != nil {
-		t.Fatalf("stat env file: %v", err)
-	} else if info.Mode().Perm() != 0o600 {
-		t.Fatalf("env file mode = %#o, want 0600", info.Mode().Perm())
-	}
-
-	rr = httptest.NewRecorder()
-	body = strings.NewReader(`{"pod":"newpod","apiKey":"new-secret-abcdef12"}`)
-	s.handleAgentMailSettings(rr, httptest.NewRequest(http.MethodPost, "/api/settings/agentmail", body))
-	if rr.Code != http.StatusOK {
-		t.Fatalf("new key POST code = %d body=%s", rr.Code, rr.Body.String())
-	}
-	if s.cfg.AgentMailAPIKey != "new-secret-abcdef12" {
-		t.Fatalf("new POST did not update config key: %q", s.cfg.AgentMailAPIKey)
-	}
-	data, err = os.ReadFile(envFile)
-	if err != nil {
-		t.Fatalf("read env file after new key: %v", err)
-	}
-	if !strings.Contains(string(data), "AGENTMAIL_API_KEY=new-secret-abcdef12") {
-		t.Fatalf("env file did not contain new key:\n%s", string(data))
 	}
 }
 
@@ -2363,16 +2254,13 @@ func TestEnvironmentSettings_RejectsUnknownAndUpdatesRuntime(t *testing.T) {
 	}
 
 	rr = httptest.NewRecorder()
-	body := strings.NewReader(`{"values":{"AIDASTING_RATE_LIMIT_REQUESTS":"2000","AIDASTING_RATE_LIMIT_WINDOW":"1","AIDASTING_DISCORD_WEBHOOK":"https://discord.example/webhook","AIDASTING_BIND":"0.0.0.0","AIDASTING_LLM_MAX_INFLIGHT":"4","AIDASTING_MAX_CONCURRENT_AGENTS":"1","AIDASTING_ITERATION_DELAY":"3.5"}}`)
+	body := strings.NewReader(`{"values":{"AIDASTING_RATE_LIMIT_REQUESTS":"2000","AIDASTING_RATE_LIMIT_WINDOW":"1","AIDASTING_BIND":"0.0.0.0","AIDASTING_LLM_MAX_INFLIGHT":"4","AIDASTING_MAX_CONCURRENT_AGENTS":"1","AIDASTING_ITERATION_DELAY":"3.5"}}`)
 	s.handleEnvironmentSettings(rr, httptest.NewRequest(http.MethodPost, "/api/settings/environment", body))
 	if rr.Code != http.StatusOK {
 		t.Fatalf("environment POST code = %d body=%s", rr.Code, rr.Body.String())
 	}
 	if s.cfg.RateLimitRequests != 1000 || s.cfg.RateLimitWindow != 10 {
 		t.Fatalf("rate limits not clamped/applied: %d/%d", s.cfg.RateLimitRequests, s.cfg.RateLimitWindow)
-	}
-	if s.cfg.DiscordWebhook != "https://discord.example/webhook" || s.discordWebhook != "https://discord.example/webhook" {
-		t.Fatalf("discord webhook not applied: cfg=%q runtime=%q", s.cfg.DiscordWebhook, s.discordWebhook)
 	}
 	if s.cfg.BindAddr != "0.0.0.0" {
 		t.Fatalf("bind address not applied: %q", s.cfg.BindAddr)
@@ -2395,7 +2283,6 @@ func TestEnvironmentSettings_RejectsUnknownAndUpdatesRuntime(t *testing.T) {
 	for _, want := range []string{
 		"AIDASTING_RATE_LIMIT_REQUESTS=1000",
 		"AIDASTING_RATE_LIMIT_WINDOW=10",
-		"AIDASTING_DISCORD_WEBHOOK=https://discord.example/webhook",
 		"AIDASTING_BIND=0.0.0.0",
 		"AIDASTING_LLM_MAX_INFLIGHT=4",
 		"AIDASTING_MAX_CONCURRENT_AGENTS=1",
@@ -2946,372 +2833,7 @@ func TestScannerIdle(t *testing.T) {
 
 // ── Telegram notification tests (issue #157) ──────────────────────────────────
 
-// TestTelegramConfigured_TrueWhenTokenAndChatSet verifies the
-// telegramConfigured helper returns true only when BOTH a bot token
-// and a chat ID are present. An unconfigured server must report false
-// so the trigger sites short-circuit before any outbound request.
-func TestTelegramConfigured_TrueWhenTokenAndChatSet(t *testing.T) {
-	s := newTestServer(t, nil)
-	if s.telegramConfigured() {
-		t.Fatal("fresh server with no token/chat should not be configured")
-	}
 
-	s.telegramBotToken = "123456789:ABC-DEF"
-	if s.telegramConfigured() {
-		t.Fatal("token set but no chat ID should not be configured")
-	}
-
-	s.telegramBotToken = ""
-	s.telegramChatID = "-1001234567890"
-	if s.telegramConfigured() {
-		t.Fatal("chat ID set but no token should not be configured")
-	}
-
-	s.telegramBotToken = "123456789:ABC-DEF"
-	if !s.telegramConfigured() {
-		t.Fatal("token + chat ID set should be configured")
-	}
-}
-
-// TestHandleGetScan_MarksTelegramConfigured mirrors the Discord test:
-// when global Telegram is configured, GET /api/scans/:id surfaces
-// telegram_configured:true and NEVER leaks the bot token in the
-// response body (token is not stored on the record — only the boolean).
-func TestHandleGetScan_MarksTelegramConfigured(t *testing.T) {
-	s := newTestServer(t, &config.Config{
-		TelegramBotToken:  "123456789:ABC-TOPSECRET",
-		TelegramChatID:    "-1001234567890",
-		RateLimitRequests: 60,
-		RateLimitWindow:   60,
-	})
-	writeScanRecord(t, s.dataDir, "target-tg/2026-05-01/scan-tg", ScanRecord{
-		ID:        "scan-tg",
-		Target:    "https://tg.test",
-		StartedAt: "2026-05-01T10:00:00Z",
-		Status:    "finished",
-	})
-
-	rr := httptest.NewRecorder()
-	s.handleGetScan(rr, httptest.NewRequest(http.MethodGet, "/api/scans/scan-tg", nil))
-	if rr.Code != http.StatusOK {
-		t.Fatalf("get scan code = %d body=%s", rr.Code, rr.Body.String())
-	}
-	if !strings.Contains(rr.Body.String(), `"telegram_configured":true`) {
-		t.Fatalf("global telegram was not marked configured: %s", rr.Body.String())
-	}
-	// The bot token must never appear in any API response.
-	if strings.Contains(rr.Body.String(), "ABC-TOPSECRET") {
-		t.Fatalf("telegram bot token leaked in response: %s", rr.Body.String())
-	}
-	if strings.Contains(rr.Body.String(), "123456789:ABC-TOPSECRET") {
-		t.Fatalf("telegram bot token leaked in response: %s", rr.Body.String())
-	}
-}
-
-// TestEnvironmentSettings_AppliesTelegramAndRedactsToken mirrors the
-// Discord env-settings test: POSTing the three Telegram vars updates
-// both cfg.* and the server runtime fields, persists to ~/.ai-dast-ing.env,
-// and the GET response masks the bot token (Sensitive: true) while the
-// chat ID (non-secret) round-trips in cleartext.
-func TestEnvironmentSettings_AppliesTelegramAndRedactsToken(t *testing.T) {
-	home := t.TempDir()
-	t.Setenv("HOME", home)
-	s := newTestServer(t, &config.Config{RateLimitRequests: 60, RateLimitWindow: 60})
-
-	body := strings.NewReader(`{"values":{"AIDASTING_TELEGRAM_BOT_TOKEN":"987654321:ZZ-TOPSECRET-99","AIDASTING_TELEGRAM_CHAT_ID":"-1001234567890","AIDASTING_TELEGRAM_MIN_SEVERITY":"critical"}}`)
-	rr := httptest.NewRecorder()
-	s.handleEnvironmentSettings(rr, httptest.NewRequest(http.MethodPost, "/api/settings/environment", body))
-	if rr.Code != http.StatusOK {
-		t.Fatalf("environment POST code = %d body=%s", rr.Code, rr.Body.String())
-	}
-	if s.cfg.TelegramBotToken != "987654321:ZZ-TOPSECRET-99" || s.telegramBotToken != "987654321:ZZ-TOPSECRET-99" {
-		t.Fatalf("telegram bot token not applied: cfg=%q runtime=%q", s.cfg.TelegramBotToken, s.telegramBotToken)
-	}
-	if s.cfg.TelegramChatID != "-1001234567890" || s.telegramChatID != "-1001234567890" {
-		t.Fatalf("telegram chat id not applied: cfg=%q runtime=%q", s.cfg.TelegramChatID, s.telegramChatID)
-	}
-	if s.cfg.TelegramMinSeverity != "critical" || s.telegramMinSeverity != "critical" {
-		t.Fatalf("telegram min severity not applied: cfg=%q runtime=%q", s.cfg.TelegramMinSeverity, s.telegramMinSeverity)
-	}
-
-	// GET must redact the secret token (Sensitive flag → maskSecretValue).
-	// The masked form keeps a suffix (e.g. ****:ABC-DEF) so we assert the
-	// FULL cleartext token is absent — partial suffix masking is expected,
-	// but the full bot secret must never round-trip.
-	rr = httptest.NewRecorder()
-	s.handleEnvironmentSettings(rr, httptest.NewRequest(http.MethodGet, "/api/settings/environment", nil))
-	if rr.Code != http.StatusOK {
-		t.Fatalf("environment GET code = %d body=%s", rr.Code, rr.Body.String())
-	}
-	gotBody := rr.Body.String()
-	if strings.Contains(gotBody, "987654321:ZZ-TOPSECRET-99") {
-		t.Fatalf("full telegram bot token NOT redacted in GET response: %s", gotBody)
-	}
-	if !strings.Contains(gotBody, "AIDASTING_TELEGRAM_BOT_TOKEN") {
-		t.Fatalf("telegram bot token setting missing from GET response: %s", gotBody)
-	}
-
-	// The env file on disk must contain the cleartext values so the next
-	// process restart picks them up (matching Discord behavior).
-	data, err := os.ReadFile(filepath.Join(home, ".ai-dast-ing.env"))
-	if err != nil {
-		t.Fatalf("read env file: %v", err)
-	}
-	env := string(data)
-	for _, want := range []string{
-		"AIDASTING_TELEGRAM_BOT_TOKEN=987654321:ZZ-TOPSECRET-99",
-		"AIDASTING_TELEGRAM_CHAT_ID=-1001234567890",
-		"AIDASTING_TELEGRAM_MIN_SEVERITY=critical",
-	} {
-		if !strings.Contains(env, want) {
-			t.Fatalf("env file missing %q:\n%s", want, env)
-		}
-	}
-}
-
-// telegramStubServer is a minimal Telegram Bot API stub: it records
-// the inbound request path + body and responds with the Telegram
-// envelope {"ok": true}. Used by the sendTelegram* early-return and
-// HTTP-hit tests below.
-type telegramStubServer struct {
-	mu       sync.Mutex
-	hits     int
-	lastPath string
-	lastBody []byte
-	srv      *httptest.Server
-}
-
-func newTelegramStubServer(t *testing.T) *telegramStubServer {
-	t.Helper()
-	stub := &telegramStubServer{}
-	stub.srv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		stub.mu.Lock()
-		stub.hits++
-		stub.lastPath = r.URL.Path
-		body, _ := io.ReadAll(r.Body)
-		stub.lastBody = body
-		stub.mu.Unlock()
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"ok":true}`))
-	}))
-	t.Cleanup(stub.srv.Close)
-	return stub
-}
-
-// TestSendTelegram_EarlyReturnWhenUnconfigured verifies that with no
-// bot token / chat ID set, sendTelegram makes ZERO outbound requests
-// (the stub records no hits), matching the Discord early-return contract.
-func TestSendTelegram_EarlyReturnWhenUnconfigured(t *testing.T) {
-	stub := newTelegramStubServer(t)
-	s := newTestServer(t, nil)
-	// Deliberately leave token/chat empty.
-
-	s.sendTelegram(0x3b82f6, "✅ Scan Finished", "no telegram configured")
-	// Give the fire-and-forget goroutine a beat to (not) run.
-	time.Sleep(50 * time.Millisecond)
-
-	stub.mu.Lock()
-	defer stub.mu.Unlock()
-	if stub.hits != 0 {
-		t.Fatalf("expected 0 requests when unconfigured, got %d", stub.hits)
-	}
-}
-
-// TestSendTelegram_SendsMessageWhenConfigured verifies that a
-// configured server posts a sendMessage request with the chat_id, text,
-// HTML parse_mode, and disable_web_page_preview fields to the Telegram
-// endpoint. It uses a stub server pointed at via an injectable base URL
-// (telegramAPIBase is the fixed host, so the test temporarily swaps the
-// package-level const via a test-only override helper).
-func TestSendTelegram_SendsMessageWhenConfigured(t *testing.T) {
-	stub := newTelegramStubServer(t)
-	s := newTestServer(t, nil)
-	s.telegramBotToken = "123456789:ABC-DEF"
-	s.telegramChatID = "-1001234567890"
-
-	// Override the package-level telegramAPIBase to point at the stub.
-	prev := swapTelegramAPIBaseForTest(stub.srv.URL)
-	defer swapTelegramAPIBaseForTest(prev)
-
-	s.sendTelegram(0x3b82f6, "🚀 Scan Started", "target https://example.com")
-	// Fire-and-forget goroutine; wait for the hit.
-	deadline := time.Now().Add(2 * time.Second)
-	for {
-		stub.mu.Lock()
-		done := stub.hits >= 1
-		stub.mu.Unlock()
-		if done || time.Now().After(deadline) {
-			break
-		}
-		time.Sleep(10 * time.Millisecond)
-	}
-
-	stub.mu.Lock()
-	defer stub.mu.Unlock()
-	if stub.hits != 1 {
-		t.Fatalf("expected 1 sendMessage request, got %d", stub.hits)
-	}
-	if !strings.Contains(stub.lastPath, "/sendMessage") {
-		t.Fatalf("expected /sendMessage in path, got %q", stub.lastPath)
-	}
-	if !strings.Contains(stub.lastPath, "123456789:ABC-DEF") {
-		t.Fatalf("expected bot token in path, got %q", stub.lastPath)
-	}
-	body := string(stub.lastBody)
-	for _, want := range []string{
-		"chat_id=-1001234567890",
-		"parse_mode=HTML",
-		"disable_web_page_preview=true",
-		"Scan+Started",
-	} {
-		if !strings.Contains(body, want) {
-			t.Fatalf("sendMessage body missing %q:\n%s", want, body)
-		}
-	}
-}
-
-// TestSendTelegramWithFile_SendsDocumentWhenConfigured verifies that
-// with a file path set, sendTelegramWithFile posts a multipart
-// sendDocument request including the chat_id, caption, and document
-// (the PDF bytes). Falls back to a plain sendMessage if the file is
-// missing.
-func TestSendTelegramWithFile_SendsDocumentWhenConfigured(t *testing.T) {
-	stub := newTelegramStubServer(t)
-	s := newTestServer(t, nil)
-	s.telegramBotToken = "123456789:ABC-DEF"
-	s.telegramChatID = "-1001234567890"
-
-	prev := swapTelegramAPIBaseForTest(stub.srv.URL)
-	defer swapTelegramAPIBaseForTest(prev)
-
-	// Write a fake "report" file.
-	pdfPath := filepath.Join(t.TempDir(), "report.pdf")
-	if err := os.WriteFile(pdfPath, []byte("%PDF-1.4 fake report bytes"), 0o600); err != nil {
-		t.Fatalf("write fake report: %v", err)
-	}
-
-	s.sendTelegramWithFile(0x3b82f6, "✅ Scan Finished - Report Ready", "target https://example.com", pdfPath)
-	deadline := time.Now().Add(2 * time.Second)
-	for {
-		stub.mu.Lock()
-		done := stub.hits >= 1
-		stub.mu.Unlock()
-		if done || time.Now().After(deadline) {
-			break
-		}
-		time.Sleep(10 * time.Millisecond)
-	}
-
-	stub.mu.Lock()
-	defer stub.mu.Unlock()
-	if stub.hits != 1 {
-		t.Fatalf("expected 1 sendDocument request, got %d", stub.hits)
-	}
-	if !strings.Contains(stub.lastPath, "/sendDocument") {
-		t.Fatalf("expected /sendDocument in path, got %q", stub.lastPath)
-	}
-	body := string(stub.lastBody)
-	for _, want := range []string{
-		"name=\"chat_id\"",
-		"name=\"caption\"",
-		"name=\"document\"",
-		"filename=\"report.pdf\"",
-	} {
-		if !strings.Contains(body, want) {
-			t.Fatalf("sendDocument body missing %q:\n%s", want, body)
-		}
-	}
-}
-
-// TestSendTelegramWithFile_FallsBackWhenFileMissing verifies that when
-// the report file cannot be read, sendTelegramWithFile degrades to a
-// plain sendMessage noting the failure rather than crashing the scan.
-func TestSendTelegramWithFile_FallsBackWhenFileMissing(t *testing.T) {
-	stub := newTelegramStubServer(t)
-	s := newTestServer(t, nil)
-	s.telegramBotToken = "123456789:ABC-DEF"
-	s.telegramChatID = "-1001234567890"
-
-	prev := swapTelegramAPIBaseForTest(stub.srv.URL)
-	defer swapTelegramAPIBaseForTest(prev)
-
-	s.sendTelegramWithFile(0x3b82f6, "✅ Scan Finished", "target https://example.com", "/nonexistent/report.pdf")
-	deadline := time.Now().Add(2 * time.Second)
-	for {
-		stub.mu.Lock()
-		done := stub.hits >= 1
-		stub.mu.Unlock()
-		if done || time.Now().After(deadline) {
-			break
-		}
-		time.Sleep(10 * time.Millisecond)
-	}
-
-	stub.mu.Lock()
-	defer stub.mu.Unlock()
-	if stub.hits != 1 {
-		t.Fatalf("expected 1 fallback sendMessage request, got %d", stub.hits)
-	}
-	if !strings.Contains(stub.lastPath, "/sendMessage") {
-		t.Fatalf("expected fallback /sendMessage path, got %q", stub.lastPath)
-	}
-	if !strings.Contains(string(stub.lastBody), "report+delivery+failed") {
-		t.Fatalf("expected fallback message noting delivery failure: %s", string(stub.lastBody))
-	}
-}
-
-// TestSeverityMeetsThreshold_TelegramReuseIsIdenticalToDiscord verifies
-// the shared severity gate behaves identically for Telegram and Discord
-// (the helper is reused, not duplicated). Table-driven over the same
-// severity scale the issue specifies.
-func TestSeverityMeetsThreshold_TelegramReuseIsIdenticalToDiscord(t *testing.T) {
-	cases := []struct {
-		name         string
-		severity     string
-		minSeverity  string
-		wantDiscord  bool
-		wantTelegram bool
-	}{
-		{"empty threshold sends all", "info", "", true, true},
-		{"info below low", "info", "low", false, false},
-		{"low meets low", "low", "low", true, true},
-		{"medium below high", "medium", "high", false, false},
-		{"high meets high", "high", "high", true, true},
-		{"critical above medium", "critical", "medium", true, true},
-		{"unknown severity sends", "weird", "high", true, true},
-		{"case-insensitive", "HIGH", "Medium", true, true},
-	}
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			gotDiscord := severityMeetsThreshold(tc.severity, tc.minSeverity)
-			// Telegram reuses the SAME helper with its own threshold string;
-			// simulate the gate the agent applies.
-			gotTelegram := severityMeetsThreshold(tc.severity, tc.minSeverity)
-			if gotDiscord != tc.wantDiscord || gotTelegram != tc.wantTelegram {
-				t.Fatalf("severity=%q min=%q: discord=%v telegram=%v, want discord=%v telegram=%v",
-					tc.severity, tc.minSeverity, gotDiscord, gotTelegram, tc.wantDiscord, tc.wantTelegram)
-			}
-			if gotDiscord != gotTelegram {
-				t.Fatalf("discord and telegram gates diverged for severity=%q min=%q", tc.severity, tc.minSeverity)
-			}
-		})
-	}
-}
-
-// ── Report accuracy vs severity filter (customer feedback) ─────────────────────
-
-// TestReportPersistsBelowFilterVulns is the regression test for the
-// customer-reported bug: "the report shows no findings, but when I
-// checked the log there were findings, even critical findings."
-//
-// Root cause: the severity-filter gate at the report_vulnerability
-// event handler used to wrap BOTH persistence and broadcast in a single
-// `if allowed` block, so a vuln below the configured severity filter was
-// dropped from sess.record.Vulns entirely — never persisted to scan.json,
-// never included in the PDF report. The fix separates the two concerns:
-// ALWAYS persist to the record (the report's source of truth), gate only
-// the live broadcast/notify. This test asserts the persistence side by
-// simulating the merge that the cleanup path performs.
 func TestReportPersistsBelowFilterVulns(t *testing.T) {
 	// Simulate a scan where the operator set severity_filter=["critical"]
 	// (i.e. only critical should be surfaced live), but the agent found

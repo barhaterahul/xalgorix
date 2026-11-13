@@ -171,17 +171,6 @@ func allEnvSettingDefinitions() []envSettingDefinition {
 		{Key: "AIDASTING_SOURCE_REPO", Label: "Whitebox source (repo/path)", Category: "Runtime", Description: "Enable whitebox / source-assisted assessment. A Git URL (shallow-cloned) or a local directory path to the target's source. Activates the code_search tool and source→sink→exploit methodology — where RCE, injection, and secret-exposure bugs are found.", Placeholder: "https://github.com/org/app.git", InputType: "text", RequiresRestart: true},
 		{Key: "GEMINI_API_KEY", Label: "Gemini web-search key", Category: "LLM", Description: "Optional Gemini key for web search enrichment.", Placeholder: "AIza...", InputType: "secret", Sensitive: true},
 
-		{Key: "AIDASTING_DISCORD_WEBHOOK", Label: "Discord webhook", Category: "Notifications", Description: "Global Discord webhook used when a scan does not provide its own.", Placeholder: "https://discord.com/api/webhooks/...", InputType: "secret", Sensitive: true},
-		{Key: "AIDASTING_DISCORD_MIN_SEVERITY", Label: "Discord minimum severity", Category: "Notifications", Description: "Minimum severity sent to Discord.", InputType: "select", Options: []string{"", "info", "low", "medium", "high", "critical"}},
-
-		{Key: "AIDASTING_TELEGRAM_BOT_TOKEN", Label: "Telegram bot token", Category: "Notifications", Description: "Bot token from @BotFather. Required to enable Telegram notifications.", Placeholder: "123456789:ABC-DEF...", InputType: "secret", Sensitive: true},
-		{Key: "AIDASTING_TELEGRAM_CHAT_ID", Label: "Telegram chat ID", Category: "Notifications", Description: "Target chat/channel ID. Numeric ID (e.g. -1001234567890) or @channelusername.", Placeholder: "-1001234567890", InputType: "text"},
-		{Key: "AIDASTING_TELEGRAM_MIN_SEVERITY", Label: "Telegram minimum severity", Category: "Notifications", Description: "Minimum severity sent to Telegram.", InputType: "select", Options: []string{"", "info", "low", "medium", "high", "critical"}},
-		{Key: "AIDASTING_NOTIFY_SCAN_COMPLETE", Label: "Notify on scan completion", Category: "Notifications", Description: "Send the \"Scan Finished\" summary (report ready / clean scan) to the configured channels after every scan. Off by default so only per-vulnerability alerts are sent.", DefaultValue: "false", InputType: "boolean"},
-
-		{Key: "AGENTMAIL_POD", Label: "AgentMail pod", Category: "AgentMail", Description: "AgentMail pod identifier.", Placeholder: "am_us_pod_47", InputType: "text"},
-		{Key: "AGENTMAIL_API_KEY", Label: "AgentMail API key", Category: "AgentMail", Description: "AgentMail API key for inbound email triage.", Placeholder: "ak_...", InputType: "secret", Sensitive: true},
-
 		{Key: "AIDASTING_RATE_LIMIT_REQUESTS", Label: "Rate-limit requests", Category: "Rate limits", Description: "Requests allowed per dashboard rate-limit window.", DefaultValue: "60", InputType: "number"},
 		{Key: "AIDASTING_RATE_LIMIT_WINDOW", Label: "Rate-limit window", Category: "Rate limits", Description: "Rate-limit window in seconds.", DefaultValue: "60", InputType: "number"},
 		{Key: "AIDASTING_RATE_RPS", Label: "Outbound RPS", Category: "Rate limits", Description: "Sustained per-domain outbound request rate.", DefaultValue: "10", InputType: "number"},
@@ -876,29 +865,6 @@ func (s *Server) applyEnvironmentToRuntimeConfig(values map[string]string) {
 			s.cfg.OTelEndpoint = value
 		case "GEMINI_API_KEY":
 			s.cfg.GeminiAPIKey = value
-		case "AGENTMAIL_API_KEY":
-			s.cfg.AgentMailAPIKey = value
-		case "AGENTMAIL_POD":
-			s.cfg.AgentMailPod = value
-		case "AIDASTING_DISCORD_WEBHOOK":
-			s.cfg.DiscordWebhook = value
-			s.discordWebhook = value
-		case "AIDASTING_DISCORD_MIN_SEVERITY":
-			s.cfg.DiscordMinSeverity = value
-			s.discordMinSeverity = strings.ToLower(strings.TrimSpace(value))
-		case "AIDASTING_TELEGRAM_BOT_TOKEN":
-			s.cfg.TelegramBotToken = value
-			s.telegramBotToken = value
-		case "AIDASTING_TELEGRAM_CHAT_ID":
-			s.cfg.TelegramChatID = value
-			s.telegramChatID = value
-		case "AIDASTING_TELEGRAM_MIN_SEVERITY":
-			s.cfg.TelegramMinSeverity = value
-			s.telegramMinSeverity = strings.ToLower(strings.TrimSpace(value))
-		case "AIDASTING_NOTIFY_SCAN_COMPLETE":
-			enabled := parseBoolSetting(value, false)
-			s.cfg.NotifyScanComplete = enabled
-			s.notifyScanComplete.Store(enabled)
 		case "AIDASTING_USERNAME":
 			s.cfg.Username = value
 		case "AIDASTING_PASSWORD":
@@ -1024,22 +990,6 @@ func (s *Server) envSettingValue(key string) string {
 		return s.cfg.OTelEndpoint
 	case "GEMINI_API_KEY":
 		return s.cfg.GeminiAPIKey
-	case "AGENTMAIL_API_KEY":
-		return s.cfg.AgentMailAPIKey
-	case "AGENTMAIL_POD":
-		return s.cfg.AgentMailPod
-	case "AIDASTING_DISCORD_WEBHOOK":
-		return s.cfg.DiscordWebhook
-	case "AIDASTING_DISCORD_MIN_SEVERITY":
-		return s.cfg.DiscordMinSeverity
-	case "AIDASTING_TELEGRAM_BOT_TOKEN":
-		return s.cfg.TelegramBotToken
-	case "AIDASTING_TELEGRAM_CHAT_ID":
-		return s.cfg.TelegramChatID
-	case "AIDASTING_TELEGRAM_MIN_SEVERITY":
-		return s.cfg.TelegramMinSeverity
-	case "AIDASTING_NOTIFY_SCAN_COMPLETE":
-		return strconv.FormatBool(s.notifyScanComplete.Load())
 	case "AIDASTING_USERNAME":
 		return s.cfg.Username
 	case "AIDASTING_PASSWORD":

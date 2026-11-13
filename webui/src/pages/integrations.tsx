@@ -3,29 +3,21 @@ import { useI18n } from "@/i18n";
 import {
   CheckCircle2,
   ExternalLink,
-  Mail,
-  MessageSquare,
   Plug,
-  Send,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  useAgentMail,
-  useEnvironmentSettings,
-  useRateLimit,
-  useVersion,
-} from "@/api/queries";
+import { useRateLimit, useVersion } from "@/api/queries";
 import { cn } from "@/lib/utils";
 
 type Integration = {
   key: string;
   name: string;
   description: string;
-  category: "AI" | "Email" | "Notifications" | "Engagement";
+  category: "AI" | "Engagement";
   icon: typeof Plug;
   configurePath?: string;
   configureLabel?: string;
@@ -36,18 +28,10 @@ type Integration = {
 
 export default function IntegrationsPage() {
   const { t } = useI18n();
-  const mail = useAgentMail();
   const rate = useRateLimit();
   const version = useVersion();
-  const environment = useEnvironmentSettings();
   const ai = version.data?.ai;
   const usesVercelGateway = ai?.gateway === "vercel";
-  const discordWebhook = environment.data?.variables.find(
-    (variable) => variable.key === "AIDASTING_DISCORD_WEBHOOK",
-  );
-  const telegramToken = environment.data?.variables.find(
-    (variable) => variable.key === "AIDASTING_TELEGRAM_BOT_TOKEN",
-  );
 
   const integrations: Integration[] = [
     {
@@ -65,49 +49,6 @@ export default function IntegrationsPage() {
       detail: ai
         ? `${ai.provider}${ai.model ? ` · ${ai.model}` : ""}`
         : "Loading provider status...",
-    },
-    {
-      key: "agentmail",
-      name: "AgentMail",
-      description:
-        "Inbound email triage: forward security inboxes and let the agent classify, prioritize, and respond.",
-      category: "Email",
-      icon: Mail,
-      configurePath: "/settings?tab=email",
-      configureLabel: "Configure",
-      external: "https://agentmail.to",
-      isConfigured: Boolean(mail.data?.hasApiKey && mail.data?.pod),
-      detail: mail.data?.pod ? `Pod: ${mail.data.pod}` : "Not connected",
-    },
-    {
-      key: "discord",
-      name: "Discord webhook",
-      description:
-        "Stream critical findings and scan summaries to a Discord channel as they happen.",
-      category: "Notifications",
-      icon: MessageSquare,
-      configurePath: "/settings?tab=notifications",
-      configureLabel: "Configure",
-      external: "https://discord.com/developers/docs/resources/webhook",
-      isConfigured: Boolean(discordWebhook?.hasValue),
-      detail: discordWebhook?.hasValue
-        ? "Global webhook configured"
-        : "Global default, with per-scan overrides available.",
-    },
-    {
-      key: "telegram",
-      name: "Telegram bot",
-      description:
-        "Receive scan events, severity-gated findings, and the finished PDF report in a Telegram chat or channel.",
-      category: "Notifications",
-      icon: Send,
-      configurePath: "/settings?tab=notifications",
-      configureLabel: "Configure",
-      external: "https://core.telegram.org/bots/api",
-      isConfigured: Boolean(telegramToken?.hasValue),
-      detail: telegramToken?.hasValue
-        ? "Bot token configured"
-        : "Set a bot token and chat ID to enable Telegram alerts.",
     },
     {
       key: "rate-limit",
@@ -137,7 +78,7 @@ export default function IntegrationsPage() {
         </p>
       </div>
 
-      {(["AI", "Email", "Notifications", "Engagement"] as const).map((cat) => {
+      {(["AI", "Engagement"] as const).map((cat) => {
         const items = byCategory[cat] ?? [];
         if (!items.length) return null;
         return (

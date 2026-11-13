@@ -242,11 +242,11 @@ ACTIONS:
   1. launch url=https://target.com/signup
   2. snapshot → identify form fields
   3. type selector=@e3 text=testuser123
-  4. type selector=@e5 text=user@agentmail.to (from agentmail create_inbox)
+  4. type selector=@e5 text=user@example.com
   5. type selector=@e7 text=SecureP@ss123!
   6. click selector=@e9 (submit button)
   7. wait selector=".success" OR wait type=navigation
-  8. Use agentmail wait_for_email to get verification link
+  8. Retrieve the verification link from the inbox if email verification is required
   9. goto url=VERIFICATION_LINK
   10. get_cookies → save session tokens for authenticated testing⟦/ex⟧`,
 		Parameters: []tools.Parameter{

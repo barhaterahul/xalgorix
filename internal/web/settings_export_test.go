@@ -45,7 +45,6 @@ func TestSettingsExportImport_RoundTrip(t *testing.T) {
 	src.cfg.LLM = "test-model"
 	src.cfg.APIKey = "sk-primary-secret-key"
 	src.cfg.APIKeys = []string{"sk-primary-secret-key", "sk-pool-secret-key"}
-	src.cfg.DiscordWebhook = "https://discord.example/hook-1"
 	if err := src.profiles.Put(context.Background(), auth.Profile{
 		Provider:  "openai",
 		ProfileID: "default",
@@ -68,7 +67,7 @@ func TestSettingsExportImport_RoundTrip(t *testing.T) {
 	}()
 
 	// Cleartext export is the point: secrets must be present in the bundle.
-	for _, want := range []string{"sk-primary-secret-key", "sk-pool-secret-key", "sk-profile-key-123", "https://discord.example/hook-1"} {
+	for _, want := range []string{"sk-primary-secret-key", "sk-pool-secret-key", "sk-profile-key-123"} {
 		if !strings.Contains(exportBody, want) {
 			t.Fatalf("export missing %q:\n%s", want, exportBody)
 		}

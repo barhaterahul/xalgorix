@@ -10,12 +10,12 @@ func TestSecretEnvKey(t *testing.T) {
 	// tool subprocess environment. Includes the non-namespaced ones that a plain
 	// AIDASTING_* scrub would miss (the gap this closes for the terminal tool).
 	secret := []string{
-		"GEMINI_API_KEY", "AGENTMAIL_API_KEY", "AGENTMAIL_POD",
+		"GEMINI_API_KEY",
 		"CAIDO_API_TOKEN", "INBOUND_EMAIL_SECRET",
 		"AIDASTING_API_KEY", "AIDASTING_API_KEYS", "AIDASTING_API_TOKEN",
 		"AIDASTING_USERNAME", "AIDASTING_PASSWORD", "AIDASTING_PASSWORD_HASH",
 		"AIDASTING_PROXY_URL", "AIDASTING_TARGET_AUTH", "AIDASTING_OOB_API_KEY",
-		"agentmail_api_key", "Caido_Api_Token", // case-insensitive
+		"gemini_api_key", "Caido_Api_Token", // case-insensitive
 	}
 	for _, k := range secret {
 		if !SecretEnvKey(k) {
@@ -45,7 +45,6 @@ func TestSanitizeEnviron(t *testing.T) {
 		"PATH=/usr/bin",
 		"AIDASTING_API_KEYS=k1,k2",
 		"GITHUB_TOKEN=ghp_keepme",
-		"AGENTMAIL_API_KEY=am_secret",
 		"GEMINI_API_KEY=gm_secret",
 		"MALFORMED_NO_EQUALS",
 		"AIDASTING_WORKSPACE=/work",
@@ -58,7 +57,7 @@ func TestSanitizeEnviron(t *testing.T) {
 			t.Errorf("SanitizeEnviron dropped %q; kept:\n%s", must, joined)
 		}
 	}
-	for _, gone := range []string{"AIDASTING_API_KEYS", "AGENTMAIL_API_KEY", "GEMINI_API_KEY"} {
+	for _, gone := range []string{"AIDASTING_API_KEYS", "GEMINI_API_KEY"} {
 		if strings.Contains(joined, gone+"=") {
 			t.Errorf("SanitizeEnviron leaked secret %q; kept:\n%s", gone, joined)
 		}

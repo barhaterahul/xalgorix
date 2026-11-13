@@ -26,7 +26,6 @@ const NAV: { to: string; labelKey: string; icon: typeof LayoutGrid; end?: boolea
   { to: "/instances", labelKey: "nav.instances", icon: Server },
   { to: "/findings", labelKey: "nav.findings", icon: ShieldAlert },
   { to: "/live", labelKey: "nav.live", icon: Radio },
-  { to: "/email", labelKey: "nav.email", icon: Mail },
   { to: "/reports", labelKey: "nav.reports", icon: FileText },
   { to: "/integrations", labelKey: "nav.integrations", icon: Plug },
   { to: "/settings", labelKey: "nav.settings", icon: Settings },

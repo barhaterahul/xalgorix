@@ -45,7 +45,6 @@ func (s *Server) saveQueueStateDurable(idx int, req ScanRequest, progress ...que
 		ScanIntensity:  req.ScanIntensity,
 		CompanyName:    req.CompanyName,
 		LogoPath:       req.LogoPath,
-		DiscordWebhook: req.DiscordWebhook,
 	}
 	if len(progress) > 0 {
 		p := progress[0]
@@ -343,7 +342,6 @@ func scanRequestFromQueueState(state *QueueState, sourcePath string) ScanRequest
 		ScanIntensity:        state.ScanIntensity,
 		CompanyName:          state.CompanyName,
 		LogoPath:             state.LogoPath,
-		DiscordWebhook:       state.DiscordWebhook,
 		ResumeActiveTarget:   state.ActiveTarget,
 		ResumeScanDir:        state.ActiveScanDir,
 		ResumeScanID:         state.ActiveScanID,
@@ -416,9 +414,6 @@ func fillResumeRequestDefaults(req *ScanRequest, defaults ScanRequest) {
 	if req.LogoPath == "" {
 		req.LogoPath = defaults.LogoPath
 	}
-	if req.DiscordWebhook == "" {
-		req.DiscordWebhook = defaults.DiscordWebhook
-	}
 }
 
 func (s *Server) scanRequestForPausedInstance(instanceID string, inst *ScanInstance) (ScanRequest, bool, string) {
@@ -432,7 +427,6 @@ func (s *Server) scanRequestForPausedInstance(instanceID string, inst *ScanInsta
 		Instruction:    inst.Instruction,
 		ScanMode:       inst.ScanMode,
 		SeverityFilter: append([]string(nil), inst.SeverityFilter...),
-		DiscordWebhook: inst.DiscordWebhook,
 		Name:           inst.Name,
 		Phases:         append([]int(nil), inst.Phases...),
 		ReconMode:      inst.ReconMode,
