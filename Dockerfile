@@ -150,15 +150,22 @@ COPY --from=gobuild /go/bin/ /root/go/bin/
 # The ai-dast-ing binary itself.
 COPY --from=gobuild /out/ai-dast-ing /usr/local/bin/ai-dast-ing
 
-ENV PATH="/usr/local/go/bin:/root/go/bin:${PATH}" \
+ENV PATH="/usr/local/go/bin:/root/go/bin:/root/.local/bin:${PATH}" \
     GOBIN=/root/go/bin \
     HOME=/root
 
-# SecLists (shallow clone) — ffuf/gobuster wordlists. The engine embeds a small
-# default list, but content discovery quality depends on real wordlists. Debian
-# does not package seclists, and it has no packageMap route (lazy install is not
-# possible), so bake it in. Best-effort: scans still work off the embedded list.
-RUN git clone --depth 1 https://github.com/danielmiessler/SecLists /usr/share/seclists \
+# SecLists — ffuf/gobuster wordlists. The engine embeds a small default list,
+# but content discovery quality depends on real wordlists. Debian does not
+# package seclists, and it has no packageMap route (lazy install is not
+# possible), so bake it in. A full working tree is ~2.7 GB (the repo carries
+# huge asset dumps we never use), so sparse-checkout only the categories the
+# agent drives — Discovery/Web-Content, Discovery/DNS, Passwords credential
+# lists — then drop .git. Best-effort: scans still work off the embedded list.
+RUN git clone --depth 1 --filter=blob:none --sparse \
+      https://github.com/danielmiessler/SecLists /usr/share/seclists \
+    && cd /usr/share/seclists \
+    && git sparse-checkout set Discovery/Web-Content Discovery/DNS Passwords/Common-Credentials \
+    && rm -rf .git \
     || echo "WARN: seclists clone failed (embedded wordlist remains available)"
 
 # arjun — hidden-parameter discovery (pipx). Small; pipx stays available at
